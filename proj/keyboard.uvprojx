@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>FT32F072x8</Define>
               <Undefine></Undefine>
-              <IncludePath>..\FTLib\CMSIS\inc;..\FTLib\Inc;..\FTLib\Lib;..\usb\inc;..\user;..\RTT</IncludePath>
+              <IncludePath>..\FTLib\CMSIS\inc;..\FTLib\Inc;..\FTLib\Lib;..\usb\inc;..\user;..\RTT;..\iap2</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -389,6 +389,11 @@
               <FilePath>..\user\main.c</FilePath>
             </File>
             <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\keyboard.c</FilePath>
+            </File>
+            <File>
               <FileName>SysTick.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\SysTick.c</FilePath>
@@ -407,11 +412,6 @@
               <FileName>Matrix.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\Matrix.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\user\timer.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -577,6 +577,46 @@
               <FileName>SEGGER_RTT_printf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\RTT\SEGGER_RTT_printf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>iap2</GroupName>
+          <Files>
+            <File>
+              <FileName>SwTimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\SwTimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>iAp2Session.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\iAp2Session.c</FilePath>
+            </File>
+            <File>
+              <FileName>Iap2Link.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\Iap2Link.c</FilePath>
+            </File>
+            <File>
+              <FileName>Iap2CtrlSession.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\Iap2CtrlSession.c</FilePath>
+            </File>
+            <File>
+              <FileName>Driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\Driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>ListUsbData.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\ListUsbData.c</FilePath>
+            </File>
+            <File>
+              <FileName>List.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\iap2\List.c</FilePath>
             </File>
           </Files>
         </Group>

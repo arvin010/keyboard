@@ -8706,6 +8706,9 @@ ITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 
 
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+
 
 
 
@@ -12543,6 +12546,8 @@ typedef M_CFG* PM_CFG;
 
 
 
+
+
  
 
 
@@ -12559,6 +12564,9 @@ extern uint16_t_uint8_t StatusInfo;
 extern const uint8_t LanguageId[];
 extern const uint8_t ManufacturerStringDescriptor[];
 extern const uint8_t ProductStringDescriptor[];
+
+extern const uint8_t iapStringDescriptor[];
+
 extern const uint8_t SerialNumberSringDescriptor[];
 extern const uint8_t USB_FSDeviceDescriptor[];
 extern const uint8_t USB_FSConfigDescriptor[];
@@ -12572,6 +12580,8 @@ extern const uint16_t USB_FSDeviceDescriptorSize;
 extern const uint16_t USB_FSConfigDescriptorSize;
 extern const uint16_t LanguageIdSize;
 extern const uint16_t ManufacturerStringDescriptorSize;
+extern const uint16_t iapStringDescriptorSize;
+
 extern const uint16_t ProductStringDescriptorSize;
 extern const uint16_t SerialNumberSringDescriptorSize;
 extern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -12604,7 +12614,7 @@ extern const uint16_t USB_HID_FSReportDescriptor_5Size;
 
 
  
-# 94 "..\\user\\main.h"
+# 192 "..\\user\\main.h"
 
  
 # 27 "..\\usb\\inc\\usb_core.h"
@@ -12839,6 +12849,10 @@ typedef M_EPBOUT_STATUS* PM_EPBOUT_STATUS;
 
 
 
+
+
+
+
  
 
 
@@ -12860,7 +12874,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS, int);
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
 ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 
 uint8_t USB_ReadRegister(uint8_t USB_Refister);
 void USB_PDCTRLConfig(uint8_t PDCT);
@@ -12874,6 +12888,38 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
  
 
 # 57 "..\\user\\main.h"
+# 1 "..\\user\\keyboard.h"
+
+
+
+
+extern uint8_t Vendor_data_Buffer[];
+extern uint8_t	ep2_send_buf[];
+
+
+
+
+
+
+void send_boot_keyboard_code(uint8_t* dat, uint8_t len);
+
+
+
+
+
+void send_hid_keyboard_code(uint8_t* dat, uint8_t len);
+
+void ep2_send_data(uint8_t rpt_type, uint8_t* dat, uint8_t len);
+void USB_Transmit_VendorData(uint8_t* dat, uint8_t len);
+void USB_Receive_VendorData(uint8_t* dat, uint8_t len);
+
+
+
+
+
+
+ 
+# 58 "..\\user\\main.h"
 # 1 "..\\RTT\\SEGGER_RTT.h"
 
 
@@ -13454,18 +13500,18 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
  
-# 58 "..\\user\\main.h"
-# 1 "..\\user\\SysTick.h"
-# 13 "..\\user\\SysTick.h"
-
-
-
-
-
 # 59 "..\\user\\main.h"
+# 1 "..\\user\\SysTick.h"
+# 14 "..\\user\\SysTick.h"
 
 
-# 69 "..\\user\\main.h"
+
+
+
+# 60 "..\\user\\main.h"
+
+
+# 70 "..\\user\\main.h"
 
 
 
@@ -13475,6 +13521,103 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
 
+enum IAP2PacketEnums
+{
+     
+    kIAP2PacketSYNC        = 0xFF,
+    kIAP2PacketSOP         = 0x5A,
+    kIAP2PacketSOPOrig     = 0x55,
+
+    kIAP2PacketSOPLen      = 2,
+
+    kiAP2PacketVersion     = 1,
+
+     
+    kIAP2PacketIndexSYNC   = 0,    
+    kIAP2PacketIndexSOP    = 1,    
+    kIAP2PacketIndexLEN1   = 2,    
+    kIAP2PacketIndexLEN2   = 3,    
+    kIAP2PacketIndexCTRL   = 4,    
+    kIAP2PacketIndexSEQ    = 5,    
+    kIAP2PacketIndexACK    = 6,    
+    kIAP2PacketIndexSESSID = 7,    
+    kIAP2PacketIndexCHK    = 8,    
+
+     
+    kIAP2PacketDetectLEN    = 0x0200,
+    kIAP2PacketDetectCTRL   = 0xEE,
+    kIAP2PacketDetectSEQ    = 0x10,
+
+     
+    kIAP2PacketDetectNACKLEN    = 0x0400,
+    kIAP2PacketDetectNACKCTRL   = 0x02,
+    kIAP2PacketDetectNACKSEQ    = 0x04,
+    kIAP2PacketDetectNACKACK    = 0xEE,
+    kIAP2PacketDetectNACKSESSID = 0x08,
+
+    
+
+
+ 
+    kIAP2PacketHeaderLen = 9,
+    kIAP2PacketChksumLen = 1,    
+
+    kiAP2PacketLenMax = 0xFFFF,
+    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+
+     
+    kIAP2PacketControlMaskSYN = 0x80,    
+    kIAP2PacketControlMaskACK = 0x40,    
+    kIAP2PacketControlMaskEAK = 0x20,    
+    kIAP2PacketControlMaskRST = 0x10,    
+    kIAP2PacketControlMaskSUS = 0x08,    
+
+    kIAP2PacketSynDataIdxVersion           = 0,
+    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+
+    kIAP2PacketSynDataBaseLen              = 10,
+
+    kIAP2PacketSynDataIdxSessionInfo       = 10,
+
+    kIAP2PacketSynSessionIdxID             = 0,
+    kIAP2PacketSynSessionIdxType           = 1,
+    kIAP2PacketSynSessionIdxVersion        = 2,
+    kIAP2PacketSynSessionSize              = 3,
+
+     
+    kIAP2PacketReservedSessionID           = 0,
+
+    kIAP2PacketMaxSessions                 = 10,
+
+    kIAP2PacketSynOptionMaskLP             = 0x80,
+    kIAP2PacketSynOptionMaskHP             = 0x40
+};
+
+typedef enum
+{
+    kiAP2PacketParseStateSOP1 = 0,
+    kiAP2PacketParseStateSOP2,
+    kiAP2PacketParseStateLEN1,
+    kiAP2PacketParseStateLEN2,
+    kiAP2PacketParseStateCTRL,
+    kiAP2PacketParseStateSEQ,
+    kiAP2PacketParseStateACK,
+    kiAP2PacketParseStateSESSID,
+    kiAP2PacketParseStateCHK,
+    kiAP2PacketParseStatePAYLOAD,
+    kiAP2PacketParseStatePAYLOADCHK,
+    kiAP2PacketParseStateFINISH,
+    kiAP2PacketParseStateDETECT,
+    kiAP2PacketParseStateDETECTBAD,
+
+    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+
+} kiAP2PacketParseState_t;
  
 
 
@@ -13497,6 +13640,7 @@ void Systick_Init(void);
 
 
 
+void SysTick_Delay_Ms(volatile uint32_t nTime);
 
 void Systick_Init(void);
 uint32_t GetTime(void);
@@ -13520,6 +13664,7 @@ uint32_t GetTime(void);
 
 
 struct _tagSwTimer;
+
 typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 struct _tagTimerManager;
 typedef struct _tagSwTimer

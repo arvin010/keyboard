@@ -40,6 +40,7 @@
 .\objects\swtimer.o: ..\usb\inc\usb_core.h
 .\objects\swtimer.o: ..\usb\inc\usb_desc.h
 .\objects\swtimer.o: ..\user\main.h
+.\objects\swtimer.o: ..\user\keyboard.h
 .\objects\swtimer.o: ..\RTT\SEGGER_RTT.h
 .\objects\swtimer.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\swtimer.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

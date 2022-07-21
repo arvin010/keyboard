@@ -1,10 +1,10 @@
 --cpu Cortex-M0
 ".\objects\main.o"
+".\objects\keyboard.o"
 ".\objects\systick.o"
 ".\objects\io.o"
 ".\objects\key_buffer.o"
 ".\objects\matrix.o"
-".\objects\timer.o"
 ".\objects\usb_core.o"
 ".\objects\usb_desc.o"
 ".\objects\ft32f0xx_adc.o"
@@ -34,6 +34,13 @@
 ".\objects\startup_ft32f072xb.o"
 ".\objects\segger_rtt.o"
 ".\objects\segger_rtt_printf.o"
+".\objects\swtimer.o"
+".\objects\iap2session.o"
+".\objects\iap2link.o"
+".\objects\iap2ctrlsession.o"
+".\objects\driver.o"
+".\objects\listusbdata.o"
+".\objects\list.o"
 --strict --scatter ".\Objects\keyboard.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

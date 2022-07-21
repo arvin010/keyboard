@@ -4249,6 +4249,8 @@ typedef M_CFG* PM_CFG;
 
 
 
+
+
  
 
 
@@ -4265,6 +4267,9 @@ extern uint16_t_uint8_t StatusInfo;
 extern const uint8_t LanguageId[];
 extern const uint8_t ManufacturerStringDescriptor[];
 extern const uint8_t ProductStringDescriptor[];
+
+extern const uint8_t iapStringDescriptor[];
+
 extern const uint8_t SerialNumberSringDescriptor[];
 extern const uint8_t USB_FSDeviceDescriptor[];
 extern const uint8_t USB_FSConfigDescriptor[];
@@ -4278,6 +4283,8 @@ extern const uint16_t USB_FSDeviceDescriptorSize;
 extern const uint16_t USB_FSConfigDescriptorSize;
 extern const uint16_t LanguageIdSize;
 extern const uint16_t ManufacturerStringDescriptorSize;
+extern const uint16_t iapStringDescriptorSize;
+
 extern const uint16_t ProductStringDescriptorSize;
 extern const uint16_t SerialNumberSringDescriptorSize;
 extern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -8727,6 +8734,9 @@ ITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 
 
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+
 
 
 
@@ -12352,11 +12362,43 @@ void WWDG_ClearFlag(void);
 
 
  
-# 350 "..\\usb\\inc\\usb_core.h"
+# 354 "..\\usb\\inc\\usb_core.h"
 
  
 
 # 57 "..\\user\\main.h"
+# 1 "..\\user\\keyboard.h"
+
+
+
+
+extern uint8_t Vendor_data_Buffer[];
+extern uint8_t	ep2_send_buf[];
+
+
+
+
+
+
+void send_boot_keyboard_code(uint8_t* dat, uint8_t len);
+
+
+
+
+
+void send_hid_keyboard_code(uint8_t* dat, uint8_t len);
+
+void ep2_send_data(uint8_t rpt_type, uint8_t* dat, uint8_t len);
+void USB_Transmit_VendorData(uint8_t* dat, uint8_t len);
+void USB_Receive_VendorData(uint8_t* dat, uint8_t len);
+
+
+
+
+
+
+ 
+# 58 "..\\user\\main.h"
 # 1 "..\\RTT\\SEGGER_RTT.h"
 
 
@@ -12937,7 +12979,7 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
  
-# 58 "..\\user\\main.h"
+# 59 "..\\user\\main.h"
 # 1 "..\\user\\SysTick.h"
 
 
@@ -12961,13 +13003,14 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
  
-# 94 "..\\user\\main.h"
+# 192 "..\\user\\main.h"
 
  
 # 5 "..\\user\\SysTick.h"
 
 
 
+void SysTick_Delay_Ms(volatile uint32_t nTime);
 
 void Systick_Init(void);
 uint32_t GetTime(void);
@@ -12978,10 +13021,10 @@ uint32_t GetTime(void);
 
 
 
-# 59 "..\\user\\main.h"
+# 60 "..\\user\\main.h"
 
 
-# 69 "..\\user\\main.h"
+# 70 "..\\user\\main.h"
 
 
 
@@ -12991,6 +13034,103 @@ uint32_t GetTime(void);
 
 
 
+enum IAP2PacketEnums
+{
+     
+    kIAP2PacketSYNC        = 0xFF,
+    kIAP2PacketSOP         = 0x5A,
+    kIAP2PacketSOPOrig     = 0x55,
+
+    kIAP2PacketSOPLen      = 2,
+
+    kiAP2PacketVersion     = 1,
+
+     
+    kIAP2PacketIndexSYNC   = 0,    
+    kIAP2PacketIndexSOP    = 1,    
+    kIAP2PacketIndexLEN1   = 2,    
+    kIAP2PacketIndexLEN2   = 3,    
+    kIAP2PacketIndexCTRL   = 4,    
+    kIAP2PacketIndexSEQ    = 5,    
+    kIAP2PacketIndexACK    = 6,    
+    kIAP2PacketIndexSESSID = 7,    
+    kIAP2PacketIndexCHK    = 8,    
+
+     
+    kIAP2PacketDetectLEN    = 0x0200,
+    kIAP2PacketDetectCTRL   = 0xEE,
+    kIAP2PacketDetectSEQ    = 0x10,
+
+     
+    kIAP2PacketDetectNACKLEN    = 0x0400,
+    kIAP2PacketDetectNACKCTRL   = 0x02,
+    kIAP2PacketDetectNACKSEQ    = 0x04,
+    kIAP2PacketDetectNACKACK    = 0xEE,
+    kIAP2PacketDetectNACKSESSID = 0x08,
+
+    
+
+
+ 
+    kIAP2PacketHeaderLen = 9,
+    kIAP2PacketChksumLen = 1,    
+
+    kiAP2PacketLenMax = 0xFFFF,
+    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+
+     
+    kIAP2PacketControlMaskSYN = 0x80,    
+    kIAP2PacketControlMaskACK = 0x40,    
+    kIAP2PacketControlMaskEAK = 0x20,    
+    kIAP2PacketControlMaskRST = 0x10,    
+    kIAP2PacketControlMaskSUS = 0x08,    
+
+    kIAP2PacketSynDataIdxVersion           = 0,
+    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+
+    kIAP2PacketSynDataBaseLen              = 10,
+
+    kIAP2PacketSynDataIdxSessionInfo       = 10,
+
+    kIAP2PacketSynSessionIdxID             = 0,
+    kIAP2PacketSynSessionIdxType           = 1,
+    kIAP2PacketSynSessionIdxVersion        = 2,
+    kIAP2PacketSynSessionSize              = 3,
+
+     
+    kIAP2PacketReservedSessionID           = 0,
+
+    kIAP2PacketMaxSessions                 = 10,
+
+    kIAP2PacketSynOptionMaskLP             = 0x80,
+    kIAP2PacketSynOptionMaskHP             = 0x40
+};
+
+typedef enum
+{
+    kiAP2PacketParseStateSOP1 = 0,
+    kiAP2PacketParseStateSOP2,
+    kiAP2PacketParseStateLEN1,
+    kiAP2PacketParseStateLEN2,
+    kiAP2PacketParseStateCTRL,
+    kiAP2PacketParseStateSEQ,
+    kiAP2PacketParseStateACK,
+    kiAP2PacketParseStateSESSID,
+    kiAP2PacketParseStateCHK,
+    kiAP2PacketParseStatePAYLOAD,
+    kiAP2PacketParseStatePAYLOADCHK,
+    kiAP2PacketParseStateFINISH,
+    kiAP2PacketParseStateDETECT,
+    kiAP2PacketParseStateDETECTBAD,
+
+    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+
+} kiAP2PacketParseState_t;
  
 
 
@@ -13241,6 +13381,10 @@ typedef M_EPBOUT_STATUS* PM_EPBOUT_STATUS;
 
 
 
+
+
+
+
  
 
 
@@ -13262,7 +13406,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS, int);
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
 ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 
 uint8_t USB_ReadRegister(uint8_t USB_Refister);
 void USB_PDCTRLConfig(uint8_t PDCT);
@@ -13276,6 +13420,274 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
  
 
 # 22 "..\\usb\\src\\usb_core.c"
+
+# 1 "..\\iap2\\ListUsbData.h"
+
+
+
+
+# 1 "..\\iap2\\GenericTypeDefs.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+# 1 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+ 
+
+
+
+
+
+
+ 
+
+ 
+ 
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+# 34 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+
+  typedef signed int ptrdiff_t;
+
+
+
+  
+
+
+
+    typedef unsigned int size_t;    
+# 57 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+   
+
+
+
+      typedef unsigned short wchar_t;  
+# 82 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+    
+
+
+
+
+   
+
+
+
+
+  typedef long double max_align_t;
+
+
+
+
+
+
+
+
+
+# 114 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+ 
+
+# 63 "..\\iap2\\GenericTypeDefs.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+typedef unsigned char uint8;
+typedef char int8;
+typedef unsigned short uint16;
+typedef short int16;
+typedef unsigned int uint32;
+typedef volatile unsigned int vuint32;
+typedef int int32;
+typedef uint16 wchar;
+
+
+typedef signed int          INT;
+typedef signed char         INT8;
+typedef signed short int    INT16;
+typedef signed long int     INT32;
+
+
+
+
+
+ 
+# 130 "..\\iap2\\GenericTypeDefs.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct _tagList
+{
+	struct _tagList* 	m_pNext;
+	struct _tagList* 	m_pPre;
+    uint8 				m_isUsed;
+}List;
+
+
+
+ 
+typedef unsigned int        UINT;
+typedef unsigned char       UINT8;
+typedef unsigned short int  UINT16;
+ 
+
+typedef unsigned long int   UINT32;      
+ 
+
+
+
+
+ 
+
+ 
+typedef void                    VOID;
+
+typedef char                    CHAR8;
+typedef unsigned char           UCHAR8;
+
+typedef unsigned char           BYTE;                            
+typedef unsigned short int      WORD;                            
+typedef unsigned long           DWORD;                           
+ 
+
+
+typedef signed char             CHAR;                            
+typedef signed short int        SHORT;                           
+typedef signed long             LONG;                            
+ 
+
+
+
+
+
+
+# 6 "..\\iap2\\ListUsbData.h"
+typedef struct _tagListUsbData
+{
+	struct _tagListUsbData* 	m_pNext;
+	struct _tagListUsbData* 	m_pPre;
+    INT16 				data_size;
+	  uint8         *pdata;
+	  uint8         m_isUsed;
+}ListUsbData;
+extern ListUsbData * g_usbdata_list;
+void ListUsbData_Init(ListUsbData* pList);
+ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
+ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
+uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
+int ListUsbData_Count(ListUsbData* pNode);
+void ListUsbData_RemoveAll(ListUsbData* pNode);
+
+
+
+# 24 "..\\usb\\src\\usb_core.c"
+
  
  
  
@@ -13294,7 +13706,7 @@ typedef M_EP0_STATUS*  PM_EP0_STATUS;
 
 
 
-
+extern int b_config;
 
 
  
@@ -13340,14 +13752,14 @@ static void USB_Endpoint0_Rx(PM_EP0_STATUS pep0state);
  
 void USB_Init(void)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitTypeDef NVIC_InitStructure;
 
 	if(RCC_GetFlagStatus(((uint8_t)0x71)) != SET)
 	{
 		RCC_HSI48Cmd(ENABLE);
 		while(RCC_GetFlagStatus(((uint8_t)0x71)) != SET);
 	}
-	RCC_USBCLKConfig(((uint32_t)0x00000000));
+  RCC_USBCLKConfig(((uint32_t)0x00000000));
 	RCC_APB1PeriphClockCmd(((uint32_t)0x00800000),ENABLE);
 
 		
@@ -13356,13 +13768,13 @@ void USB_Init(void)
 	USB_ITConfig(((uint32_t) 0x00000408),ENABLE);
 	USB_ITConfig(((uint32_t) 0x00000404),ENABLE);
 		
-	USB_PDCTRLConfig(((uint8_t)(0x01)));
-
-	NVIC_InitStructure.NVIC_IRQChannel = USB_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
+  USB_PDCTRLConfig(((uint8_t)(0x01)));
+	
+  NVIC_InitStructure.NVIC_IRQChannel = USB_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+	
 	RCC_APB1PeriphClockCmd(((uint32_t)0x08000000),ENABLE);
 	CRS_FrequencyErrorCounterCmd(ENABLE);
 	CRS_AutomaticCalibrationCmd(ENABLE);
@@ -13378,14 +13790,22 @@ void USB_Init(void)
 void USB_IRQHandler(void)
 {
 	uint8_t usb_intrin = 0,usb_intrusb = 0,usb_introut = 0;
-	
+			ListUsbData  *pUsbData;
+			uint16 recv_data_len;
 	usb_intrin  = ((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->INTRIN;									
 	usb_intrusb = ((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->INTRUSB;									
 	usb_introut = ((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->INTROUT;
 	
 	
-	
-	
+	if(usb_introut!=0 || usb_intrin!=0)
+		{
+		SEGGER_RTT_printf(0,"USB_IRQHandler ###usb_intrin =0x%02x usb_intrusb =0x%02x ###usb_introut =0x%02x\n",usb_intrin,usb_intrusb,usb_introut);
+		}
+	if(usb_introut!=0)
+		{
+		   
+		   SEGGER_RTT_printf(0,"USB_IRQHandler ############################################# usb_introut =0x%02x \n",usb_introut);
+		}
 	 
 	if((usb_intrusb & 0x02) != RESET)							
 	{
@@ -13406,35 +13826,73 @@ void USB_IRQHandler(void)
 	 
 	if((usb_intrin & ((uint32_t) 0x00000101)) != RESET)
 	{
+	SEGGER_RTT_printf(0,"USB_Endpoint0(M_EP_NORMAL); 111");
 		USB_Endpoint0(0);
 	}
+
+
+	
+		
+
+		 
+	if((usb_introut & ((uint32_t) 0x00000202)) != RESET) 
+	{
+		
+				SEGGER_RTT_printf(0,"US B_IT_OUT_EP1_FLAG ##   # function=%s line=%d\n",__FUNCTION__,175);
+			recv_data_len = 	USB_EP_Rx(0x00, Vendor_data_Buffer, 64);
+		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
+		pUsbData->pdata = malloc(recv_data_len);
+		pUsbData->m_isUsed = 0;
+		pUsbData->m_pNext = 0;
+		pUsbData->m_pPre = 0;
+		pUsbData->data_size = recv_data_len;
+		
+
+			ListUsbData_AddTail(g_usbdata_list,pUsbData);
+
+		
+		
+
+	}
+	
+	if((usb_introut & ((uint32_t) 0x00000204)) != RESET) 
+	{
+	
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,195);
+	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, 64);
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,197,recv_data_len);
+
+
+		
+		
+
+	}
+	
+
 	
 	 
 	if((usb_introut & ((uint32_t) 0x00000220)) != RESET)
 	{
-		
+	
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,211);
+		USB_EP_Rx(0x05, Vendor_data_Buffer, 64);
 		
 
 		
 		
 
 	}
-	
-
 	
 	 
 	if((usb_introut & ((uint32_t) 0x00000280)) != RESET)
 	{	
+		USB_EP_Rx(7, Vendor_data_Buffer, 64);
+		
 
-
-
-
-
+		Vendor_data_Buffer[0]++;
+		USB_EP_Tx(6, Vendor_data_Buffer, 64);
 
 	}
-	
-
-	
 
 	 
 	 
@@ -13477,7 +13935,6 @@ void USB_Suspend(void)
 
 
 
-		
 		
 		 	
 	}
@@ -13554,9 +14011,7 @@ void USB_Remote_Wakeup(void)
 {
 	((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->POWER |= 0x04;
 
-	((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->POWER &= ~0x04;	
-
-	
+	((USB_TypeDef *) (((uint32_t)0x40000000) + 0x00005C00))->POWER &= ~0x04;			
 }
 
 
@@ -13589,6 +14044,8 @@ void EndpointBulkIn(M_EPBIN_STATUS pbistate, int nCallState)
 	}
 	else
 	{
+	
+	SEGGER_RTT_printf(0,"EndpointBulkIn pbistate.nBytesLeft=%d\n",pbistate.nBytesLeft);
 		  
 		if(pbistate.nBytesLeft != -1)
 		{
@@ -13603,9 +14060,12 @@ void EndpointBulkIn(M_EPBIN_STATUS pbistate, int nCallState)
 				nBytes = 64;
 				pbistate.nBytesLeft -= 64;
 			}
+			SEGGER_RTT_printf(0,"222 EndpointBulkIn pbistate.nBytesLeft=%d\n",pbistate.nBytesLeft);
 
 			 
 			FIFOWrite((int)pbistate.byEP, nBytes, pbistate.pData);
+			
+			SEGGER_RTT_printf(0,"333 EndpointBulkIn nBytes=%d\n",nBytes);
 			pbistate.pData = (BYTE *)pbistate.pData + nBytes;
 
 			*((BYTE *)(0x40005c00+14)) = pbistate . byEP;
@@ -13742,6 +14202,8 @@ void FIFORead(int nEP, int nBytes, void * pDst)
 	int     nCount;
 	BYTE *  pby;
 	int     nAddr;
+	int i;
+	SEGGER_RTT_printf(0,"start FIFORead nBytes = %d nEP=%d\n",nBytes,nEP);
 
 	if(nBytes) 
 	{
@@ -13750,10 +14212,19 @@ void FIFORead(int nEP, int nBytes, void * pDst)
 		pby = (BYTE *)pDst;
 		while(nCount) 
 		{
+
+		 SEGGER_RTT_printf(0," 0x%02x ",*pby);
+		 i++;
+		if(i==10)
+			SEGGER_RTT_printf(0,"\n");
 			*pby++ = *((BYTE *)nAddr);
+			
 			nCount--;
+			
 		}
 	}
+	
+	SEGGER_RTT_printf(0,"\n  end FIFORead nBytes = %d nEP=%d\n",nBytes,nEP);
 }
 
 
@@ -13770,7 +14241,9 @@ void FIFOWrite(int nEP, int nBytes, void * pSrc)
 	int     nCount;
 	BYTE *  pby;
 	int     nAddr;
-
+	int i = 0;
+	SEGGER_RTT_printf(0,"start FIFOWrite nBytes = %d nEP=%d\n",nBytes,nEP);
+	
 	if(nBytes)
 	{
 		nAddr = 0x40005c00+32+(nEP<<2);
@@ -13778,10 +14251,16 @@ void FIFOWrite(int nEP, int nBytes, void * pSrc)
 		pby = (BYTE *)pSrc;
 		while (nCount)
 		{
+		 SEGGER_RTT_printf(0," 0x%02x ",*pby);
 		 *((BYTE *)nAddr) = *pby++;
+		 i++;
+		if(i==10)
+			SEGGER_RTT_printf(0,"\n");
 			nCount--;
 		}
 	}
+	
+	SEGGER_RTT_printf(0,"\n end FIFOWrite nBytes = %d nEP=%d\n",nBytes,nEP);
 	
 }
 
@@ -13885,6 +14364,7 @@ void USB_Endpoint0(int nCallState)
 	BYTE	byCSR0;
 
 	
+	SEGGER_RTT_printf(0,"USB_Endpoint0  xxx nCallState =%d\n",nCallState);
 	 
 	if (nCallState == 1)
 	{
@@ -13909,10 +14389,14 @@ void USB_Endpoint0(int nCallState)
 			*((BYTE *)(0x40005c00)) = ep0state . byFAddr;		
 			if((gnDevState == 0) && ep0state.byFAddr)
 			{
+			
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 xxx 111\n");
 				gnDevState = 1;				
 			}
 			else if((gnDevState == 1) && !ep0state.byFAddr)
 			{
+			
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 222\n");
 				gnDevState = 0;				
 			}
 		}
@@ -13947,17 +14431,23 @@ void USB_Endpoint0(int nCallState)
 			 
 			 
 			 
-			FIFORead(0, 8, &cmd);							
+			FIFORead(0, 8, &cmd);	
+			SEGGER_RTT_printf(0,"USB_Endpoint0  aaa\n");
+			
 			USB_Endpoint0_Command(&ep0state, &cmd);			
 		}
 	}
 	
 	if(ep0state.nState == 2)
 	{
+	
+	SEGGER_RTT_printf(0,"USB_Endpoint0_Tx 1111\n");
 		USB_Endpoint0_Tx(&ep0state);
 	}
 	else if(ep0state.nState == 1)
 	{
+	
+	SEGGER_RTT_printf(0,"USB_Endpoint0_Tx 2222\n");
 		USB_Endpoint0_Rx(&ep0state);
 	}
 }
@@ -14200,6 +14690,7 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 	uint8_t srbuff;
 	uint8_t txdat[2] = {0};
 	
+	SEGGER_RTT_printf(0,"USB_StdDev_Req;  333 pcmd->bRequest=%d\n",pcmd->bRequest);
 	switch(pcmd->bRequest) 
 	{
 		 
@@ -14343,6 +14834,8 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 						}
 						break;
 					case	(0x03<<8):	
+
+						SEGGER_RTT_printf(0,"USB_StdDev_Req;  333 pcmd->USBwValue=%d\n",pcmd->wValue . w);
 						switch(pcmd->wValue . w & 0xff)
 						{
 							case	0:	
@@ -14364,7 +14857,6 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 								}
 								pep0state->pData = (void*)ManufacturerStringDescriptor;
 								pep0state->nState = 2;
-								SEGGER_RTT_printf(0, "ManufacturerStringDescriptorSize.....>>>>>>%s\n",pep0state->pData);
 							break;	
 							case	2:	
 								pep0state->nBytesLeft = ProductStringDescriptorSize;		
@@ -14386,6 +14878,21 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 								pep0state->pData = (void*)SerialNumberSringDescriptor;
 								pep0state->nState = 2;
 							break;
+
+							case	4:	
+								pep0state->nBytesLeft = iapStringDescriptorSize;		
+								 
+								
+								SEGGER_RTT_printf(0,"USB_StdDev_Req;  444 pcmd->USBwLength=%d\n",pcmd->wLength . w);
+								
+								SEGGER_RTT_printf(0,"USB_StdDev_Req;  444 pcmd->nBytesLeft=%d\n",pep0state->nBytesLeft);
+								if (pcmd->wLength . w < pep0state->nBytesLeft)
+								{
+									pep0state->nBytesLeft = pcmd->wLength . w;
+								}
+								pep0state->pData = (void*)iapStringDescriptor;
+								pep0state->nState = 2;
+							break;		
 							default:
 								bError = 1;								
 							break;
@@ -14402,19 +14909,25 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 			byConfig = (BYTE)(pcmd->wValue . w & 0x00FF);
 			if(gnDevState == 0)
 			{
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 777 byConfig=%d\n",byConfig);
 				bError = 1;
 			}
 			 
 			else if(byConfig >USB_FSDeviceDescriptor[USB_FSDeviceDescriptorSize-1])
 			{
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 666 byConfig=%d\n",byConfig);
 				bError = 1;
 			}
 			else if(!byConfig)
 			{
+			
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 333\n");
 				gnDevState = 1;
 			}
 			else
 			{
+			
+			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 555 byConfig=%d\n",byConfig);
 				 
 				gpCurCfg = (void *)USB_FSConfigDescriptor;
 				 
@@ -14422,10 +14935,15 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 					gbyCurIfVal[n] = 0;
 				 
 				ConfigureIfs();
+				
+				SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;  444\n");
 				gnDevState = 2;
 				*((BYTE *)(0x40005c00+14)) = 0;
 				bNoData = 1;
 			}
+			
+			SEGGER_RTT_printf(0,"b_config == 1\n");
+			b_config = 1;
 			break;
 
 		 		
@@ -14846,8 +15364,6 @@ static void USB_Endpoint0_Tx(PM_EP0_STATUS pep0state)
  
 static void USB_Endpoint0_Rx(PM_EP0_STATUS pep0state)
 {
-	uint8_t state = 0x00;
-	uint8_t st_led = 0x00;
 	BYTE    byOutCSR;
 	
 	 
@@ -14864,18 +15380,8 @@ static void USB_Endpoint0_Rx(PM_EP0_STATUS pep0state)
 
 		 
 		
+		FIFORead(0, pep0state->nBytesLeft, pep0state->pData);
 		
-		
-		 
-		FIFORead(0, sizeof(state), &state);
-		
-		st_led = (state & 0x02);
-		switch(st_led)
-		{
-			case 0x00: GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), Bit_SET); break;
-			case 0x02: GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), Bit_RESET); break;
-		}
-
 		 
 		*((BYTE *)(0x40005c00+17)) = 0x40;
 		 
@@ -14912,19 +15418,28 @@ static uint32_t ConfigureIfs(void)
 	 
 	pcfg = (PSTD_CFG_DSCR)gpCurCfg;
 	pbyIfVal = (BYTE*)&gbyCurIfVal;	
+
+	SEGGER_RTT_printf(0,"ConfigureIfs;  pcfg->bNumInterfaces=%d\n",pcfg->bNumInterfaces);
 	for (byIf=0; byIf < pcfg->bNumInterfaces; byIf++, pbyIfVal++) 
 	{
+		SEGGER_RTT_printf(0,"ConfigureIfs; byIf=%d	byAltIf=%d pbyIfVal=%d\n",byIf,byAltIf ,*pbyIfVal);
 		 
 		if (*pbyIfVal) 
 		{
+		
+	
 			for (byAltIf=0; byAltIf<*pbyIfVal; byAltIf++) 
 			{
 				byNumEPs = pif->bNumEndpoints;
-				pby += sizeof(STD_IF_DSCR) + byNumEPs * sizeof(STD_EP_DSCR) + sizeof(STD_HID_DSCR);
+				
+				SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d\n",byNumEPs,byAltIf);
+				pby += sizeof(STD_IF_DSCR) + byNumEPs * sizeof(STD_EP_DSCR)  ;
 				pif  = (PSTD_IF_DSCR)pby;
 				 
 				if (!pif->bAlternateSetting)
 				{
+				
+				SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d !pif->bAlternateSetting\n",byNumEPs,byAltIf);
 					return 0;
 				}
 			} 
@@ -14932,32 +15447,51 @@ static uint32_t ConfigureIfs(void)
 
 		 
 		gpCurIf[byIf] = pif;
+		SEGGER_RTT_printf(0,"aa ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
 
 		 
 		byNumEPs = pif->bNumEndpoints;
-		pby += sizeof(STD_IF_DSCR) + sizeof(STD_HID_DSCR);	
 		
+		SEGGER_RTT_printf(0,"bbb ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
+		pby += sizeof(STD_IF_DSCR)  ;	
+		
+		SEGGER_RTT_printf(0,"ccc ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
 		for ( byEP = 0; byEP < byNumEPs; byEP++ )
 		{
+		
+		SEGGER_RTT_printf(0,"ddd ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			pep = (PSTD_EP_DSCR)pby;
+			SEGGER_RTT_printf(0,"ee ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 
 			 
 			*((BYTE *)(0x40005c00+14)) = (pep->bEndpointAddress & 0x0F);
+			
+			SEGGER_RTT_printf(0,"ff ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			 
 			by = (BYTE)((pep->wMaxPacketSize + 7) >> 3);
 			
+			SEGGER_RTT_printf(0,"33 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			if(pep->bEndpointAddress & 0x80)
 			{
+			
+			SEGGER_RTT_printf(0,"444 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 				*((BYTE *)(0x40005c00+16)) = by;
 				by = *((BYTE *)(0x40005c00+18));
 				
+				SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+				
+				SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",(pep->bmAttributes & 0x03));
 				switch (pep->bmAttributes & 0x03)
 				{
 					case 0x01:
+						
+						SEGGER_RTT_printf(0,"555 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 						by |= 0x40;
 					break;
-					case 0x10:
-					case 0x11:						
+					case 0x02:
+					case 0x03:		
+						
+						SEGGER_RTT_printf(0,"777 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by &= ~0x40;
 					break;
 				}
@@ -14976,13 +15510,18 @@ static uint32_t ConfigureIfs(void)
 				*((BYTE *)(0x40005c00+19)) = by;
 				by = *((BYTE *)(0x40005c00+21));
 				
+				SEGGER_RTT_printf(0,"999 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 				switch (pep->bmAttributes & 0x03)
 				{
 					case 0x01:
+						
+						SEGGER_RTT_printf(0,"hhh ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by |= 0x40;
 					break;
-					case 0x10:
-					case 0x11:
+					case 0x02:
+					case 0x03:
+						
+						SEGGER_RTT_printf(0,"ffff ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by &= ~0x40;
 					break;
 				}
@@ -15013,25 +15552,36 @@ ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 	M_EPBIN_STATUS tEp0in;
 	uint32_t timeout = 0;
 	
+	SEGGER_RTT_printf(0,"USB_EP_Tx gnDevState=%d\n",gnDevState);
 	if(gnDevState > 1)
 	{
+	
+	SEGGER_RTT_printf(0,"2 USB_EP_Tx gnDevState=%d\n",gnDevState);
 		tEp0in.byEP = Ep;
 		tEp0in.nBytesLeft = data_len;
 		tEp0in.pData = ptr;
 		EndpointBulkIn(tEp0in, 0);
 
 		
+		SEGGER_RTT_printf(0,"3 USB_EP_Tx MREAD_BYTE(M_REG_INCSR1)=0x%02x\n",*((BYTE *)(0x40005c00+17)));
 		while(*((BYTE *)(0x40005c00+17)) & 0x01)
 		{
+		
+		SEGGER_RTT_printf(0,"4 USB_EP_Tx timeout=%d\n",timeout);
 			timeout++;
 			if(timeout>=0xffffffff)
 			{
+			
+			SEGGER_RTT_printf(0,"5 USB_EP_Tx timeout=%d\n",timeout);
 				return ERROR;
 			}
 		}
+		
+		SEGGER_RTT_printf(0,"6 USB_EP_Tx gnDevState=%d\n",gnDevState);
 		return SUCCESS;
 	}
 	
+	SEGGER_RTT_printf(0,"7 USB_EP_Tx gnDevState=%d\n",gnDevState);
 	return ERROR;
 }
 
@@ -15044,7 +15594,7 @@ ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 
 
  
-void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
+int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 {
 	M_EPBOUT_STATUS    tEp1out;
 	
@@ -15054,6 +15604,7 @@ void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 	tEp1out.nBytesRecv = 0;
 
 	EndpointBulkOut(tEp1out, 0);
+	return tEp1out.nBytesRecv;
 }
 
 

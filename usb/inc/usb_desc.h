@@ -243,8 +243,10 @@ typedef M_CFG* PM_CFG;
 #define M_EP_TFMASK     		0x03
 #define M_EP_CONTROL    		0x00
 #define M_EP_ISO        		0x01
-#define M_EP_BULK       		0x10
-#define M_EP_INTR       		0x11
+//#define M_EP_BULK       		0x10
+//#define M_EP_INTR       		0x11
+#define M_EP_BULK       		0x02
+#define M_EP_INTR       		0x03
 
 /* Standard Device Feature Selectors */
 #define M_FTR_EPHALT			  0x0000
@@ -262,6 +264,9 @@ extern uint16_t_uint8_t StatusInfo;
 extern const uint8_t LanguageId[];
 extern const uint8_t ManufacturerStringDescriptor[];
 extern const uint8_t ProductStringDescriptor[];
+
+extern const uint8_t iapStringDescriptor[];
+
 extern const uint8_t SerialNumberSringDescriptor[];
 extern const uint8_t USB_FSDeviceDescriptor[];
 extern const uint8_t USB_FSConfigDescriptor[];
@@ -275,6 +280,8 @@ extern const uint16_t USB_FSDeviceDescriptorSize;
 extern const uint16_t USB_FSConfigDescriptorSize;
 extern const uint16_t LanguageIdSize;
 extern const uint16_t ManufacturerStringDescriptorSize;
+extern const uint16_t iapStringDescriptorSize;
+
 extern const uint16_t ProductStringDescriptorSize;
 extern const uint16_t SerialNumberSringDescriptorSize;
 extern const uint16_t USB_HID_FSReportDescriptor_1Size;

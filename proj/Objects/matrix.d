@@ -39,6 +39,7 @@
 .\objects\matrix.o: ..\usb\inc\usb_core.h
 .\objects\matrix.o: ..\usb\inc\usb_desc.h
 .\objects\matrix.o: ..\user\main.h
+.\objects\matrix.o: ..\user\keyboard.h
 .\objects\matrix.o: ..\RTT\SEGGER_RTT.h
 .\objects\matrix.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\matrix.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

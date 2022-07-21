@@ -1237,6 +1237,67 @@ void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT)
   I2Cx->ICR = I2C_IT;
 }
 
+
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+{
+	  I2C_GenerateSTART(I2C1,ENABLE);
+  //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+    //??????-?
+	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
+	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+ 
+    //????????
+    I2C_SendData(I2C1,addr);
+
+    //????????
+    I2C_GenerateSTART(I2C1,ENABLE);
+	    //??????-?
+	I2C_MasterRequestConfig(I2C1,I2C_Direction_Receiver);
+	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+	
+    while(bufferSize)
+    {
+        bufferSize--;
+        if(bufferSize == 0)
+        {
+        	//??????
+            I2C_AcknowledgeConfig(I2C1, DISABLE);
+        }
+        
+       
+        *pBuffer = I2C_ReceiveData(I2C1);
+        pBuffer++;
+    }
+	//??????
+    I2C_GenerateSTOP(I2C1,ENABLE);
+    //????????
+    I2C_AcknowledgeConfig(I2C1, ENABLE);
+		
+	  return 0;
+}
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+{
+	I2C_GenerateSTART(I2C1,ENABLE);
+  //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+    //??????-?
+	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
+	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+ 
+    //????????
+    I2C_SendData(I2C1,addr);
+
+    //??????
+    while(bufferSize--)
+    {
+        I2C_SendData(I2C1,*pBuffer);
+        pBuffer++;
+       // while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+    }
+    //??????
+    I2C_GenerateSTOP(I2C1,ENABLE);
+		return 0;
+}
+
 /**
   * @}
   */  

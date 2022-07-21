@@ -4381,6 +4381,9 @@ ITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 
 
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+
 
 
 
@@ -6039,6 +6042,67 @@ void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT)
 
    
   I2Cx->ICR = I2C_IT;
+}
+
+
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+{
+	  I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+  
+    
+	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
+	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+ 
+    
+    I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),addr);
+
+    
+    I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+	    
+	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0400));
+	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+	
+    while(bufferSize)
+    {
+        bufferSize--;
+        if(bufferSize == 0)
+        {
+        	
+            I2C_AcknowledgeConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)), DISABLE);
+        }
+        
+       
+        *pBuffer = I2C_ReceiveData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)));
+        pBuffer++;
+    }
+	
+    I2C_GenerateSTOP(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+    
+    I2C_AcknowledgeConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)), ENABLE);
+		
+	  return 0;
+}
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+{
+	I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+  
+    
+	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
+	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+ 
+    
+    I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),addr);
+
+    
+    while(bufferSize--)
+    {
+        I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),*pBuffer);
+        pBuffer++;
+       
+    }
+    
+    I2C_GenerateSTOP(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+		return 0;
 }
 
 

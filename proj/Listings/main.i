@@ -8453,6 +8453,9 @@ ITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 void I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 
 
+int i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+
 
 
 
@@ -12290,6 +12293,8 @@ typedef M_CFG* PM_CFG;
 
 
 
+
+
  
 
 
@@ -12306,6 +12311,9 @@ extern uint16_t_uint8_t StatusInfo;
 extern const uint8_t LanguageId[];
 extern const uint8_t ManufacturerStringDescriptor[];
 extern const uint8_t ProductStringDescriptor[];
+
+extern const uint8_t iapStringDescriptor[];
+
 extern const uint8_t SerialNumberSringDescriptor[];
 extern const uint8_t USB_FSDeviceDescriptor[];
 extern const uint8_t USB_FSConfigDescriptor[];
@@ -12319,6 +12327,8 @@ extern const uint16_t USB_FSDeviceDescriptorSize;
 extern const uint16_t USB_FSConfigDescriptorSize;
 extern const uint16_t LanguageIdSize;
 extern const uint16_t ManufacturerStringDescriptorSize;
+extern const uint16_t iapStringDescriptorSize;
+
 extern const uint16_t ProductStringDescriptorSize;
 extern const uint16_t SerialNumberSringDescriptorSize;
 extern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -12351,7 +12361,7 @@ extern const uint16_t USB_HID_FSReportDescriptor_5Size;
 
 
  
-# 94 "..\\user\\main.h"
+# 192 "..\\user\\main.h"
 
  
 # 27 "..\\usb\\inc\\usb_core.h"
@@ -12586,6 +12596,10 @@ typedef M_EPBOUT_STATUS* PM_EPBOUT_STATUS;
 
 
 
+
+
+
+
  
 
 
@@ -12607,7 +12621,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS, int);
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
 ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 
 uint8_t USB_ReadRegister(uint8_t USB_Refister);
 void USB_PDCTRLConfig(uint8_t PDCT);
@@ -12621,6 +12635,38 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
  
 
 # 57 "..\\user\\main.h"
+# 1 "..\\user\\keyboard.h"
+
+
+
+
+extern uint8_t Vendor_data_Buffer[];
+extern uint8_t	ep2_send_buf[];
+
+
+
+
+
+
+void send_boot_keyboard_code(uint8_t* dat, uint8_t len);
+
+
+
+
+
+void send_hid_keyboard_code(uint8_t* dat, uint8_t len);
+
+void ep2_send_data(uint8_t rpt_type, uint8_t* dat, uint8_t len);
+void USB_Transmit_VendorData(uint8_t* dat, uint8_t len);
+void USB_Receive_VendorData(uint8_t* dat, uint8_t len);
+
+
+
+
+
+
+ 
+# 58 "..\\user\\main.h"
 # 1 "..\\RTT\\SEGGER_RTT.h"
 
 
@@ -13201,7 +13247,7 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
  
-# 58 "..\\user\\main.h"
+# 59 "..\\user\\main.h"
 # 1 "..\\user\\SysTick.h"
 
 
@@ -13210,6 +13256,7 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 
 
 
+void SysTick_Delay_Ms(volatile uint32_t nTime);
 
 void Systick_Init(void);
 uint32_t GetTime(void);
@@ -13220,10 +13267,10 @@ uint32_t GetTime(void);
 
 
 
-# 59 "..\\user\\main.h"
+# 60 "..\\user\\main.h"
 
 
-# 69 "..\\user\\main.h"
+# 70 "..\\user\\main.h"
 
 
 
@@ -13233,6 +13280,103 @@ uint32_t GetTime(void);
 
 
 
+enum IAP2PacketEnums
+{
+     
+    kIAP2PacketSYNC        = 0xFF,
+    kIAP2PacketSOP         = 0x5A,
+    kIAP2PacketSOPOrig     = 0x55,
+
+    kIAP2PacketSOPLen      = 2,
+
+    kiAP2PacketVersion     = 1,
+
+     
+    kIAP2PacketIndexSYNC   = 0,    
+    kIAP2PacketIndexSOP    = 1,    
+    kIAP2PacketIndexLEN1   = 2,    
+    kIAP2PacketIndexLEN2   = 3,    
+    kIAP2PacketIndexCTRL   = 4,    
+    kIAP2PacketIndexSEQ    = 5,    
+    kIAP2PacketIndexACK    = 6,    
+    kIAP2PacketIndexSESSID = 7,    
+    kIAP2PacketIndexCHK    = 8,    
+
+     
+    kIAP2PacketDetectLEN    = 0x0200,
+    kIAP2PacketDetectCTRL   = 0xEE,
+    kIAP2PacketDetectSEQ    = 0x10,
+
+     
+    kIAP2PacketDetectNACKLEN    = 0x0400,
+    kIAP2PacketDetectNACKCTRL   = 0x02,
+    kIAP2PacketDetectNACKSEQ    = 0x04,
+    kIAP2PacketDetectNACKACK    = 0xEE,
+    kIAP2PacketDetectNACKSESSID = 0x08,
+
+    
+
+
+ 
+    kIAP2PacketHeaderLen = 9,
+    kIAP2PacketChksumLen = 1,    
+
+    kiAP2PacketLenMax = 0xFFFF,
+    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+
+     
+    kIAP2PacketControlMaskSYN = 0x80,    
+    kIAP2PacketControlMaskACK = 0x40,    
+    kIAP2PacketControlMaskEAK = 0x20,    
+    kIAP2PacketControlMaskRST = 0x10,    
+    kIAP2PacketControlMaskSUS = 0x08,    
+
+    kIAP2PacketSynDataIdxVersion           = 0,
+    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+
+    kIAP2PacketSynDataBaseLen              = 10,
+
+    kIAP2PacketSynDataIdxSessionInfo       = 10,
+
+    kIAP2PacketSynSessionIdxID             = 0,
+    kIAP2PacketSynSessionIdxType           = 1,
+    kIAP2PacketSynSessionIdxVersion        = 2,
+    kIAP2PacketSynSessionSize              = 3,
+
+     
+    kIAP2PacketReservedSessionID           = 0,
+
+    kIAP2PacketMaxSessions                 = 10,
+
+    kIAP2PacketSynOptionMaskLP             = 0x80,
+    kIAP2PacketSynOptionMaskHP             = 0x40
+};
+
+typedef enum
+{
+    kiAP2PacketParseStateSOP1 = 0,
+    kiAP2PacketParseStateSOP2,
+    kiAP2PacketParseStateLEN1,
+    kiAP2PacketParseStateLEN2,
+    kiAP2PacketParseStateCTRL,
+    kiAP2PacketParseStateSEQ,
+    kiAP2PacketParseStateACK,
+    kiAP2PacketParseStateSESSID,
+    kiAP2PacketParseStateCHK,
+    kiAP2PacketParseStatePAYLOAD,
+    kiAP2PacketParseStatePAYLOADCHK,
+    kiAP2PacketParseStateFINISH,
+    kiAP2PacketParseStateDETECT,
+    kiAP2PacketParseStateDETECTBAD,
+
+    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+
+} kiAP2PacketParseState_t;
  
 
 
@@ -13469,43 +13613,773 @@ void matrix_key_handle(matrix_t* matrix);
 
 
 # 24 "..\\user\\main.c"
-# 1 "..\\user\\timer.h"
+
+# 1 "..\\iap2\\GenericTypeDefs.h"
 
 
 
-# 5 "..\\user\\timer.h"
 
 
-typedef struct
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+# 1 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+ 
+
+
+
+
+
+
+ 
+
+ 
+ 
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+# 34 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+
+  typedef signed int ptrdiff_t;
+
+
+
+  
+
+
+
+    typedef unsigned int size_t;    
+# 57 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+   
+
+
+
+      typedef unsigned short wchar_t;  
+# 82 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+    
+
+
+
+
+   
+
+
+
+
+  typedef long double max_align_t;
+
+
+
+
+
+
+
+
+
+# 114 "C:\\Keil_v5\\ARM\\ARMCC\\Bin\\..\\include\\stddef.h"
+
+
+
+ 
+
+# 63 "..\\iap2\\GenericTypeDefs.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+typedef unsigned char uint8;
+typedef char int8;
+typedef unsigned short uint16;
+typedef short int16;
+typedef unsigned int uint32;
+typedef volatile unsigned int vuint32;
+typedef int int32;
+typedef uint16 wchar;
+
+
+typedef signed int          INT;
+typedef signed char         INT8;
+typedef signed short int    INT16;
+typedef signed long int     INT32;
+
+
+
+
+
+ 
+# 130 "..\\iap2\\GenericTypeDefs.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct _tagList
 {
-	uint16_t v;
-	uint16_t d;
-}br_t;
+	struct _tagList* 	m_pNext;
+	struct _tagList* 	m_pPre;
+    uint8 				m_isUsed;
+}List;
 
 
 
-void set_bright_light(void);
-void TIM_Config(void);
+ 
+typedef unsigned int        UINT;
+typedef unsigned char       UINT8;
+typedef unsigned short int  UINT16;
+ 
 
-
-
-
-
-
-# 25 "..\\user\\main.c"
-
-
-
-
+typedef unsigned long int   UINT32;      
+ 
 
 
 
 
+ 
+
+ 
+typedef void                    VOID;
+
+typedef char                    CHAR8;
+typedef unsigned char           UCHAR8;
+
+typedef unsigned char           BYTE;                            
+typedef unsigned short int      WORD;                            
+typedef unsigned long           DWORD;                           
+ 
+
+
+typedef signed char             CHAR;                            
+typedef signed short int        SHORT;                           
+typedef signed long             LONG;                            
+ 
 
 
 
 
 
+
+# 26 "..\\user\\main.c"
+
+
+# 1 "..\\iap2\\Driver.h"
+
+
+
+
+
+
+# 8 "..\\iap2\\Driver.h"
+# 1 "..\\iap2\\Iap2Link.h"
+
+
+
+
+
+
+
+
+
+
+# 12 "..\\iap2\\Iap2Link.h"
+# 1 "..\\iap2\\swtimer.h"
+
+
+
+# 8 "..\\iap2\\swtimer.h"
+# 9 "..\\iap2\\swtimer.h"
+
+
+
+
+
+
+
+
+
+
+
+struct _tagSwTimer;
+
+typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
+struct _tagTimerManager;
+typedef struct _tagSwTimer
+{
+	List	m_base;
+    uint32 	m_dwTimeoutTicks;
+    uint32 	m_dwInitTicks;
+	
+    uint8 	m_isStart:1;
+    uint8 	m_Reserved:7;
+    
+    uint8 	m_nTimerId;
+	
+    void* 	m_context;
+    TimeoutFun timeout;
+	struct _tagTimerManager* m_pTimerManager;
+}SwTimer;
+
+typedef struct _tagTimerManager
+{
+    SwTimer* 	m_timerList;
+	uint32		m_ticks;
+}TimerManager;
+
+void SwTimer_Init(SwTimer* pTimer, TimeoutFun timeout, void* pContext);
+void SwTimer_Stop(SwTimer* pTimer);
+void SwTimer_Start(SwTimer* pTimer, uint8 timerId, uint32 value_ms);
+void SwTimer_ReStart(SwTimer* pTimer);
+uint8 SwTimer_isStart(SwTimer* pTimer);
+void SwTimer_Reset(SwTimer* pTimer);
+uint8 SwTimer_GetId(SwTimer* pTimer);
+void SwTimer_Release(SwTimer* pTimer);
+uint8 SwTimer_isTimerOut(uint32 initTicks, uint32 newTicks, uint32 timeOutTicks);
+uint8 SwTimer_isTimerOutEx(SwTimer* pTimer);
+
+SwTimer* TimerArray_New(SwTimer* pTimerArray, int nCount);
+SwTimer* TimerArray_Get(SwTimer* pTimerArray, int nCount, uint8 timerId);
+
+void TimerManager_Init(TimerManager* pTm);
+void TimerManager_AddTimer(TimerManager* pTm, SwTimer* pTimer);
+void TimerManager_Run(TimerManager* pTm, uint32 ticks);
+void TimerManager_ResetTimer(TimerManager* pTm, uint32 ticks);
+void TimerManager_RemoveTimer(SwTimer* pTimer);
+
+
+
+
+
+
+
+# 13 "..\\iap2\\Iap2Link.h"
+
+
+
+
+
+
+# 28 "..\\iap2\\Iap2Link.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct _CtrlByte
+{
+	uint8 m_Reserved:3;	
+	uint8 m_SlpBit:1;	
+	uint8 m_RstBit:1;	
+	uint8 m_EakBit:1;	
+	uint8 m_AckBit:1;	
+	uint8 m_SynBit:1;	
+}CtrlByte;
+
+typedef enum _PayloadType
+{
+	 PL_TYPE_DETECT_IAP2 = 0
+	,PL_TYPE_LINK_SYNC
+	,PL_TYPE_SESSION
+	,PL_TYPE_EAK
+	,PL_TYPE_UNKNOWN
+}PayloadType;
+
+
+
+typedef struct _Iap2LinkPkt
+{
+	uint16 m_Sof;
+	uint16 m_Len;
+	CtrlByte m_CtrlByte;
+	
+	uint8 m_SeqNum;
+	uint8 m_AckSeqNum;	
+	uint8 m_SessionId;
+	uint8 m_HeaderSum;
+	uint8 m_Payload[1];
+}Iap2LinkPkt;
+
+typedef struct _Iap2LinkReqPkt
+{
+	Iap2LinkPkt	m_Base;
+	uint8 m_Payload[64];
+}Iap2LinkReqPkt;
+
+typedef struct _Iap2LinkRspPkt
+{
+	Iap2LinkPkt	m_Base;
+	uint8 m_Payload[1024 + 50];
+}Iap2LinkRspPkt;
+
+typedef struct _Iap2Req
+{
+	Iap2LinkPkt	m_Base;
+	uint8 m_Payload[64];
+}Iap2Req;
+
+typedef struct _Iap2Rsp
+{
+	Iap2LinkPkt	m_Base;
+	uint8 m_Payload[1024 + 50];
+}Iap2Rsp;
+
+
+
+typedef struct _SessionIden
+{
+	uint8 m_ID;
+	uint8 m_Type;
+	uint8 m_Ver;
+}SessionIden;
+
+
+typedef struct _LinkPayload
+{
+	uint8 m_LinkVer;			
+	uint8 m_MaxOfOutstandingPkt;
+	
+	uint8 m_MaxPktLenMsb;	
+	uint8 m_MaxPktLenLsb;	
+	
+	uint8 m_ReTxTimeOutMsb;	
+	uint8 m_ReTxTimeOutLsb;	
+	
+	uint8 m_AckTimeOutMsb;	
+	uint8 m_AckTimeOutLsb;	
+	
+	uint8 m_MaxReTxCount;	
+	uint8 m_MaxAckCount;	
+	
+	SessionIden m_Session[2];
+}LinkPayload;
+
+
+void LinkPayload_Init(LinkPayload* pLinkPayload);
+
+
+typedef enum _Iap2Event
+{
+	IAP2_EVENT_INIT = 1
+	,IAP2_EVENT_HAND_SHAKE
+	,IAP2_EVENT_EAK 
+	,IAP2_EVENT_ACK 
+	,IAP2_EVENT_LINK_SYNC_DONE 
+	,IAP2_EVENT_TRANSFER_SUCCESS
+	,IAP2_EVENT_TRANSFER_FAILED
+	,IAP2_EVENT_SESSION_DONE 
+	,IAP2_EVENT_RX_REQ 
+}Iap2Event;
+
+typedef enum _Iap2Rc
+{
+	 IAP2RC_SUCCESS	=	0
+	,IAP2RC_FAILED	=	1
+	,IAP2RC_PENDING
+	,IAP2RC_ACK
+	,IAP2RC_UNKNOWN
+}Iap2Rc;
+
+typedef enum _Iap2State
+{
+	 IAP2_STATE_INIT = 0
+	,IAP2_STATE_TX_LINK_SYNC
+	,IAP2_STATE_RX_LINK_SYNC
+	,IAP2_STATE_TX_ACK
+	,IAP2_STATE_RX_ACK
+	,IAP2_STATE_LINK_DONE
+}Iap2State;
+
+
+typedef struct _Irb
+{
+	uint8 	m_isTx;
+	uint8*	m_pBuff;
+	uint16	m_Len;
+	uint16	m_ActLen;
+
+
+
+}Irb;
+
+typedef uint8 (*Iap2LinkTransferFn)(Irb* pIrb);
+struct _SessionMgr;
+typedef struct _Iap2Link
+{
+	uint8	m_State;
+
+	
+	SwTimer	m_SentACKTimer;			
+	uint8 	m_NextSentPSN;			
+	uint8 	m_OldestTxNakPSN;		
+	uint8 	m_InitialSentPSN;		
+	uint8 	m_LastRcvInPSN;			
+	uint8 	m_InitialRcvSN;			
+	uint8 	m_RcvPSNs[3];	
+
+	struct _SessionMgr* m_pSessionMgr;
+
+	uint8 	m_SessionCount;
+	SessionIden m_Session[2];
+	
+	Iap2LinkReqPkt  _ReqPkt;
+	Iap2LinkRspPkt  _RspPkt;
+	Iap2LinkPkt		_AckPkt;
+	Iap2LinkPkt* 	m_pReqPkt;
+	Iap2LinkPkt* 	m_pRspPkt;
+	Iap2LinkPkt* 	m_pAckPkt;
+	
+	SwTimer	m_ReTxTimer;		
+	uint8	m_ReTxCount;		
+	uint8	m_MaxReTxCount;		
+	uint16	m_ReSendTimeMs;
+
+	Irb		m_Irb;
+	
+	Iap2LinkTransferFn TransferStart;
+}Iap2Link;
+
+void Iap2Link_Init(Iap2Link* pIap2Link, Iap2LinkTransferFn Tx);
+void Iap2Link_Start(Iap2Link* pIap2Link);
+void Iap2Link_Run(Iap2Link* pIap2Link);
+int Iap2LinkPkt_Init(Iap2LinkPkt* pPkt
+	, CtrlByte ctrl
+	, uint8 seq
+	, uint8 ackSeq
+	, uint8 sessionId
+	, const void* pPaoload
+	, uint16 payloadLen);
+
+uint8 Iap2Link_RcvData(Iap2Link* pIap2Link, void* pBuff, int len);
+uint8 Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 reSendTimeMs, uint8 maxTxCount);
+int Iap2Link_AckInit(Iap2LinkPkt* pAckPkt, const Iap2LinkPkt* pPkt);
+void Iap2Link_RegSession(Iap2Link* pIap2Link, struct _SessionMgr* pSession);
+void Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess);
+void Iap2Link_TimerReset(Iap2Link* pIap2Link);
+
+
+
+
+
+
+
+
+# 9 "..\\iap2\\Driver.h"
+
+uint8 Driver_TransferStart(Irb* pIrb);
+void Driver_RxDone(const void* pData, int len);
+void Driver_Check();
+void Driver_TxDone();
+
+
+
+# 29 "..\\user\\main.c"
+# 1 "..\\iap2\\Iap2CtrlSession.h"
+
+
+
+
+
+
+
+# 1 "..\\iap2\\Iap2Session.h"
+
+
+
+
+
+
+
+
+# 10 "..\\iap2\\Iap2Session.h"
+
+
+
+
+
+
+typedef enum _SessionState
+{
+	 IAP2_STATE_SESSION_INIT = IAP2_STATE_RX_ACK + 1
+	,IAP2_STATE_TX_REQ
+	,IAP2_STATE_RX_REQ
+	,IAP2_STATE_TX_RSP
+	,IAP2_STATE_RX_RSP
+}SessionState;
+
+
+
+typedef int (*Iap2EventFn)(void* pObj, Iap2Event event);
+typedef int (*Iap2ReqFn)(void* pObj, const void* pReq, void* pRsp, uint16* pLen);
+typedef int (*Iap2RspFn)(void* pObj, const void* pReq, void* pRsp);
+
+typedef struct _SessionMgr
+{
+	SessionIden 	m_Base;
+	
+	uint8			m_State;
+
+	Iap2EventFn		EventProc;
+	Iap2ReqFn 		ReqProc;
+	Iap2RspFn 		RspProc;
+}SessionMgr;
+	
+Iap2Rc SessionMgr_Fsm(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt);
+uint8 SessionMgr_RxReq(SessionMgr* pSessionMgr);
+uint8 SessionMgr_TxReq(SessionMgr* pSessionMgr, const void* pParam, uint16 len);
+void SessionMgr_Init(SessionMgr* pSessionMgr);
+
+
+
+
+
+
+
+
+# 9 "..\\iap2\\Iap2CtrlSession.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 33 "..\\iap2\\Iap2CtrlSession.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+typedef struct _Iap2CtrlSessionMsgParam
+{
+	uint16 m_Len;
+	uint16 m_MsgId;
+
+	uint8 *m_Data;
+}Iap2CtrlSessionMsgParam;
+
+typedef struct _Iap2CtrlSessionMsg
+{
+	uint16 m_Sof;
+	uint16 m_Len;
+	uint16 m_MsgId;
+	Iap2CtrlSessionMsgParam m_Param[1];
+}Iap2CtrlSessionMsg;
+
+
+
+typedef struct _Iap2CtrlSession
+{
+	SessionMgr	m_Base;
+	
+	uint16 m_MsgId;
+
+	Iap2CtrlSessionMsg m_TxMsg;
+	Iap2CtrlSessionMsg m_RxMsg;
+}Iap2CtrlSession;
+
+uint8 Iap2CtrlSession_Init(Iap2CtrlSession* pIap2CtrlSession);
+uint8 Iap2CtrlSession_SendMsg(Iap2CtrlSession* pIap2CtrlSession, Iap2CtrlSessionMsg* pMsg);
+int Iap2CtrlSessionMsg_AddParam(Iap2CtrlSessionMsg* pMsg
+	, uint16 paramId
+	, const uint8* pData
+	, uint16 len);
+int Iap2CtrlSessionMsg_Init(Iap2CtrlSessionMsg* pMsg, uint16 MsgId);
+
+
+
+
+
+
+
+
+# 30 "..\\user\\main.c"
+# 31 "..\\user\\main.c"
+# 1 "..\\iap2\\ListUsbData.h"
+
+
+
+
+# 6 "..\\iap2\\ListUsbData.h"
+typedef struct _tagListUsbData
+{
+	struct _tagListUsbData* 	m_pNext;
+	struct _tagListUsbData* 	m_pPre;
+    INT16 				data_size;
+	  uint8         *pdata;
+	  uint8         m_isUsed;
+}ListUsbData;
+extern ListUsbData * g_usbdata_list;
+void ListUsbData_Init(ListUsbData* pList);
+ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
+ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
+uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
+int ListUsbData_Count(ListUsbData* pNode);
+void ListUsbData_RemoveAll(ListUsbData* pNode);
+
+
+
+# 32 "..\\user\\main.c"
+# 33 "..\\user\\main.c"
+# 34 "..\\user\\main.c"
+# 35 "..\\user\\main.c"
+# 36 "..\\user\\main.c"
+# 37 "..\\user\\main.c"
+
+# 39 "..\\user\\main.c"
+# 40 "..\\user\\main.c"
+
+
+
+
+
+# 51 "..\\user\\main.c"
+
+
+uint8 g_start_key = 0;
+
+
+extern Iap2Link* g_pIap2Link;
+
+ListUsbData * g_usbdata,* g_usbdata_list;
+uint8_t  g_usbdata_head[9];
+uint8_t  g_hid_report[6];
+
+
+uint8_t	receive_data_buf[512] = {0};
 
 
 uint8_t qty = 0x00;
@@ -13513,6 +14387,8 @@ uint8_t buff[128] = {0x00};
 uint32_t NOW = 0X00;
 
 
+
+	
 
 
 
@@ -13551,7 +14427,7 @@ const KeyIOMap cMap[] = {
 	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000400)),     ((uint16_t)0x0020) , ((uint8_t)0x01), ((uint8_t)0x05) },   	
 	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000400)),     ((uint16_t)0x0040) , ((uint8_t)0x01), ((uint8_t)0x06) },  		
 	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000400)),     ((uint16_t)0x0080) , ((uint8_t)0x01), ((uint8_t)0x07) },  		
-	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)),     ((uint16_t)0x8000), ((uint8_t)0x02), ((uint8_t)0x0F)},   	
+	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)),     ((uint16_t)0x4000), ((uint8_t)0x02), ((uint8_t)0x0E)},   	
 	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00001400)),     ((uint16_t)0x0001) , ((uint8_t)0x05), ((uint8_t)0x00) },   	
 	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00001400)),     ((uint16_t)0x0002) , ((uint8_t)0x05), ((uint8_t)0x01) },   	
 };
@@ -13567,7 +14443,7 @@ const unsigned char keyMatrix[] =
 	
     0x00, 0x00, 0x00, 0x00, 0x00, 0xE3, 0x00, 0x00, 
     0xE6, 0x00, 0xE2, 0x00, 0x00, 0x00, 0x00, 0x00, 
-    0x00, 0xE7, 0x00, 0x00, 0x00, 0x00, 0xAF, 0x3E, 
+    0x00, 0xE7, 0x00, 0x00, 0x00, 0x00, 0xE0, 0x3E, 
     0x51, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x46, 0x00, 
     0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x50, 0x00, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -13580,8 +14456,8 @@ const unsigned char keyMatrix[] =
     0x45, 0x28, 0x44, 0x31, 0x00, 0x2A, 0x42, 0x43, 
     0x00, 0x37, 0x00, 0x0F, 0x12, 0x40, 0x41, 0x26, 
 	0x00, 0x36, 0x3F, 0x0E, 0x0C, 0x30, 0x2E, 0x25, 
-    0x38, 0xE0, 0x34, 0x33, 0x13, 0x2F, 0x2D, 0x27, 
-    0x00, 0x1D, 0x29, 0x04, 0x14, 0x2B, 0x35, 0x1E, 
+    0x38, 0xAF, 0x34, 0x33, 0x13, 0x2F, 0x2D, 0x27, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x05, 0x19, 0x0A, 0x09, 0x15, 0x17, 0x22, 0x21, 
     0x98, 0x06, 0x3D, 0x07, 0x08, 0x3C, 0x3B, 0x20  
 };
@@ -13596,8 +14472,9 @@ const unsigned char keyMatrix[] =
  
 remap_t remap[] = {
 	{0x3A, 0xBE},			
-	{0x3B, 0xBF},						
-	{0x3D, 0xC0},					
+	{0x3B, 0xBF},			
+	{0x3C, 0xC1},				
+	{0x3D, 0xC7},					
 	{0x40, 0xB1},			
 	{0x41, 0xB3},	
 	{0x42, 0xB0},	
@@ -13608,6 +14485,19 @@ remap_t remap[] = {
 };
 
 
+
+	
+
+
+
+
+ 
+remap_t remap2[] = {
+	{0x50, 0x4A},
+	{0x4F, 0x4D},
+	{0x52, 0x4B},
+	{0x51, 0x4E}
+};
 
 
 
@@ -13623,16 +14513,221 @@ matrix_t matrix = {
 	.map = (uint8_t*)keyMatrix,
 	.remap = remap,
 	.remap_num = sizeof(remap) / sizeof(remap_t),
-	.fn_led_status = 0x01
+	.remap2 = remap2,
+	.remap2_num = sizeof(remap2) / sizeof(remap_t)
 };
 
 
+int g_ParseState_t = kiAP2PacketParseStateSOP1;
+int buffer_offset = 0;
+uint8_t *g_packets = 0;;
+uint16_t g_packetLen ;
+
+int iAP2PacketParseBuffer ( uint8_t*  buffer,
+                                uint32_t        bufferLen
+                               )
+
+{
+	  uint8_t* pbuffer = buffer;
+	  int pbuffer_len =0;
+	  
+	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,215);
+	  if(pbuffer ==0)
+		return -1;
+	  
+	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,219,pbuffer_len,bufferLen);
+		while(pbuffer_len < bufferLen)
+		{
+		
+		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,223,pbuffer_len,bufferLen);
+		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,224,g_ParseState_t);
+	   switch(g_ParseState_t)
+		{ 
+		  case kiAP2PacketParseStateSOP1:
+				memset(g_usbdata_head,0,9);
+				buffer_offset = 0;
+				g_packetLen = 0;
+			if(*pbuffer==kIAP2PacketSYNC )
+				{
+					g_ParseState_t	= kiAP2PacketParseStateSOP2;
+					g_usbdata_head[kIAP2PacketIndexSYNC]=(uint8)kIAP2PacketSYNC;
+				}
+						
+				
+				pbuffer++;
+				break;
+				
+		   case kiAP2PacketParseStateSOP2:
+				 if(*pbuffer==kIAP2PacketSOP)
+				 {
+								g_ParseState_t	= kiAP2PacketParseStateLEN1;
+					 g_usbdata_head[kIAP2PacketIndexSOP]=(uint8)kIAP2PacketSOP;
+					
+					 pbuffer++;
+				 }
+			else if(*pbuffer==kIAP2PacketSOPOrig )
+				{
+						g_ParseState_t	= kiAP2PacketParseStateLEN1;
+					
+					g_usbdata_head[kIAP2PacketIndexSOP]=(uint8)kIAP2PacketSOPOrig;
+					pbuffer++;
+				}		
+				else if(*pbuffer==kIAP2PacketSYNC )
+				{
+					 g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+				}  
+				
+				break;
+			 
+				case  kiAP2PacketParseStateLEN1:
+					g_packetLen = (((uint16_t) *pbuffer) << 8);
+				g_ParseState_t	= kiAP2PacketParseStateLEN2;
+								g_usbdata_head[kIAP2PacketIndexLEN1]=(uint8)*pbuffer;
+	
+				   pbuffer++;
+					break;
+				case  kiAP2PacketParseStateLEN2:
+				g_packetLen += ((uint16_t) *pbuffer);
+				
+				  
+				if (((g_packetLen <= 65535) &&
+							g_packetLen >= kIAP2PacketHeaderLen) ||
+							kIAP2PacketDetectLEN == g_packetLen ||
+							kIAP2PacketDetectNACKLEN == g_packetLen)
+				{
+					  g_ParseState_t = kiAP2PacketParseStateCTRL;
+							g_usbdata_head[kIAP2PacketIndexLEN2]=(uint8)*pbuffer;
+					   pbuffer++;
+				}
+				else
+				{
+					 g_ParseState_t = kiAP2PacketParseStateSOP1;
+				}
+				
+					break;
+				
+				   case kiAP2PacketParseStateCTRL:
+						 g_usbdata_head[kIAP2PacketIndexCTRL]=(uint8)*pbuffer;
+					 pbuffer++;
+						 g_ParseState_t = kiAP2PacketParseStateSEQ;
+						 break;
+					 case kiAP2PacketParseStateSEQ:
+						 g_usbdata_head[kIAP2PacketIndexCTRL]=(uint8)*pbuffer;
+						 if(g_usbdata_head[kIAP2PacketIndexLEN1] == 0x20 && g_usbdata_head[kIAP2PacketIndexLEN1] == 0x00 &&
+									 g_usbdata_head[kIAP2PacketIndexCTRL] == 0xee && 0x10==  *pbuffer	 )
+							{
+								
+								
+									 g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+								Driver_RxDone(g_usbdata_head,6);
+							}
+							else	
+							{							
+						 g_ParseState_t = kiAP2PacketParseStateACK;
+								 g_usbdata_head[kIAP2PacketIndexSEQ] =* pbuffer;
+							}
+							 pbuffer++;
+						 break;
+					  case kiAP2PacketParseStateACK:
+						 g_ParseState_t = kiAP2PacketParseStateSESSID;
+						 g_usbdata_head[kIAP2PacketIndexACK] =* pbuffer;
+						pbuffer++;
+						 break;
+						case kiAP2PacketParseStateSESSID:
+						{
+					   
+						g_ParseState_t = kiAP2PacketParseStateCHK;
+						 g_usbdata_head[kIAP2PacketIndexSESSID] =* pbuffer;
+						pbuffer++;
+							
+					   
+					}
+							break;
+						case kiAP2PacketParseStateCHK:
+					
+									{
+										 g_usbdata_head[kIAP2PacketIndexCHK] =* pbuffer;
+										
+												if(  (g_usbdata_head[kIAP2PacketIndexLEN1] == 0x04 &&
+											g_usbdata_head[kIAP2PacketIndexLEN1] == 0x00 &&
+				kIAP2PacketDetectNACKCTRL	== g_usbdata_head[kIAP2PacketIndexCTRL] &&
+				kIAP2PacketDetectNACKSEQ	== g_usbdata_head[kIAP2PacketIndexSEQ] &&
+				kIAP2PacketDetectNACKACK	== g_usbdata_head[kIAP2PacketIndexACK]	&&
+				kIAP2PacketDetectNACKSESSID == g_usbdata_head[kIAP2PacketIndexSESSID]))
+										{
+												
+											  g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+													Driver_RxDone(g_usbdata_head,8);
+										} 
+										else{
+										g_ParseState_t = kiAP2PacketParseStatePAYLOAD;
+												
+											g_usbdata->data_size = g_packetLen;
+											if(g_usbdata->pdata!=0)
+												free(g_usbdata->pdata);
+										g_usbdata->pdata = malloc(g_usbdata->data_size);
+											memset(g_usbdata->pdata,0,g_usbdata->data_size);
+											memcpy(g_usbdata->pdata,g_usbdata_head,9);
+											buffer_offset = 9;
+										}
+								pbuffer++;
+										
+						
+					}
+						 break;
+						 
+					 case kiAP2PacketParseStatePAYLOAD:
+					{
+										g_usbdata->pdata[buffer_offset]= *pbuffer;
+										buffer_offset++;
+										pbuffer++;
+										if(buffer_offset == g_packetLen)
+										{
+											g_ParseState_t =  kiAP2PacketParseStateSOP1;
+											Driver_RxDone(g_usbdata->pdata,g_packetLen);
+											
+											
+											
+										}
+									}
+					 break;
+					case kiAP2PacketParseStateFINISH:
+					case kiAP2PacketParseStateDETECT:
+					case kiAP2PacketParseStateDETECTBAD:
+						break;
+				
+					 
+		}
+		}
+	
+	  return 0;
+	}
 
 
 
 
+void usb_send_data_buffer(uint8_t *pdata, uint16 data_size )
+{
+    if(data_size > 0)
+    	{
 
+		SEGGER_RTT_printf(0,"usb_send_data_buffer data_size=%d\n",data_size);
+    	for(int i = 0;i<data_size;i++)
+    		{ 
+    		SEGGER_RTT_printf(0,"0x%02x ",pdata[i]);
+    		}
+		SEGGER_RTT_printf(0," \n usb_send_data_buffer \n");
 
+		
+		if(USB_EP_Tx(1,pdata,data_size) != SUCCESS)
+			{
+					SEGGER_RTT_printf(0," \n usb_send_data_buffer error \n");
+				
+			}
+		SEGGER_RTT_printf(0," \n usb_send_data_buffer suceessful \n");
+			
+    	}
+	}	
 
 
 
@@ -13656,53 +14751,50 @@ static void remap_fun(matrix_t* matrix, remap_t* remap, uint8_t num)
 
 
 
-
 void hotKey(matrix_t* matrix)
 {
-	static uint8_t b_flag = 0x00;
 	static uint8_t lock_flag = 0x00;
-	
-	if(lock_flag == 0x00 && get_key(&(matrix->buf), 0xAF))
-	{
-		lock_flag = 0x01;
-		matrix->fn_led_status ^= 1;
-		key_up(&(matrix->buf), 0xAF);
-		GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), (BitAction)matrix->fn_led_status);
-		return ;
-	}else if(lock_flag == 0x01 && !get_key(&(matrix->buf), 0xAF))
-	{
-		lock_flag = 0x00;
-		key_up(&(matrix->buf), 0xAF);
-		return ;
-	}
-	
-	if(matrix->fn_led_status)
-	{
-		remap_fun(matrix, matrix->remap, matrix->remap_num);
 		
-		if(get_key(&matrix->buf, 0x3C))
+	if(get_key(&(matrix->buf), 0xAF))
+	{
+		 
+		key_up(&(matrix->buf), 0xAF);
+		
+		 
+		if(get_key(&(matrix->buf), 0x29) && !lock_flag)
 		{
-			key_up(&matrix->buf, 0x3C);
-			key_down(&matrix->buf, 0xE3);
-			key_down(&matrix->buf, 0x2B);
+			lock_flag = 0x01;
+			matrix->fn_led_status ^= 1;
+			 
+			GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), (BitAction)(matrix->fn_led_status));
+			
+		}else if(get_key(&(matrix->buf), 0x29) == 0x00 && lock_flag)
+		{
+			lock_flag = 0x00;
+		}
+		
+		key_up(&(matrix->buf), 0x29);
+		
+		
+		 
+		if(matrix->fn_led_status)
+		{		
+			remap_fun(matrix, matrix->remap, matrix->remap_num);
 		}
 		
 		 
-		if(get_key(&matrix->buf, 0x3F) && b_flag == 0x00)
-		{
-			b_flag = 0x01;
-		}
-		else if(get_key(&matrix->buf, 0x3F) == 0x00 && b_flag == 0x01)
-		{
-			b_flag = 0x00;
-			set_bright_light();
-		}
-		
-		key_up(&matrix->buf, 0x3F);
+		remap_fun(matrix, matrix->remap2, matrix->remap2_num);
 	}
-
+	else
+	{
+		 
+		if(!(matrix->fn_led_status))
+		{
+			 
+			remap_fun(matrix, matrix->remap, matrix->remap_num);
+		}
+	}
 }
-
 
 
 
@@ -13744,14 +14836,15 @@ void build_keycode(matrix_t* matrix)
 		{
 			case 0xBE:			
 			case 0xBF:			
-			case 0xC0:								
+			case 0xC1:				
+			case 0xC7:					
 			case 0xB1:			
 			case 0xB3:	
 			case 0xB0:	
 			case 0xB4:
 			case 0xB7:				
 			case 0xB6:
-			case 0xBA: 
+			case 0xBA:
 				if(matrix->acpi_send_flag == 0x00)
 				{
 					matrix->acpi_send[0] = t_buff[i];
@@ -13859,7 +14952,7 @@ void build_media_key(matrix_t* matrix, uint8_t* media_buffer, uint8_t len)
 			
 		 
 		case 0xBA:			
-			media_buffer[1] = 0xB8; 
+			media_buffer[1] = 0x30; 
 			media_buffer[2] = 0x00; 
 		break;
 			
@@ -13874,11 +14967,17 @@ void build_media_key(matrix_t* matrix, uint8_t* media_buffer, uint8_t len)
 			media_buffer[1] = 0x6F; 
 			media_buffer[2] = 0x00; 
 		break;        
+		
+		 
+		case 0xC1:		
+			media_buffer[1] = 0x23; 
+			media_buffer[2] = 0x02; 
+		break;
 			
 		 
-		case 0xC0:		
-			media_buffer[1] = 0x21; 
-			media_buffer[2] = 0x02; 
+		case 0xC7:		
+			media_buffer[1] = 0xAE; 
+			media_buffer[2] = 0x01; 
 		break;
 	}
 }
@@ -13895,10 +14994,12 @@ void send_acpi_media_keycode(matrix_t* matrix)
 	if(matrix->acpi_send_flag == 0x01)
 	{
 		
-		build_media_key(matrix, media_buffer, sizeof(media_buffer));		
+		build_media_key(matrix, media_buffer, sizeof(media_buffer));
+		
+		
+		
 		USB_EP_Tx(0x02, media_buffer, sizeof(media_buffer));
 		matrix->acpi_send_flag = 0x02;
-		SEGGER_RTT_printf(0,">>>>>>>>>>>>>>>>>>>>");
 		
 	}
 	else if(matrix->acpi_send_flag == 0x03)
@@ -13915,58 +15016,97 @@ void send_acpi_media_keycode(matrix_t* matrix)
 
 
 
-void init_light_pin(void)
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+uint8_t  g_hid_report[6];
+int b_config = 0;
+int main(void)
 {
-	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), 0x06);
-	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), 0x06);
-	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0400), 0x06);
-	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), Bit_SET);
-	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), Bit_SET);
-	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0400), Bit_RESET);
-}
+	I2C_InitTypeDef* g_I2C_1_InitStruct;
+    int usb_receive_len;
+	 uint8 data_offset=0;
+	 ListUsbData * usbdata;
 
 
+	
+	Systick_Init();
+	I2C_DeInit(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)));
+	I2C_StructInit(g_I2C_1_InitStruct);
+	I2C_Init(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),g_I2C_1_InitStruct);
+	I2C_Cmd(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+	USB_Init();
 
 
-void init_device_rcc(void)
-{
 	RCC_AHBPeriphClockCmd(((uint32_t)0x00020000), ENABLE);
 	RCC_AHBPeriphClockCmd(((uint32_t)0x00040000), ENABLE);
 	RCC_AHBPeriphClockCmd(((uint32_t)0x00080000), ENABLE);
 	RCC_AHBPeriphClockCmd(((uint32_t)0x00400000), ENABLE);
-}
-
-
-
-
-
-
- 
-
-
-
-
-
-
- 
-int main(void)
-{
-
-	init_device_rcc();
-	
-	Systick_Init();
-	USB_Init();
-
-	init_light_pin();
 	
 	
-	TIM_Config();
+	SEGGER_RTT_printf(0, "g2g start\n");
+	ListUsbData_Init(g_usbdata);
 	
-	SEGGER_RTT_printf(0, "start\n");
- 
+	ListUsbData_Init(g_usbdata_list);
+	
+   while(1)
+   	{
+   	  SysTick_Delay_Ms(5000);
+			break;
+   	}
+
+   
+   SEGGER_RTT_printf(0,"xxxx b_config == 1\n");
+	
+
+	
+	
+		
+		
+		
+		
+		
+		
+		Iap2CtrlSession g_Iap2CtrlSession;
+		Iap2Link_Init(g_pIap2Link, (Iap2LinkTransferFn)Driver_TransferStart);
+		Iap2CtrlSession_Init(&g_Iap2CtrlSession);
+		
+		Iap2Link_Start(g_pIap2Link);
+
+
+	
 	while (1)
 	{
 
+	  Iap2Link_Start(g_pIap2Link);
+
+		Driver_Check();
+		data_offset =0;
+		memset(g_hid_report,0,6);
+		Iap2Link_Run(g_pIap2Link);
+
+				
+				usbdata = ListUsbData_Remove(g_usbdata_list);
+		if(usbdata!=0 )
+			{
+			
+			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,783);
+			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
+			free(usbdata->pdata);
+			free(usbdata);
+			}
+		SysTick_Delay_Ms(1000);
+		if(!g_start_key)
+				continue;
 
 		matrix_scan_key(&matrix);
 		matrix_scan_again(&matrix);

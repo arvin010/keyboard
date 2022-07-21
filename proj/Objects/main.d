@@ -36,6 +36,7 @@
 .\objects\main.o: ..\usb\inc\usb_core.h
 .\objects\main.o: ..\usb\inc\usb_desc.h
 .\objects\main.o: ..\user\main.h
+.\objects\main.o: ..\user\keyboard.h
 .\objects\main.o: ..\RTT\SEGGER_RTT.h
 .\objects\main.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
@@ -44,4 +45,11 @@
 .\objects\main.o: ..\user\key_buffer.h
 .\objects\main.o: ..\user\io.h
 .\objects\main.o: ..\user\keycode.h
-.\objects\main.o: ..\user\timer.h
+.\objects\main.o: ..\iap2\GenericTypeDefs.h
+.\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\main.o: ..\iap2\Driver.h
+.\objects\main.o: ..\iap2\Iap2Link.h
+.\objects\main.o: ..\iap2\swtimer.h
+.\objects\main.o: ..\iap2\Iap2CtrlSession.h
+.\objects\main.o: ..\iap2\Iap2Session.h
+.\objects\main.o: ..\iap2\ListUsbData.h

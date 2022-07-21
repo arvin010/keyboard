@@ -36,6 +36,7 @@
 .\objects\io.o: ..\usb\inc\usb_core.h
 .\objects\io.o: ..\usb\inc\usb_desc.h
 .\objects\io.o: ..\user\main.h
+.\objects\io.o: ..\user\keyboard.h
 .\objects\io.o: ..\RTT\SEGGER_RTT.h
 .\objects\io.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\io.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

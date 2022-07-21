@@ -20,6 +20,7 @@
  
 
  
+
 # 1 "..\\usb\\inc\\usb_desc.h"
 
 
@@ -4225,6 +4226,8 @@ typedef M_CFG* PM_CFG;
 
 
 
+
+
  
 
 
@@ -4241,6 +4244,9 @@ extern uint16_t_uint8_t StatusInfo;
 extern const uint8_t LanguageId[];
 extern const uint8_t ManufacturerStringDescriptor[];
 extern const uint8_t ProductStringDescriptor[];
+
+extern const uint8_t iapStringDescriptor[];
+
 extern const uint8_t SerialNumberSringDescriptor[];
 extern const uint8_t USB_FSDeviceDescriptor[];
 extern const uint8_t USB_FSConfigDescriptor[];
@@ -4254,6 +4260,8 @@ extern const uint16_t USB_FSDeviceDescriptorSize;
 extern const uint16_t USB_FSConfigDescriptorSize;
 extern const uint16_t LanguageIdSize;
 extern const uint16_t ManufacturerStringDescriptorSize;
+extern const uint16_t iapStringDescriptorSize;
+
 extern const uint16_t ProductStringDescriptorSize;
 extern const uint16_t SerialNumberSringDescriptorSize;
 extern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -4266,7 +4274,7 @@ extern const uint16_t USB_HID_FSReportDescriptor_5Size;
 
  
 
-# 23 "..\\usb\\src\\usb_desc.c"
+# 24 "..\\usb\\src\\usb_desc.c"
  
  
 const uint8_t USB_FSDeviceDescriptor[] = 
@@ -4274,7 +4282,7 @@ const uint8_t USB_FSDeviceDescriptor[] =
    
 	0x12,		
 	0x01,		
-	0x00,		
+	0x10,		
 	0x02,		
 	0x00,		
 	0x00,		
@@ -4295,7 +4303,8 @@ const uint16_t USB_FSDeviceDescriptorSize = sizeof(USB_FSDeviceDescriptor);
 
 const uint8_t USB_FSConfigDescriptor[] = 
 {
-     
+
+   
 	0x09,		
 	0x02,		
 	0x20,		
@@ -4303,7 +4312,7 @@ const uint8_t USB_FSConfigDescriptor[] =
 	0x01,		
 	0x01,		
 	0x00,		
-	0xA0,		
+	0x80,		
 	0x32,		
 	
 	
@@ -4316,7 +4325,9 @@ const uint8_t USB_FSConfigDescriptor[] =
 	0xff,		
 	0xf0,		
 	0x00,		
-	0x02,		
+	0x04,		
+
+	
    
 	0x07,	    
 	0x05,     
@@ -4333,6 +4344,10 @@ const uint8_t USB_FSConfigDescriptor[] =
   0x40,	    
   0x00,     
   0x00,	    
+
+
+
+
 };
 const uint16_t USB_FSConfigDescriptorSize = sizeof(USB_FSConfigDescriptor);
 
@@ -4359,7 +4374,33 @@ const uint16_t ManufacturerStringDescriptorSize = sizeof(ManufacturerStringDescr
 
 const uint8_t ProductStringDescriptor[] = 
 {
+
 	
+		(12*2 + 2),
+		0x03,			
+		'm',0,
+		'f',0,
+		'i',0,
+		' ',0,
+	
+		'k',0,
+		'e',0,
+		'y',0,
+		'b',0,
+		'o',0,
+		'a',0,
+		'r',0,
+		'd',0
+	
+
+};
+
+const uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
+
+const uint8_t iapStringDescriptor[] = 
+{
+
+
 		(13*2 + 2),
 		0x03,			
 		'i',0,
@@ -4374,13 +4415,12 @@ const uint8_t ProductStringDescriptor[] =
 		'r',0,
 		'f',0,
 		'a',0,
-		'c',0,		
-		'e',0,	
-	
+		'c'	,0,
+		'e',0
+# 184 "..\\usb\\src\\usb_desc.c"
 
 };
-const uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
-
+const uint16_t iapStringDescriptorSize = sizeof(iapStringDescriptor);
 
 const uint8_t SerialNumberSringDescriptor[] = 
 {
@@ -4605,6 +4645,8 @@ const uint8_t USB_HID_FSReportDescriptor_5 [] =
     0xC0,	
 };
 const uint16_t USB_HID_FSReportDescriptor_5Size = sizeof(USB_HID_FSReportDescriptor_5);
+
+
 
  
 

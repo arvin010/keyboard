@@ -20,6 +20,7 @@ N  *  **************************************************************************
 N  */
 N
 N/* Includes ----------------------------------------------------------------------*/
+N
 N#include "usb_desc.h"
 L 1 "..\usb\inc\usb_desc.h" 1
 N/**
@@ -7157,8 +7158,10 @@ N/* Endpoint transfer types */
 N#define M_EP_TFMASK     		0x03
 N#define M_EP_CONTROL    		0x00
 N#define M_EP_ISO        		0x01
-N#define M_EP_BULK       		0x10
-N#define M_EP_INTR       		0x11
+N//#define M_EP_BULK       		0x10
+N//#define M_EP_INTR       		0x11
+N#define M_EP_BULK       		0x02
+N#define M_EP_INTR       		0x03
 N
 N/* Standard Device Feature Selectors */
 N#define M_FTR_EPHALT			  0x0000
@@ -7176,6 +7179,9 @@ Nextern uint16_t_uint8_t StatusInfo;
 Nextern const uint8_t LanguageId[];
 Nextern const uint8_t ManufacturerStringDescriptor[];
 Nextern const uint8_t ProductStringDescriptor[];
+N
+Nextern const uint8_t iapStringDescriptor[];
+N
 Nextern const uint8_t SerialNumberSringDescriptor[];
 Nextern const uint8_t USB_FSDeviceDescriptor[];
 Nextern const uint8_t USB_FSConfigDescriptor[];
@@ -7189,6 +7195,8 @@ Nextern const uint16_t USB_FSDeviceDescriptorSize;
 Nextern const uint16_t USB_FSConfigDescriptorSize;
 Nextern const uint16_t LanguageIdSize;
 Nextern const uint16_t ManufacturerStringDescriptorSize;
+Nextern const uint16_t iapStringDescriptorSize;
+N
 Nextern const uint16_t ProductStringDescriptorSize;
 Nextern const uint16_t SerialNumberSringDescriptorSize;
 Nextern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -7201,7 +7209,7 @@ N
 N#endif /* _DESCRIPT_H_ */
 N/************************* (C) COPYRIGHT FMD *****END OF FILE*********************/
 N
-L 23 "..\usb\src\usb_desc.c" 2
+L 24 "..\usb\src\usb_desc.c" 2
 N/* Private Constant --------------------------------------------------------------*/
 N/* Public Constant ---------------------------------------------------------------*/
 Nconst uint8_t USB_FSDeviceDescriptor[] = 
@@ -7209,7 +7217,7 @@ N{
 N  /*---------------------- Device Descriptor ----------------------*/
 N	0x12,		// bLength                 
 N	0x01,		// bDescriptorType         
-N	0x00,		// bcdUSB L               
+N	0x10,		// bcdUSB L               
 N	0x02,		// bcdUSB H               
 N	0x00,		// bDeviceClass            
 N	0x00,		// bDeviceSubClass      
@@ -7230,7 +7238,8 @@ Nconst uint16_t USB_FSDeviceDescriptorSize = sizeof(USB_FSDeviceDescriptor);
 N
 Nconst uint8_t USB_FSConfigDescriptor[] = 
 N{
-N    /*------------------ Configuration Descriptor -------------------  */
+N
+N  /*------------------ Configuration Descriptor -------------------  */
 N	0x09,		// bLength                
 N	0x02,		// bDescriptorType       
 N	0x20,		// wTotalLength 
@@ -7238,7 +7247,7 @@ N	0x00,
 N	0x01,		// bNumInterfaces         
 N	0x01,		// bConfigurationValue    
 N	0x00,		// iConfiguration         
-N	0xA0,		// bmAttributes           
+N	0x80,		// bmAttributes           
 N	0x32,		// MaxPower 
 N	
 N	//-----------------------------------------------------------------//
@@ -7251,7 +7260,9 @@ N	0x02,		// bNumEndpoints
 N	0xff,		// bInterfaceClass        
 N	0xf0,		// bInterfaceSubClass    
 N	0x00,		// bInterfaceProtocol   
-N	0x02,		// iInterface     
+N	0x04,		// iInterface     
+N
+N	
 N  /*------------------- Endpoint Descriptor------------------------*/
 N	0x07,	    //bLength              
 N	0x05,     //bDescriptorType      
@@ -7268,6 +7279,10 @@ N  0x02,	    // bmAttributes: Interrupt endpoint
 N  0x40,	    //wMaxPacketSize (Low Byte)
 N  0x00,     //wMaxPacketSize (High Byte)  
 N  0x00,	    // bInterval: Polling Interval (1 ms) 
+N
+N
+N
+N
 N};
 Nconst uint16_t USB_FSConfigDescriptorSize = sizeof(USB_FSConfigDescriptor);
 N
@@ -7294,7 +7309,33 @@ Nconst uint16_t ManufacturerStringDescriptorSize = sizeof(ManufacturerStringDesc
 N
 Nconst uint8_t ProductStringDescriptor[] = 
 N{
+N
 N	
+N		(12*2 + 2),//length
+N		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
+N		'm',0,
+N		'f',0,
+N		'i',0,
+N		' ',0,
+N	
+N		'k',0,
+N		'e',0,
+N		'y',0,
+N		'b',0,
+N		'o',0,
+N		'a',0,
+N		'r',0,
+N		'd',0
+N	
+N
+N};
+N
+Nconst uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
+N
+Nconst uint8_t iapStringDescriptor[] = 
+N{
+N
+N	#if 1
 N		(13*2 + 2),//length
 N		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
 N		'i',0,
@@ -7309,13 +7350,29 @@ N		'e',0,
 N		'r',0,
 N		'f',0,
 N		'a',0,
-N		'c',0,		
-N		'e',0,	
-N	
+N		'c'	,0,
+N		'e',0
+N	#else
+S		(13 + 2),//length
+S		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
+S		'i',
+S		'A',
+S		'P',
+S		' ',
+S	
+S		'I',
+S		'n',
+S		't',
+S		'e',
+S		'r',
+S		'f',
+S		'a',
+S		'c'	,
+S		'e'
+N	#endif
 N
 N};
-Nconst uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
-N
+Nconst uint16_t iapStringDescriptorSize = sizeof(iapStringDescriptor);
 N
 Nconst uint8_t SerialNumberSringDescriptor[] = 
 N{
@@ -7540,6 +7597,8 @@ N    0x91 ,0x00,                            // Ouput (Data,Var,Abs)
 N    0xC0,	
 N};
 Nconst uint16_t USB_HID_FSReportDescriptor_5Size = sizeof(USB_HID_FSReportDescriptor_5);
+N
+N
 N
 N/************************** (C) COPYRIGHT JD-DZ.COM **********************END OF FILE****/
 N

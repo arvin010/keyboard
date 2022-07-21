@@ -27,10 +27,34 @@ uint32_t GetTime(void)
 	return sysTick;
 }
 
+void SysTick_Delay_Ms(__IO uint32_t nTime)
+{
+    uint32_t tmpTime = GetTime();
+	uint32_t tmpTime2;
+
+	
+	//Ê±ÖÓµÎ´ðÊý
+	while(1)
+	{
+	tmpTime2 = GetTime();
+	if(tmpTime2 < tmpTime)
+		{
+		    if((tmpTime2 + (0xffffffff - tmpTime)) > nTime)
+			break;
+		}
+		else  if ((tmpTime2 - tmpTime) > nTime)
+			break;
+		
+	}		
+}
+
 
 void SysTick_Handler(void)
 {	
-	sysTick++;
+	
+	if(sysTick== 0xffffffff)
+		sysTick = 0;
+	else sysTick++;
 }
 
 

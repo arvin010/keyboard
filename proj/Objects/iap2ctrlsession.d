@@ -43,6 +43,7 @@
 .\objects\iap2ctrlsession.o: ..\usb\inc\usb_core.h
 .\objects\iap2ctrlsession.o: ..\usb\inc\usb_desc.h
 .\objects\iap2ctrlsession.o: ..\user\main.h
+.\objects\iap2ctrlsession.o: ..\user\keyboard.h
 .\objects\iap2ctrlsession.o: ..\RTT\SEGGER_RTT.h
 .\objects\iap2ctrlsession.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\iap2ctrlsession.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

@@ -19,6 +19,7 @@
   */
 
 /* Includes ----------------------------------------------------------------------*/
+
 #include "usb_desc.h"
 /* Private Constant --------------------------------------------------------------*/
 /* Public Constant ---------------------------------------------------------------*/
@@ -27,7 +28,7 @@ const uint8_t USB_FSDeviceDescriptor[] =
   /*---------------------- Device Descriptor ----------------------*/
 	0x12,		// bLength                 
 	0x01,		// bDescriptorType         
-	0x00,		// bcdUSB L               
+	0x10,		// bcdUSB L               
 	0x02,		// bcdUSB H               
 	0x00,		// bDeviceClass            
 	0x00,		// bDeviceSubClass      
@@ -48,7 +49,8 @@ const uint16_t USB_FSDeviceDescriptorSize = sizeof(USB_FSDeviceDescriptor);
 
 const uint8_t USB_FSConfigDescriptor[] = 
 {
-    /*------------------ Configuration Descriptor -------------------  */
+
+  /*------------------ Configuration Descriptor -------------------  */
 	0x09,		// bLength                
 	0x02,		// bDescriptorType       
 	0x20,		// wTotalLength 
@@ -56,7 +58,7 @@ const uint8_t USB_FSConfigDescriptor[] =
 	0x01,		// bNumInterfaces         
 	0x01,		// bConfigurationValue    
 	0x00,		// iConfiguration         
-	0xA0,		// bmAttributes           
+	0x80,		// bmAttributes           
 	0x32,		// MaxPower 
 	
 	//-----------------------------------------------------------------//
@@ -69,7 +71,9 @@ const uint8_t USB_FSConfigDescriptor[] =
 	0xff,		// bInterfaceClass        
 	0xf0,		// bInterfaceSubClass    
 	0x00,		// bInterfaceProtocol   
-	0x02,		// iInterface     
+	0x04,		// iInterface     
+
+	
   /*------------------- Endpoint Descriptor------------------------*/
 	0x07,	    //bLength              
 	0x05,     //bDescriptorType      
@@ -86,6 +90,10 @@ const uint8_t USB_FSConfigDescriptor[] =
   0x40,	    //wMaxPacketSize (Low Byte)
   0x00,     //wMaxPacketSize (High Byte)  
   0x00,	    // bInterval: Polling Interval (1 ms) 
+
+
+
+
 };
 const uint16_t USB_FSConfigDescriptorSize = sizeof(USB_FSConfigDescriptor);
 
@@ -112,7 +120,33 @@ const uint16_t ManufacturerStringDescriptorSize = sizeof(ManufacturerStringDescr
 
 const uint8_t ProductStringDescriptor[] = 
 {
+
 	
+		(12*2 + 2),//length
+		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
+		'm',0,
+		'f',0,
+		'i',0,
+		' ',0,
+	
+		'k',0,
+		'e',0,
+		'y',0,
+		'b',0,
+		'o',0,
+		'a',0,
+		'r',0,
+		'd',0
+	
+
+};
+
+const uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
+
+const uint8_t iapStringDescriptor[] = 
+{
+
+	#if 1
 		(13*2 + 2),//length
 		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
 		'i',0,
@@ -127,13 +161,29 @@ const uint8_t ProductStringDescriptor[] =
 		'r',0,
 		'f',0,
 		'a',0,
-		'c',0,		
-		'e',0,	
+		'c'	,0,
+		'e',0
+	#else
+		(13 + 2),//length
+		0x03,			//×Ö·û´®ÃèÊö·ûµÄÀàÐÍ±àÂë0x03
+		'i',
+		'A',
+		'P',
+		' ',
 	
+		'I',
+		'n',
+		't',
+		'e',
+		'r',
+		'f',
+		'a',
+		'c'	,
+		'e'
+	#endif
 
 };
-const uint16_t ProductStringDescriptorSize = sizeof(ProductStringDescriptor);
-
+const uint16_t iapStringDescriptorSize = sizeof(iapStringDescriptor);
 
 const uint8_t SerialNumberSringDescriptor[] = 
 {
@@ -358,6 +408,8 @@ const uint8_t USB_HID_FSReportDescriptor_5 [] =
     0xC0,	
 };
 const uint16_t USB_HID_FSReportDescriptor_5Size = sizeof(USB_HID_FSReportDescriptor_5);
+
+
 
 /************************** (C) COPYRIGHT JD-DZ.COM **********************END OF FILE****/
 

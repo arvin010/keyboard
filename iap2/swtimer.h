@@ -18,6 +18,7 @@ extern "C"{
 #define TIMER_TASK_INTERVAL 1
 #define MAX_TEMP_BUF_SIZE 	SECTOR_SIZE
 struct _tagSwTimer;
+
 typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 struct _tagTimerManager;
 typedef struct _tagSwTimer

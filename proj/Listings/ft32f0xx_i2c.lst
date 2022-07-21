@@ -7365,6 +7365,9 @@ NITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 Nvoid I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 N
 N
+Nint i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+Nint i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+N
 N#ifdef __cplusplus
 S}
 N#endif
@@ -9377,6 +9380,85 @@ X  ((void)0);
 N
 N  /* Clear the selected flag */
 N  I2Cx->ICR = I2C_IT;
+N}
+N
+N
+Nint i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+N{
+N	  I2C_GenerateSTART(I2C1,ENABLE);
+X	  I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+N  //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+W "..\FTLib\Src\ft32f0xx_i2c.c" 1245 11 support for trigraphs is disabled
+N    //??????-?
+N	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
+X	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
+N	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+X	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+N 
+N    //????????
+N    I2C_SendData(I2C1,addr);
+X    I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),addr);
+N
+N    //????????
+N    I2C_GenerateSTART(I2C1,ENABLE);
+X    I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+N	    //??????-?
+N	I2C_MasterRequestConfig(I2C1,I2C_Direction_Receiver);
+X	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0400));
+N	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+X	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+N	
+N    while(bufferSize)
+N    {
+N        bufferSize--;
+N        if(bufferSize == 0)
+N        {
+N        	//??????
+N            I2C_AcknowledgeConfig(I2C1, DISABLE);
+X            I2C_AcknowledgeConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)), DISABLE);
+N        }
+N        
+N       
+N        *pBuffer = I2C_ReceiveData(I2C1);
+X        *pBuffer = I2C_ReceiveData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)));
+N        pBuffer++;
+N    }
+N	//??????
+N    I2C_GenerateSTOP(I2C1,ENABLE);
+X    I2C_GenerateSTOP(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+N    //????????
+N    I2C_AcknowledgeConfig(I2C1, ENABLE);
+X    I2C_AcknowledgeConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)), ENABLE);
+N		
+N	  return 0;
+N}
+Nint i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBuffer, uint32_t bufferSize)
+N{
+N	I2C_GenerateSTART(I2C1,ENABLE);
+X	I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+N  //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+N    //??????-?
+N	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
+X	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
+N	I2C_SlaveAddressConfig(I2C1,slave_addr); 
+X	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
+N 
+N    //????????
+N    I2C_SendData(I2C1,addr);
+X    I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),addr);
+N
+N    //??????
+N    while(bufferSize--)
+N    {
+N        I2C_SendData(I2C1,*pBuffer);
+X        I2C_SendData(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),*pBuffer);
+N        pBuffer++;
+N       // while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+N    }
+N    //??????
+N    I2C_GenerateSTOP(I2C1,ENABLE);
+X    I2C_GenerateSTOP(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+N		return 0;
 N}
 N
 N/**

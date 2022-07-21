@@ -172,12 +172,12 @@
 00000e  4620              MOV      r0,r4
 000010  f7fffffe          BL       read_word
 000014  9000              STR      r0,[sp,#0]
-;;;83     	//SEGGER_RTT_printf(0, "%d  %d   %08x        ", byte4, byte, buff);		
+;;;83     	//SEGGER_RTT_SEGGER_RTT_printf(0,0, "%d  %d   %08x        ", byte4, byte, buff);		
 ;;;84     	//buff |= ( data << ( byte * 8 ) );
 ;;;85     	
-;;;86     	//SEGGER_RTT_printf(0, "%08x  ", buff);	
+;;;86     	//SEGGER_RTT_SEGGER_RTT_printf(0,0, "%08x  ", buff);	
 ;;;87     	//p[byte] = data;
-;;;88     	//SEGGER_RTT_printf(0, "%08x  ", buff);	
+;;;88     	//SEGGER_RTT_SEGGER_RTT_printf(0,0, "%08x  ", buff);	
 ;;;89     
 ;;;90     	
 ;;;91     	//write_word(byte4, buff);

@@ -36,8 +36,12 @@
 .\objects\usb_core.o: ..\FTLib\Inc\ft32f0xx_usart.h
 .\objects\usb_core.o: ..\FTLib\Inc\ft32f0xx_wwdg.h
 .\objects\usb_core.o: ..\usb\inc\usb_core.h
+.\objects\usb_core.o: ..\user\keyboard.h
 .\objects\usb_core.o: ..\RTT\SEGGER_RTT.h
 .\objects\usb_core.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\usb_core.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\usb_core.o: ..\user\SysTick.h
 .\objects\usb_core.o: ..\user\main.h
+.\objects\usb_core.o: ..\iap2\ListUsbData.h
+.\objects\usb_core.o: ..\iap2\GenericTypeDefs.h
+.\objects\usb_core.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h

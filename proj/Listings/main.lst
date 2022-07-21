@@ -12903,6 +12903,9 @@ NITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 Nvoid I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 N
 N
+Nint i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+Nint i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+N
 N#ifdef __cplusplus
 S}
 N#endif
@@ -17990,8 +17993,10 @@ N/* Endpoint transfer types */
 N#define M_EP_TFMASK     		0x03
 N#define M_EP_CONTROL    		0x00
 N#define M_EP_ISO        		0x01
-N#define M_EP_BULK       		0x10
-N#define M_EP_INTR       		0x11
+N//#define M_EP_BULK       		0x10
+N//#define M_EP_INTR       		0x11
+N#define M_EP_BULK       		0x02
+N#define M_EP_INTR       		0x03
 N
 N/* Standard Device Feature Selectors */
 N#define M_FTR_EPHALT			  0x0000
@@ -18009,6 +18014,9 @@ Nextern uint16_t_uint8_t StatusInfo;
 Nextern const uint8_t LanguageId[];
 Nextern const uint8_t ManufacturerStringDescriptor[];
 Nextern const uint8_t ProductStringDescriptor[];
+N
+Nextern const uint8_t iapStringDescriptor[];
+N
 Nextern const uint8_t SerialNumberSringDescriptor[];
 Nextern const uint8_t USB_FSDeviceDescriptor[];
 Nextern const uint8_t USB_FSConfigDescriptor[];
@@ -18022,6 +18030,8 @@ Nextern const uint16_t USB_FSDeviceDescriptorSize;
 Nextern const uint16_t USB_FSConfigDescriptorSize;
 Nextern const uint16_t LanguageIdSize;
 Nextern const uint16_t ManufacturerStringDescriptorSize;
+Nextern const uint16_t iapStringDescriptorSize;
+N
 Nextern const uint16_t ProductStringDescriptorSize;
 Nextern const uint16_t SerialNumberSringDescriptorSize;
 Nextern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -18093,6 +18103,7 @@ S
 S
 S
 S#include "usb_core.h"
+S#include "keyboard.h"
 S#include "SEGGER_RTT.h"
 S#include "SysTick.h"
 S
@@ -18114,6 +18125,103 @@ S/* Public typedef -------------------------------------------------------------
 S
 S#define _debug_
 S
+Senum IAP2PacketEnums
+S{
+S    /* Start of packet bytes */
+S    kIAP2PacketSYNC        = 0xFF,
+S    kIAP2PacketSOP         = 0x5A,
+S    kIAP2PacketSOPOrig     = 0x55,
+S
+S    kIAP2PacketSOPLen      = 2,
+S
+S    kiAP2PacketVersion     = 1,
+S
+S    /* Packet field index */
+S    kIAP2PacketIndexSYNC   = 0,   /* Start of packet byte 1 */
+S    kIAP2PacketIndexSOP    = 1,   /* Start of packet byte 2 */
+S    kIAP2PacketIndexLEN1   = 2,   /* Packet length MSB */
+S    kIAP2PacketIndexLEN2   = 3,   /* Packet length LSB */
+S    kIAP2PacketIndexCTRL   = 4,   /* Control flags */
+S    kIAP2PacketIndexSEQ    = 5,   /* SEQ number */
+S    kIAP2PacketIndexACK    = 6,   /* ACK number */
+S    kIAP2PacketIndexSESSID = 7,   /* Session ID */
+S    kIAP2PacketIndexCHK    = 8,   /* Header checksum */
+S
+S    /* iAP 1.0/2.0 packet detect: FF 55 02 00 EE 10 */
+S    kIAP2PacketDetectLEN    = 0x0200,
+S    kIAP2PacketDetectCTRL   = 0xEE,
+S    kIAP2PacketDetectSEQ    = 0x10,
+S
+S    /* iAP 1.0/2.0 packet detect BAD ACK: FF 55 04 00 02 04 EE 08 */
+S    kIAP2PacketDetectNACKLEN    = 0x0400,
+S    kIAP2PacketDetectNACKCTRL   = 0x02,
+S    kIAP2PacketDetectNACKSEQ    = 0x04,
+S    kIAP2PacketDetectNACKACK    = 0xEE,
+S    kIAP2PacketDetectNACKSESSID = 0x08,
+S
+S    /*
+S    ** Packet Header Len
+S    ** SOP(2) + LEN(2) + CONTROL(1) + SEQ(1) + ACK(1) + SESSID(1) + CHK(1)
+S    */
+S    kIAP2PacketHeaderLen = 9,
+S    kIAP2PacketChksumLen = 1,   /* checksum byte length */
+S
+S    kiAP2PacketLenMax = 0xFFFF,
+S    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+S
+S    /* BitMask defines for bits in control byte */
+S    kIAP2PacketControlMaskSYN = 0x80,   /* synchronization */
+S    kIAP2PacketControlMaskACK = 0x40,   /* acknowledgement */
+S    kIAP2PacketControlMaskEAK = 0x20,   /* extended acknowledgement */
+S    kIAP2PacketControlMaskRST = 0x10,   /* reset */
+S    kIAP2PacketControlMaskSUS = 0x08,   /* suspend (sleep) */
+S
+S    kIAP2PacketSynDataIdxVersion           = 0,
+S    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+S    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+S    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+S    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+S    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+S    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+S
+S    kIAP2PacketSynDataBaseLen              = 10,
+S
+S    kIAP2PacketSynDataIdxSessionInfo       = 10,
+S
+S    kIAP2PacketSynSessionIdxID             = 0,
+S    kIAP2PacketSynSessionIdxType           = 1,
+S    kIAP2PacketSynSessionIdxVersion        = 2,
+S    kIAP2PacketSynSessionSize              = 3,
+S
+S    /* Session ID 0x0 shall not be used for any session types */
+S    kIAP2PacketReservedSessionID           = 0,
+S
+S    kIAP2PacketMaxSessions                 = 10,
+S
+S    kIAP2PacketSynOptionMaskLP             = 0x80,
+S    kIAP2PacketSynOptionMaskHP             = 0x40
+S};
+S
+Stypedef enum
+S{
+S    kiAP2PacketParseStateSOP1 = 0,
+S    kiAP2PacketParseStateSOP2,
+S    kiAP2PacketParseStateLEN1,
+S    kiAP2PacketParseStateLEN2,
+S    kiAP2PacketParseStateCTRL,
+S    kiAP2PacketParseStateSEQ,
+S    kiAP2PacketParseStateACK,
+S    kiAP2PacketParseStateSESSID,
+S    kiAP2PacketParseStateCHK,
+S    kiAP2PacketParseStatePAYLOAD,
+S    kiAP2PacketParseStatePAYLOADCHK,
+S    kiAP2PacketParseStateFINISH,
+S    kiAP2PacketParseStateDETECT,
+S    kiAP2PacketParseStateDETECTBAD,
+S
+S    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+S
+S} kiAP2PacketParseState_t;
 S/* Public define ----------------------------------------------------------------*/
 S
 S//#define ApplicationAddress    ((uint32_t)0x08002000)   //APP程序起始地址
@@ -18418,6 +18526,10 @@ N#define ep_hid_keyboard   0x02
 N#define ep_hid_vendor_tx  0x04
 N#define ep_hid_vendor_rx  0x05
 N
+N#define ep_iap2_vendor_tx  0x01
+N#define ep_iap2_vendor_rx  0x00
+N
+N
 N#define LEN_BOOT_KEYBOARD_DATA   8
 N#define LEN_TOUCHPAD_DATA        5
 N#define LEN_CONSUMER_DATA        2
@@ -18448,7 +18560,7 @@ N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
 NErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-Nvoid USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+Nint USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 N
 Nuint8_t USB_ReadRegister(uint8_t USB_Refister);
 Nvoid USB_PDCTRLConfig(uint8_t PDCT);
@@ -18462,6 +18574,39 @@ N
 N/************************* (C) COPYRIGHT JD-DZ.COM *****END OF FILE*********************/
 N
 L 57 "..\user\main.h" 2
+N#include "keyboard.h"
+L 1 "..\user\keyboard.h" 1
+N#ifndef __KEYBOARD_H
+N#define __KEYBOARD_H
+N
+N
+Nextern uint8_t Vendor_data_Buffer[];
+Nextern uint8_t	ep2_send_buf[];
+N
+N
+N
+N
+N
+N
+Nvoid send_boot_keyboard_code(uint8_t* dat, uint8_t len);
+N//void send_touchpad_code(uint8_t* dat, uint8_t len);
+N//void send_consumer_code(uint8_t* dat, uint8_t len);
+N//void send_sysctrl_code(uint8_t* dat, uint8_t len);
+N
+N
+Nvoid send_hid_keyboard_code(uint8_t* dat, uint8_t len);
+N
+Nvoid ep2_send_data(uint8_t rpt_type, uint8_t* dat, uint8_t len);
+Nvoid USB_Transmit_VendorData(uint8_t* dat, uint8_t len);
+Nvoid USB_Receive_VendorData(uint8_t* dat, uint8_t len);
+N
+N
+N
+N
+N#endif /* __KEYBOARD_H */
+N
+N/************************** (C) COPYRIGHT JD-DZ.COM **********************END OF FILE****/
+L 58 "..\user\main.h" 2
 N#include "SEGGER_RTT.h"
 L 1 "..\RTT\SEGGER_RTT.h" 1
 N/*********************************************************************
@@ -19351,7 +19496,7 @@ N
 N#endif
 N
 N/*************************** End of file ****************************/
-L 58 "..\user\main.h" 2
+L 59 "..\user\main.h" 2
 N#include "SysTick.h"
 L 1 "..\user\SysTick.h" 1
 N#ifndef __SysTick_h__
@@ -19361,6 +19506,8 @@ N#include "main.h"
 N
 N
 N
+Nvoid SysTick_Delay_Ms(__IO uint32_t nTime);
+Xvoid SysTick_Delay_Ms(volatile uint32_t nTime);
 N
 Nvoid Systick_Init(void);
 Nuint32_t GetTime(void);
@@ -19371,7 +19518,7 @@ N
 N
 N
 N
-L 59 "..\user\main.h" 2
+L 60 "..\user\main.h" 2
 N
 N
 N#define FN_PORT		GPIOC	
@@ -19391,6 +19538,103 @@ N/* Public typedef -------------------------------------------------------------
 N
 N#define _debug_
 N
+Nenum IAP2PacketEnums
+N{
+N    /* Start of packet bytes */
+N    kIAP2PacketSYNC        = 0xFF,
+N    kIAP2PacketSOP         = 0x5A,
+N    kIAP2PacketSOPOrig     = 0x55,
+N
+N    kIAP2PacketSOPLen      = 2,
+N
+N    kiAP2PacketVersion     = 1,
+N
+N    /* Packet field index */
+N    kIAP2PacketIndexSYNC   = 0,   /* Start of packet byte 1 */
+N    kIAP2PacketIndexSOP    = 1,   /* Start of packet byte 2 */
+N    kIAP2PacketIndexLEN1   = 2,   /* Packet length MSB */
+N    kIAP2PacketIndexLEN2   = 3,   /* Packet length LSB */
+N    kIAP2PacketIndexCTRL   = 4,   /* Control flags */
+N    kIAP2PacketIndexSEQ    = 5,   /* SEQ number */
+N    kIAP2PacketIndexACK    = 6,   /* ACK number */
+N    kIAP2PacketIndexSESSID = 7,   /* Session ID */
+N    kIAP2PacketIndexCHK    = 8,   /* Header checksum */
+N
+N    /* iAP 1.0/2.0 packet detect: FF 55 02 00 EE 10 */
+N    kIAP2PacketDetectLEN    = 0x0200,
+N    kIAP2PacketDetectCTRL   = 0xEE,
+N    kIAP2PacketDetectSEQ    = 0x10,
+N
+N    /* iAP 1.0/2.0 packet detect BAD ACK: FF 55 04 00 02 04 EE 08 */
+N    kIAP2PacketDetectNACKLEN    = 0x0400,
+N    kIAP2PacketDetectNACKCTRL   = 0x02,
+N    kIAP2PacketDetectNACKSEQ    = 0x04,
+N    kIAP2PacketDetectNACKACK    = 0xEE,
+N    kIAP2PacketDetectNACKSESSID = 0x08,
+N
+N    /*
+N    ** Packet Header Len
+N    ** SOP(2) + LEN(2) + CONTROL(1) + SEQ(1) + ACK(1) + SESSID(1) + CHK(1)
+N    */
+N    kIAP2PacketHeaderLen = 9,
+N    kIAP2PacketChksumLen = 1,   /* checksum byte length */
+N
+N    kiAP2PacketLenMax = 0xFFFF,
+N    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+N
+N    /* BitMask defines for bits in control byte */
+N    kIAP2PacketControlMaskSYN = 0x80,   /* synchronization */
+N    kIAP2PacketControlMaskACK = 0x40,   /* acknowledgement */
+N    kIAP2PacketControlMaskEAK = 0x20,   /* extended acknowledgement */
+N    kIAP2PacketControlMaskRST = 0x10,   /* reset */
+N    kIAP2PacketControlMaskSUS = 0x08,   /* suspend (sleep) */
+N
+N    kIAP2PacketSynDataIdxVersion           = 0,
+N    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+N    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+N    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+N    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+N    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+N    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+N
+N    kIAP2PacketSynDataBaseLen              = 10,
+N
+N    kIAP2PacketSynDataIdxSessionInfo       = 10,
+N
+N    kIAP2PacketSynSessionIdxID             = 0,
+N    kIAP2PacketSynSessionIdxType           = 1,
+N    kIAP2PacketSynSessionIdxVersion        = 2,
+N    kIAP2PacketSynSessionSize              = 3,
+N
+N    /* Session ID 0x0 shall not be used for any session types */
+N    kIAP2PacketReservedSessionID           = 0,
+N
+N    kIAP2PacketMaxSessions                 = 10,
+N
+N    kIAP2PacketSynOptionMaskLP             = 0x80,
+N    kIAP2PacketSynOptionMaskHP             = 0x40
+N};
+N
+Ntypedef enum
+N{
+N    kiAP2PacketParseStateSOP1 = 0,
+N    kiAP2PacketParseStateSOP2,
+N    kiAP2PacketParseStateLEN1,
+N    kiAP2PacketParseStateLEN2,
+N    kiAP2PacketParseStateCTRL,
+N    kiAP2PacketParseStateSEQ,
+N    kiAP2PacketParseStateACK,
+N    kiAP2PacketParseStateSESSID,
+N    kiAP2PacketParseStateCHK,
+N    kiAP2PacketParseStatePAYLOAD,
+N    kiAP2PacketParseStatePAYLOADCHK,
+N    kiAP2PacketParseStateFINISH,
+N    kiAP2PacketParseStateDETECT,
+N    kiAP2PacketParseStateDETECTBAD,
+N
+N    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+N
+N} kiAP2PacketParseState_t;
 N/* Public define ----------------------------------------------------------------*/
 N
 N//#define ApplicationAddress    ((uint32_t)0x08002000)   //APP程序起始地址
@@ -19772,44 +20016,911 @@ N
 N#endif /* __KEYCODE_H */
 N
 L 24 "..\user\main.c" 2
-N#include "timer.h"
-L 1 "..\user\timer.h" 1
-N#ifndef __timer_h__
-N#define __timer_h__
 N
-N#include "main.h"
+N#include "GenericTypeDefs.h"
+L 1 "..\iap2\GenericTypeDefs.h" 1
+N/*******************************************************************
+N
+N                  Generic Type Definitions
+N
+N********************************************************************
+N FileName:        GenericTypeDefs.h
+N Dependencies:    None
+N Processor:       PIC10, PIC12, PIC16, PIC18, PIC24, dsPIC, PIC32
+N Compiler:        MPLAB C Compilers for PIC18, PIC24, dsPIC, & PIC32
+N                  Hi-Tech PICC PRO, Hi-Tech PICC18 PRO
+N Company:         Microchip Technology Inc.
+N
+N Software License Agreement
+N
+N The software supplied herewith by Microchip Technology Incorporated
+N (the "Company") is intended and supplied to you, the Company's
+N customer, for use solely and exclusively with products manufactured
+N by the Company.
+N
+N The software is owned by the Company and/or its supplier, and is
+N protected under applicable copyright laws. All rights are reserved.
+N Any use in violation of the foregoing restrictions may subject the
+N user to criminal sanctions under applicable laws, as well as to
+N civil liability for the breach of the terms and conditions of this
+N license.
+N
+N THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
+N WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+N TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+N PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+N IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+N CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+N
+N********************************************************************
+N File Description:
+N
+N Change History:
+N  Rev   Date         Description
+N  1.1   09/11/06     Add base signed types
+N  1.2   02/28/07     Add QWORD, LONGLONG, QWORD_VAL
+N  1.3   02/06/08     Add def's for PIC32
+N  1.4   08/08/08     Remove LSB/MSB Macros, adopted by Peripheral lib
+N  1.5   08/14/08     Simplify file header
+N  2.0   07/13/09     Updated for new release of coding standards
+N*******************************************************************/
+N
+N#ifndef __GENERIC_TYPE_DEFS_H_
+N#define __GENERIC_TYPE_DEFS_H_
+N
+N/* Specify an extension for GCC based compilers */
+N#if defined(__GNUC__)
+X#if 1L
+N#define __EXTENSION __extension__
+N#else
+S#define __EXTENSION
+N#endif
+N
+N#if !defined(__PACKED)
+X#if !0L
+N    #define __PACKED
+N#endif
+N
+N/* get compiler defined type definitions (NULL, size_t, etc) */
+N#include <stddef.h> 
+L 1 "C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h" 1
+N/* stddef.h: ANSI 'C' (X3J11 Oct 88) library header, section 4.1.4 */
+N
+N/* Copyright (C) ARM Ltd., 1999
+N * All rights reserved
+N * RCS $Revision$
+N * Checkin $Date$
+N * Revising $Author: agrant $
+N */
+N
+N/* Copyright (C) Codemist Ltd., 1988                            */
+N/* Copyright 1991 ARM Limited. All rights reserved.             */
+N/* version 0.05 */
+N
+N/*
+N * The following types and macros are defined in several headers referred to in
+N * the descriptions of the functions declared in that header. They are also
+N * defined in this header file.
+N */
+N
+N#ifndef __stddef_h
+N#define __stddef_h
+N#define __ARMCLIB_VERSION 5060044
+N
+N  #ifndef __STDDEF_DECLS
+N  #define __STDDEF_DECLS
+N    #undef __CLIBNS
+N    #ifdef __cplusplus
+S        namespace std {
+S        #define __CLIBNS ::std::
+S        extern "C" {
+N    #else
+N      #define __CLIBNS
+N    #endif  /* __cplusplus */
+N
+N#if __sizeof_ptr == 8
+X#if 4 == 8
+S  typedef signed long ptrdiff_t;
+N#else
+N  typedef signed int ptrdiff_t;
+N#endif
+N
+N#if defined(__cplusplus) || !defined(__STRICT_ANSI__)
+X#if 0L || !0L
+N /* unconditional in C++ and non-strict C for consistency of debug info */
+N  #if __sizeof_ptr == 8
+X  #if 4 == 8
+S    typedef unsigned long size_t;   /* see <stddef.h> */
+N  #else
+N    typedef unsigned int size_t;   /* see <stddef.h> */
+N  #endif
+N#elif !defined(__size_t)
+X#elif !0L
+S  #define __size_t 1
+S  #if __sizeof_ptr == 8
+S    typedef unsigned long size_t;   /* see <stddef.h> */
+S  #else
+S    typedef unsigned int size_t;   /* see <stddef.h> */
+S  #endif
+S   /* the unsigned integral type of the result of the sizeof operator. */
+N#endif
+N
+N#ifndef __cplusplus  /* wchar_t is a builtin type for C++ */
+N  #if !defined(__STRICT_ANSI__)
+X  #if !0L
+N  /* unconditional in non-strict C for consistency of debug info */
+N    #if defined(__WCHAR32) || (defined(__ARM_SIZEOF_WCHAR_T) && __ARM_SIZEOF_WCHAR_T == 4)
+X    #if 0L || (0L && __ARM_SIZEOF_WCHAR_T == 4)
+S      typedef unsigned int wchar_t; /* also in <stdlib.h> and <inttypes.h> */
+N    #else
+N      typedef unsigned short wchar_t; /* also in <stdlib.h> and <inttypes.h> */
+N    #endif
+N  #elif !defined(__wchar_t)
+X  #elif !0L
+S    #define __wchar_t 1
+S    #if defined(__WCHAR32) || (defined(__ARM_SIZEOF_WCHAR_T) && __ARM_SIZEOF_WCHAR_T == 4)
+S      typedef unsigned int wchar_t; /* also in <stdlib.h> and <inttypes.h> */
+S    #else
+S      typedef unsigned short wchar_t; /* also in <stdlib.h> and <inttypes.h> */
+S    #endif
+S   /*
+S    * An integral type whose range of values can represent distinct codes for
+S    * all members of the largest extended character set specified among the
+S    * supported locales; the null character shall have the code value zero and
+S    * each member of the basic character set shall have a code value when used
+S    * as the lone character in an integer character constant.
+S    */
+N  #endif
+N#endif
+N
+N#undef NULL  /* others (e.g. <stdio.h>) also define */
+N#define NULL 0
+N   /* null pointer constant. */
+N
+N#ifdef __clang__
+S  #define offsetof(t, d) __builtin_offsetof(t, d)
+N#else
+N  /* EDG uses __INTADDR__ to avoid errors when strict */
+N  #define offsetof(t, memb) ((__CLIBNS size_t)__INTADDR__(&(((t *)0)->memb)))
+N#endif
+N
+N#if !defined(__STRICT_ANSI__) || (defined(__STDC_VERSION__) && 201112L <= __STDC_VERSION__) || (defined(__cplusplus) && 201103L <= __cplusplus)
+X#if !0L || (1L && 201112L <= 199901L) || (0L && 201103L <= __cplusplus)
+N  typedef long double max_align_t;
+N#endif
+N
+N    #ifdef __cplusplus
+S         }  /* extern "C" */
+S      }  /* namespace std */
+N    #endif /* __cplusplus */
+N  #endif /* __STDDEF_DECLS */
 N
 N
-Ntypedef struct
+N  #ifdef __cplusplus
+S    #ifndef __STDDEF_NO_EXPORTS
+S      using ::std::size_t;
+S      using ::std::ptrdiff_t;
+S      #if !defined(__STRICT_ANSI__) || (defined(__cplusplus) && 201103L <= __cplusplus)
+S        using ::std::max_align_t;
+S      #endif
+S    #endif 
+N  #endif /* __cplusplus */
+N
+N#endif
+N
+N/* end of stddef.h */
+N
+L 63 "..\iap2\GenericTypeDefs.h" 2
+N#ifndef TRUE
+S#define TRUE	1
+N#endif
+N
+N#ifndef FALSE
+S#define FALSE	0
+N#endif
+N//typedef enum _BOOL { FALSE = 0, TRUE } BOOL;    /* Undefined size */
+N//typedef enum _BIT { CLEAR = 0, SET } BIT;
+N
+N#define PUBLIC                                  /* Function attributes */
+N#define PROTECTED
+N#define PRIVATE   static
+N
+N/* INT is processor specific in length may vary in size */
+Ntypedef unsigned char uint8;
+Ntypedef char int8;
+Ntypedef unsigned short uint16;
+Ntypedef short int16;
+Ntypedef unsigned int uint32;
+Ntypedef volatile unsigned int vuint32;
+Ntypedef int int32;
+Ntypedef uint16 wchar;
+N#define Bool uint8
+N
+Ntypedef signed int          INT;
+Ntypedef signed char         INT8;
+Ntypedef signed short int    INT16;
+Ntypedef signed long int     INT32;
+N#define True 	1
+N#define False 	0
+N#define Null	0
+N
+N
+N/* BITS */
+N#define BIT_0		0x00000001UL
+N#define BIT_1		0x00000002UL
+N#define BIT_2		0x00000004UL
+N#define BIT_3		0x00000008UL
+N#define BIT_4		0x00000010UL
+N#define BIT_5		0x00000020UL
+N#define BIT_6		0x00000040UL
+N#define BIT_7		0x00000080UL
+N#define BIT_8		0x00000100UL
+N#define BIT_9		0x00000200UL
+N#define BIT_10		0x00000400UL
+N#define BIT_11		0x00000800UL
+N#define BIT_12		0x00001000UL
+N#define BIT_13		0x00002000UL
+N#define BIT_14		0x00004000UL
+N#define BIT_15		0x00008000UL
+N#define BIT_16		0x00010000UL
+N#define BIT_17		0x00020000UL
+N#define BIT_18		0x00040000UL
+N#define BIT_19		0x00080000UL
+N#define BIT_20		0x00100000UL
+N#define BIT_21		0x00200000UL
+N#define BIT_22		0x00400000UL
+N#define BIT_23		0x00800000UL
+N#define BIT_24		0x01000000UL
+N#define BIT_25		0x02000000UL
+N#define BIT_26		0x04000000UL
+N#define BIT_27		0x08000000UL
+N#define BIT_28		0x10000000UL
+N#define BIT_29		0x20000000UL
+N#define BIT_30		0x40000000UL
+N#define BIT_31		0x80000000UL
+N
+N#define SECTOR_FACTOR			9
+N
+N#define BIT(_x, _i) ((((uint32)(_x)) >> (_i)) & 0x00000001)
+N#define AS_UINT8(x) (*((uint8*)&(x)))
+N#define AS_UINT16(_msByte, _lsByte) (uint16)((((_msByte) << 8)) | (_lsByte))
+N#define AS_UINT32(_Byte3, _Byte2,_Byte1, _Byte0) (uint32)(((_Byte3) << 24) | ((_Byte2) << 16) | ((_Byte1) << 8) | (_Byte0))
+N
+N
+N#define SWAP16(value) (uint16)(value)
+N#define SWAP32(value) (uint32)(value)
+N
+N//?????
+N//#define SWAP16(value) (uint16)(((value) << 8) | (((value) >> 8) & 0xFF))
+N//#define SWAP32(value) (uint32)((((uint8*)&(value))[0] << 24) | (((uint8*)&(value))[1] << 16) | (((uint8*)&(value))[2] << 8) | ((uint8*)&(value))[3])
+N
+N#define MEM_BYTE(asUint32, byteIndex) (((uint8*)&(asUint32))[byteIndex])
+N
+N#define U16_MSB(asUint16) (uint8)((asUint16)>>8)
+N#define U16_LSB(asUint16) (uint8)(asUint16)
+Ntypedef struct _tagList
 N{
-N	uint16_t v;
-N	uint16_t d;
-N}br_t;
+N	struct _tagList* 	m_pNext;
+N	struct _tagList* 	m_pPre;
+N    uint8 				m_isUsed;
+N}List;
 N
 N
 N
-Nvoid set_bright_light(void);
-Nvoid TIM_Config(void);
+N/* UINT is processor specific in length may vary in size */
+Ntypedef unsigned int        UINT;
+Ntypedef unsigned char       UINT8;
+Ntypedef unsigned short int  UINT16;
+N/* 24-bit type only available on C18 */
 N
+Ntypedef unsigned long int   UINT32;     /* other name for 32-bit integer */
+N/* MPLAB C Compiler for PIC18 does not support 64-bit integers */
+N
+N
+N
+N
+N/***********************************************************************************/
+N
+N/* Alternate definitions */
+Ntypedef void                    VOID;
+N
+Ntypedef char                    CHAR8;
+Ntypedef unsigned char           UCHAR8;
+N
+Ntypedef unsigned char           BYTE;                           /* 8-bit unsigned  */
+Ntypedef unsigned short int      WORD;                           /* 16-bit unsigned */
+Ntypedef unsigned long           DWORD;                          /* 32-bit unsigned */
+N/* MPLAB C Compiler for PIC18 does not support 64-bit integers */
+N
+N
+Ntypedef signed char             CHAR;                           /* 8-bit signed    */
+Ntypedef signed short int        SHORT;                          /* 16-bit signed   */
+Ntypedef signed long             LONG;                           /* 32-bit signed   */
+N/* MPLAB C Compiler for PIC18 does not support 64-bit integers */
+N
+N
+N
+N#define READ_NO_WAIT_FOR_USB 1
+N
+N
+N#endif /* __GENERIC_TYPE_DEFS_H_ */
+L 26 "..\user\main.c" 2
+N
+N
+N#include "Driver.h"
+L 1 "..\iap2\Driver.h" 1
+N
+N#ifndef __DRIVER__H_
+N#define __DRIVER__H_
+N
+N
+N
+N#include "GenericTypeDefs.h"
+N#include "Iap2Link.h"
+L 1 "..\iap2\Iap2Link.h" 1
+N#ifndef __IAP2_LINK__H_
+N#define __IAP2_LINK__H_
+N
+N#ifdef __cplusplus
+Sextern "C"{
+N#endif
+N
+N//#include "typedef.h"
+N//#include "SwTimer.h"
+N//#include "iAp2Session.h"
+N#include "GenericTypeDefs.h"
+N#include "swtimer.h"
+L 1 "..\iap2\swtimer.h" 1
+N#ifndef  _SWTIMER_H_
+N#define  _SWTIMER_H_
+N
+N#ifdef __cplusplus
+Sextern "C"{
+N#endif
+N#include "GenericTypeDefs.h"
+N#include "systick.h"
+N
+N//#include "typedef.h"
+N//#include "List.h"
+N#define GET_TICKS( ) GetTime()
+N#define INVALID_TIMER_ID	0xFF
+N
+N#define MAX_MSG_COUNT		60	//Message queue deepth
+N#define MAX_TIMER_COUNT		4
+N#define MS_STICKS 			1	//Hot many ticks per ms, it is for timer
+N#define TIMER_TASK_INTERVAL 1
+N#define MAX_TEMP_BUF_SIZE 	SECTOR_SIZE
+Nstruct _tagSwTimer;
+N
+Ntypedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
+Nstruct _tagTimerManager;
+Ntypedef struct _tagSwTimer
+N{
+N	List	m_base;
+N    uint32 	m_dwTimeoutTicks;
+N    uint32 	m_dwInitTicks;
+N	
+N    uint8 	m_isStart:1;
+N    uint8 	m_Reserved:7;
+N    
+N    uint8 	m_nTimerId;
+N	
+N    void* 	m_context;
+N    TimeoutFun timeout;
+N	struct _tagTimerManager* m_pTimerManager;
+N}SwTimer;
+N
+Ntypedef struct _tagTimerManager
+N{
+N    SwTimer* 	m_timerList;
+N	uint32		m_ticks;
+N}TimerManager;
+N
+Nvoid SwTimer_Init(SwTimer* pTimer, TimeoutFun timeout, void* pContext);
+Nvoid SwTimer_Stop(SwTimer* pTimer);
+Nvoid SwTimer_Start(SwTimer* pTimer, uint8 timerId, uint32 value_ms);
+Nvoid SwTimer_ReStart(SwTimer* pTimer);
+NBool SwTimer_isStart(SwTimer* pTimer);
+Xuint8 SwTimer_isStart(SwTimer* pTimer);
+Nvoid SwTimer_Reset(SwTimer* pTimer);
+Nuint8 SwTimer_GetId(SwTimer* pTimer);
+Nvoid SwTimer_Release(SwTimer* pTimer);
+NBool SwTimer_isTimerOut(uint32 initTicks, uint32 newTicks, uint32 timeOutTicks);
+Xuint8 SwTimer_isTimerOut(uint32 initTicks, uint32 newTicks, uint32 timeOutTicks);
+NBool SwTimer_isTimerOutEx(SwTimer* pTimer);
+Xuint8 SwTimer_isTimerOutEx(SwTimer* pTimer);
+N
+NSwTimer* TimerArray_New(SwTimer* pTimerArray, int nCount);
+NSwTimer* TimerArray_Get(SwTimer* pTimerArray, int nCount, uint8 timerId);
+N
+Nvoid TimerManager_Init(TimerManager* pTm);
+Nvoid TimerManager_AddTimer(TimerManager* pTm, SwTimer* pTimer);
+Nvoid TimerManager_Run(TimerManager* pTm, uint32 ticks);
+Nvoid TimerManager_ResetTimer(TimerManager* pTm, uint32 ticks);
+Nvoid TimerManager_RemoveTimer(SwTimer* pTimer);
+N
+N#ifdef __cplusplus
+S}
+N#endif
+N
+N#endif
+N
+L 13 "..\iap2\Iap2Link.h" 2
+N//////////////////////////////////////////////////////
+N#define IAP2_PKT_SOF_MSB			0XFF
+N#define IAP2_PKT_SOF_LSB			0X5A
+N
+N#define IAP2_PKT_HEAD_SIZE			9
+N
+N#define IAP2_LINK_VERSION 			0X01
+N#define IAP2_MAX_OUTSTANDING_PKT 	0X01
+N#define MAX_IAP2_REQ_PAYLOAD_SIZE	64
+N#define MAX_IAP2_RSP_PAYLOAD_SIZE	1024 + 50
+N#define IAP2_MAX_PACKET_SIZE 		(uint16)(32768+30)//(MAX_IAP2_RSP_PAYLOAD_SIZE + IAP2_PKT_HEAD_SIZE)
+N#define IAP2_MAX_ACK_TIMEOUT		(uint16)(0)
+N#define IAP2_MAX_RETX_COUNT			(10)
+N#define IAP2_RETX_TIMEOUT 			(uint16)1500
+N#define IAP2_RETX_INTERVAL 			1000
+N
+N#define IAP2_MAX_SESSION_COUNT			2
+N
+N#define MAX_RCV_OFS_PSN					3
+N#define IAP2_LINK_INIT_TIMERID			1
+N#define IAP2_LINK_RETX_COUNT_UNLIMITIED	0xFF
+N#define IAP2_MAX_PAYLOAD_COUNT			IAP2_MAX_SESSION_COUNT
+N
+N#define LINK_SYNC_PKT_SIZE				23
+N
+N#define IAP2_REQ 0
+N#define IAP2_RSP 1
+N#define IAP2_ACK 2
+N
+Ntypedef struct _CtrlByte
+N{
+N	uint8 m_Reserved:3;	//Bit0-2: reserved, set to 0
+N	uint8 m_SlpBit:1;	//Bit3: Device Sleep
+N	uint8 m_RstBit:1;	//Bit4: Link Reset
+N	uint8 m_EakBit:1;	//Bit5: Extended Acknowledgement Payload is present
+N	uint8 m_AckBit:1;	//Bit6: Packet Acknowledgement Number is valid,and iAP2 SessionMgr Payload may be present
+N	uint8 m_SynBit:1;	//Bit7: Link Synchronization Payload is present
+N}CtrlByte;
+N
+Ntypedef enum _PayloadType
+N{
+N	 PL_TYPE_DETECT_IAP2 = 0
+N	,PL_TYPE_LINK_SYNC
+N	,PL_TYPE_SESSION
+N	,PL_TYPE_EAK
+N	,PL_TYPE_UNKNOWN
+N}PayloadType;
+N
+N
+N//#pragma pack(1)
+Ntypedef struct _Iap2LinkPkt
+N{
+N	uint16 m_Sof;
+N	uint16 m_Len;
+N	CtrlByte m_CtrlByte;
+N	
+N	uint8 m_SeqNum;
+N	uint8 m_AckSeqNum;	
+N	uint8 m_SessionId;
+N	uint8 m_HeaderSum;
+N	uint8 m_Payload[1];
+N}Iap2LinkPkt;
+N
+Ntypedef struct _Iap2LinkReqPkt
+N{
+N	Iap2LinkPkt	m_Base;
+N	uint8 m_Payload[MAX_IAP2_REQ_PAYLOAD_SIZE];
+X	uint8 m_Payload[64];
+N}Iap2LinkReqPkt;
+N
+Ntypedef struct _Iap2LinkRspPkt
+N{
+N	Iap2LinkPkt	m_Base;
+N	uint8 m_Payload[MAX_IAP2_RSP_PAYLOAD_SIZE];
+X	uint8 m_Payload[1024 + 50];
+N}Iap2LinkRspPkt;
+N
+Ntypedef struct _Iap2Req
+N{
+N	Iap2LinkPkt	m_Base;
+N	uint8 m_Payload[MAX_IAP2_REQ_PAYLOAD_SIZE];
+X	uint8 m_Payload[64];
+N}Iap2Req;
+N
+Ntypedef struct _Iap2Rsp
+N{
+N	Iap2LinkPkt	m_Base;
+N	uint8 m_Payload[MAX_IAP2_RSP_PAYLOAD_SIZE];
+X	uint8 m_Payload[1024 + 50];
+N}Iap2Rsp;
+N
+N//#pragma pack()
+N
+Ntypedef struct _SessionIden
+N{
+N	uint8 m_ID;
+N	uint8 m_Type;
+N	uint8 m_Ver;
+N}SessionIden;
+N
+N
+Ntypedef struct _LinkPayload
+N{
+N	uint8 m_LinkVer;			//LinkVersion
+N	uint8 m_MaxOfOutstandingPkt;//Maximum Number of Outstanding Packets
+N	
+N	uint8 m_MaxPktLenMsb;	//Maximum Packet Length MSB
+N	uint8 m_MaxPktLenLsb;	//Maximum Packet Length LSB
+N	
+N	uint8 m_ReTxTimeOutMsb;	//Retransmission Timeout MSB
+N	uint8 m_ReTxTimeOutLsb;	//Retransmission Timeout LSB
+N	
+N	uint8 m_AckTimeOutMsb;	//Cumulative Acknowledgement Timeout MSB
+N	uint8 m_AckTimeOutLsb;	//Cumulative Acknowledgement Timeout LSB
+N	
+N	uint8 m_MaxReTxCount;	//Maximum Number of Retransmissions
+N	uint8 m_MaxAckCount;	//Maximum Cumulative Acknowledgements
+N	
+N	SessionIden m_Session[IAP2_MAX_SESSION_COUNT];
+X	SessionIden m_Session[2];
+N}LinkPayload;
+N
+N#define LINK_PAYLOAD_HEAD_SIZE	(10)
+Nvoid LinkPayload_Init(LinkPayload* pLinkPayload);
+N
+N//////////////////////////////////////////////////////
+Ntypedef enum _Iap2Event
+N{
+N	IAP2_EVENT_INIT = 1
+N	,IAP2_EVENT_HAND_SHAKE
+N	,IAP2_EVENT_EAK 
+N	,IAP2_EVENT_ACK 
+N	,IAP2_EVENT_LINK_SYNC_DONE 
+N	,IAP2_EVENT_TRANSFER_SUCCESS
+N	,IAP2_EVENT_TRANSFER_FAILED
+N	,IAP2_EVENT_SESSION_DONE 
+N	,IAP2_EVENT_RX_REQ 
+N}Iap2Event;
+N
+Ntypedef enum _Iap2Rc
+N{
+N	 IAP2RC_SUCCESS	=	0
+N	,IAP2RC_FAILED	=	1
+N	,IAP2RC_PENDING
+N	,IAP2RC_ACK
+N	,IAP2RC_UNKNOWN
+N}Iap2Rc;
+N
+Ntypedef enum _Iap2State
+N{
+N	 IAP2_STATE_INIT = 0
+N	,IAP2_STATE_TX_LINK_SYNC
+N	,IAP2_STATE_RX_LINK_SYNC
+N	,IAP2_STATE_TX_ACK
+N	,IAP2_STATE_RX_ACK
+N	,IAP2_STATE_LINK_DONE
+N}Iap2State;
+N
+N//typedef Bool (*IrbNotifyFn)(void* pParam, Irb* pIrb);
+Ntypedef struct _Irb
+N{
+N	uint8 	m_isTx;
+N	uint8*	m_pBuff;
+N	uint16	m_Len;
+N	uint16	m_ActLen;
+N
+N//	IrbNotifyFn Notify;
+N//	void*		m_pParam;
+N}Irb;
+N
+Ntypedef Bool (*Iap2LinkTransferFn)(Irb* pIrb);
+Xtypedef uint8 (*Iap2LinkTransferFn)(Irb* pIrb);
+Nstruct _SessionMgr;
+Ntypedef struct _Iap2Link
+N{
+N	uint8	m_State;
+N//	uint8	m_PayLoadType;
+N	
+N	SwTimer	m_SentACKTimer;			//SentACKTimer: A timer that keeps track of the elapsed time (ms) since the last ACK packet was sent
+N	uint8 	m_NextSentPSN;			//NextSentPSN: The Packet Sequence Number of the next packet to be sent
+N	uint8 	m_OldestTxNakPSN;		//OldestSentUnacknowledgedPSN: The Packet Sequence Number of the oldest unacknowledged packet
+N	uint8 	m_InitialSentPSN;		//InitialSentPSN: The Packet Sequence Number used for the very first packet sent
+N	uint8 	m_LastRcvInPSN;			//LastReceivedInSequencePSN: The Packet Sequence Number of the last packet received correctly and in sequence
+N	uint8 	m_InitialRcvSN;			//InitialReceivedPSN: The Packet Sequence Number of the very first packet received
+N	uint8 	m_RcvPSNs[MAX_RCV_OFS_PSN];	//ReceivedOutOfSequencePSNs[n]:An array of Packet Sequence Numbers that have been received and acknowledged out of sequence
+X	uint8 	m_RcvPSNs[3];	
+N
+N	struct _SessionMgr* m_pSessionMgr;
+N
+N	uint8 	m_SessionCount;
+N	SessionIden m_Session[IAP2_MAX_SESSION_COUNT];
+X	SessionIden m_Session[2];
+N	
+N	Iap2LinkReqPkt  _ReqPkt;
+N	Iap2LinkRspPkt  _RspPkt;
+N	Iap2LinkPkt		_AckPkt;
+N	Iap2LinkPkt* 	m_pReqPkt;
+N	Iap2LinkPkt* 	m_pRspPkt;
+N	Iap2LinkPkt* 	m_pAckPkt;
+N	
+N	SwTimer	m_ReTxTimer;		//Re send timer.
+N	uint8	m_ReTxCount;		//Re send Count.
+N	uint8	m_MaxReTxCount;		//Max Re send Count.
+N	uint16	m_ReSendTimeMs;
+N
+N	Irb		m_Irb;
+N	
+N	Iap2LinkTransferFn TransferStart;
+N}Iap2Link;
+N
+Nvoid Iap2Link_Init(Iap2Link* pIap2Link, Iap2LinkTransferFn Tx);
+Nvoid Iap2Link_Start(Iap2Link* pIap2Link);
+Nvoid Iap2Link_Run(Iap2Link* pIap2Link);
+Nint Iap2LinkPkt_Init(Iap2LinkPkt* pPkt
+N	, CtrlByte ctrl
+N	, uint8 seq
+N	, uint8 ackSeq
+N	, uint8 sessionId
+N	, const void* pPaoload
+N	, uint16 payloadLen);
+N
+NBool Iap2Link_RcvData(Iap2Link* pIap2Link, void* pBuff, int len);
+Xuint8 Iap2Link_RcvData(Iap2Link* pIap2Link, void* pBuff, int len);
+NBool Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 reSendTimeMs, uint8 maxTxCount);
+Xuint8 Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 reSendTimeMs, uint8 maxTxCount);
+Nint Iap2Link_AckInit(Iap2LinkPkt* pAckPkt, const Iap2LinkPkt* pPkt);
+Nvoid Iap2Link_RegSession(Iap2Link* pIap2Link, struct _SessionMgr* pSession);
+Nvoid Iap2Link_TransferDone(Iap2Link* pIap2Link, Bool isSuccess);
+Xvoid Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess);
+Nvoid Iap2Link_TimerReset(Iap2Link* pIap2Link);
+N
+N#ifdef __cplusplus
+S}
+N#endif
 N
 N#endif
 N
 N
+L 9 "..\iap2\Driver.h" 2
 N
-L 25 "..\user\main.c" 2
+NBool Driver_TransferStart(Irb* pIrb);
+Xuint8 Driver_TransferStart(Irb* pIrb);
+Nvoid Driver_RxDone(const void* pData, int len);
+W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
+Nvoid Driver_Check();
+W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
+Nvoid Driver_TxDone();
 N
 N
 N
+W "..\iap2\Driver.h" 17 7 last line of file ends without a newline
+N#endif
+L 29 "..\user\main.c" 2
+N#include "Iap2CtrlSession.h"
+L 1 "..\iap2\Iap2CtrlSession.h" 1
+N#ifndef __IAP2_CTRL_SESSION__H_
+N#define __IAP2_CTRL_SESSION__H_
 N
+N#ifdef __cplusplus
+Sextern "C"{
+N#endif
+N
+N#include "Iap2Session.h"
+L 1 "..\iap2\Iap2Session.h" 1
+N#ifndef __IAP2_SESSION_H_
+N#define __IAP2_SESSION_H_
+N
+N#ifdef __cplusplus
+Sextern "C"{
+N#endif
+N
+N//#include "Typedef.h"
+N#include "Iap2Link.h"
+N
+N//iAP2 SessionTypes
+N#define SESSION_TYPE_CTRL	0	//Controlsession
+N#define SESSION_TYPE_FILE	1	//File Transfersession
+N#define SESSION_TYPE_ACCE	2	//External Accessory session
+N
+Ntypedef enum _SessionState
+N{
+N	 IAP2_STATE_SESSION_INIT = IAP2_STATE_RX_ACK + 1
+N	,IAP2_STATE_TX_REQ
+N	,IAP2_STATE_RX_REQ
+N	,IAP2_STATE_TX_RSP
+N	,IAP2_STATE_RX_RSP
+N}SessionState;
+N
+N
+N
+Ntypedef int (*Iap2EventFn)(void* pObj, Iap2Event event);
+Ntypedef int (*Iap2ReqFn)(void* pObj, const void* pReq, void* pRsp, uint16* pLen);
+Ntypedef int (*Iap2RspFn)(void* pObj, const void* pReq, void* pRsp);
+N
+Ntypedef struct _SessionMgr
+N{
+N	SessionIden 	m_Base;
+N	
+N	uint8			m_State;
+N
+N	Iap2EventFn		EventProc;
+N	Iap2ReqFn 		ReqProc;
+N	Iap2RspFn 		RspProc;
+N}SessionMgr;
+N	
+NIap2Rc SessionMgr_Fsm(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt);
+NBool SessionMgr_RxReq(SessionMgr* pSessionMgr);
+Xuint8 SessionMgr_RxReq(SessionMgr* pSessionMgr);
+NBool SessionMgr_TxReq(SessionMgr* pSessionMgr, const void* pParam, uint16 len);
+Xuint8 SessionMgr_TxReq(SessionMgr* pSessionMgr, const void* pParam, uint16 len);
+Nvoid SessionMgr_Init(SessionMgr* pSessionMgr);
+N
+N#ifdef __cplusplus
+S}
+N#endif
+N
+N#endif
+N
+N
+L 9 "..\iap2\Iap2CtrlSession.h" 2
+N
+N#define CONTROL_SESSION_ID     	0x0a
+N#define CONTROL_SESSION_TYPE   	0x00
+N#define CONTROL_SESSION_VERSION	0x01
+N
+N//#define CONTROL_SESSION_VERSION	0x02
+N
+N#define CONTROL_SESSION_SOF 	0x4040
+N
+N#define IAP2_CTRL_SESSION_MSG_PARAM_HEAD_SIZE 	4
+N
+N#define IAP2_CTRL_SESSION_MSG_HEAD_SIZE 		6
+N#define IAP2_CTRL_SESSION_MSG_SOM				0x4040
+N#define IAP2_SESSION_MSG_SIZE					512
+N
+N#define MFI_IC_PAGE_SIZE                 128
+N
+N//Accessory Authentication
+N#define IAP2_REQ_AUTH 					0xAA00
+N#define IAP2_RSP_AUTH 					0xAA01
+N#define IAP2_REQ_AUTH_CHA_RSP 			0xAA02
+N#define IAP2_RSP_AUTH_CHA_RSP 			0xAA03
+N#define IAP2_RSP_AUTH_RESULT_FAILED 	0xAA04
+N#define IAP2_RSP_AUTH_RESULT_SUCCESS 	0xAA05
+N
+N//Accessory Identification
+N#define IAP2_REQ_ID 			0x1D00
+N#define IAP2_REQ_ID_ACCEPTED	0x1D02
+N#define IAP2_REQ_ID_REJECTED	0x1D03
+N#define IAP2_REQ_ID_CANCEL		0x1D05
+N#define IAP2_REQ_ID_UPDATED		0x1D06
+N
+N//Power
+N#define IAP2_REQ_POWER_START_UPDATE		0xAE00
+N#define IAP2_REQ_POWER_UPDATE			0xAE01
+N#define IAP2_REQ_POWER_STOP_UPDATE		0xAE02
+N#define IAP2_REQ_POWER_SOURCE_UPDATE	0xAE02
+N
+N
+N/*
+Ntypedef int (Iap2ReqFn)(const Iap2CtrlSessionMsg* pReq, uint8* pData, uint16* pLen);
+Ntypedef struct _Iap2Req
+N{
+N}Iap2Req
+N*/
+N
+N//#pragma pack(1)
+N
+Ntypedef struct _Iap2CtrlSessionMsgParam
+N{
+N	uint16 m_Len;
+N	uint16 m_MsgId;
+N
+N	uint8 *m_Data;
+N}Iap2CtrlSessionMsgParam;
+N
+Ntypedef struct _Iap2CtrlSessionMsg
+N{
+N	uint16 m_Sof;
+N	uint16 m_Len;
+N	uint16 m_MsgId;
+N	Iap2CtrlSessionMsgParam m_Param[1];
+N}Iap2CtrlSessionMsg;
+N
+N//#pragma pack()
+N
+Ntypedef struct _Iap2CtrlSession
+N{
+N	SessionMgr	m_Base;
+N	
+N	uint16 m_MsgId;
+N
+N	Iap2CtrlSessionMsg m_TxMsg;
+N	Iap2CtrlSessionMsg m_RxMsg;
+N}Iap2CtrlSession;
+N
+NBool Iap2CtrlSession_Init(Iap2CtrlSession* pIap2CtrlSession);
+Xuint8 Iap2CtrlSession_Init(Iap2CtrlSession* pIap2CtrlSession);
+NBool Iap2CtrlSession_SendMsg(Iap2CtrlSession* pIap2CtrlSession, Iap2CtrlSessionMsg* pMsg);
+Xuint8 Iap2CtrlSession_SendMsg(Iap2CtrlSession* pIap2CtrlSession, Iap2CtrlSessionMsg* pMsg);
+Nint Iap2CtrlSessionMsg_AddParam(Iap2CtrlSessionMsg* pMsg
+N	, uint16 paramId
+N	, const uint8* pData
+N	, uint16 len);
+Nint Iap2CtrlSessionMsg_Init(Iap2CtrlSessionMsg* pMsg, uint16 MsgId);
+N
+N
+N#ifdef __cplusplus
+S}
+N#endif
+N
+N#endif
+N
+L 30 "..\user\main.c" 2
+N#include "ft32f0xx_i2c.h"
+N#include "ListUsbData.h"
+L 1 "..\iap2\ListUsbData.h" 1
+N#ifndef __LIST_USB_DATA__H
+N#define __LIST_USB_DATA__H
+N
+N//#include "Typedef.h"
+N#include "GenericTypeDefs.h"
+Ntypedef struct _tagListUsbData
+N{
+N	struct _tagListUsbData* 	m_pNext;
+N	struct _tagListUsbData* 	m_pPre;
+N    INT16 				data_size;
+N	  uint8         *pdata;
+N	  uint8         m_isUsed;
+N}ListUsbData;
+Nextern ListUsbData * g_usbdata_list;
+Nvoid ListUsbData_Init(ListUsbData* pList);
+NListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
+NListUsbData* ListUsbData_Remove(ListUsbData* pNode);
+NBool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
+Xuint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
+Nint ListUsbData_Count(ListUsbData* pNode);
+Nvoid ListUsbData_RemoveAll(ListUsbData* pNode);
+N
+N#endif
+N
+L 32 "..\user\main.c" 2
+N#include <stdlib.h>
+N#include "usb_core.h"
+N#include <string.h>
+N#include "Iap2Link.h"
+N#include "Iap2CtrlSession.h"
+N
+N#include "SEGGER_RTT.h"
+N#include "SEGGER_RTT_Conf.h"
 N
 N
 N
 N#define KEY_FN	0xAF
 N
+N#define FN_PORT		GPIOC	
+N#define FN_PIN		GPIO_Pin_13	
+N#define CAPS_PORT	GPIOA	
+N#define CAPS_PIN	GPIO_Pin_9
+N#define POWER_PORT	GPIOA
+N#define POWER_PIN	GPIO_Pin_10
 N
 N
+NBool g_start_key = FALSE;
+Xuint8 g_start_key = 0;
 N
 N
+Nextern Iap2Link* g_pIap2Link;
+N
+NListUsbData * g_usbdata,* g_usbdata_list;
+Nuint8_t  g_usbdata_head[9];
+Nuint8_t  g_hid_report[6];
+N//uint8_t	ep1_send_buf[64] = {0};
+N//uint8_t	ep2_send_buf[64] = {0};
+Nuint8_t	receive_data_buf[512] = {0};
 N
 N
 Nuint8_t qty = 0x00;
@@ -19817,6 +20928,8 @@ Nuint8_t buff[128] = {0x00};
 Nuint32_t NOW = 0X00;
 N
 N
+N
+N	
 N
 N
 N
@@ -19878,8 +20991,8 @@ N	{GPIOB,     GPIO_Pin_6 , EXTI_PortSourceGPIOB, EXTI_PinSource6 },  		// c13 pb
 X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000400)),     ((uint16_t)0x0040) , ((uint8_t)0x01), ((uint8_t)0x06) },  		
 N	{GPIOB,     GPIO_Pin_7 , EXTI_PortSourceGPIOB, EXTI_PinSource7 },  		// c14 pb7 ,
 X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000400)),     ((uint16_t)0x0080) , ((uint8_t)0x01), ((uint8_t)0x07) },  		
-N	{GPIOC,     GPIO_Pin_15, EXTI_PortSourceGPIOC, EXTI_PinSource15},   	// c15 pc15,
-X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)),     ((uint16_t)0x8000), ((uint8_t)0x02), ((uint8_t)0x0F)},   	
+N	{GPIOC,     GPIO_Pin_14, EXTI_PortSourceGPIOC, EXTI_PinSource14},   	// c15 pc14,
+X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)),     ((uint16_t)0x4000), ((uint8_t)0x02), ((uint8_t)0x0E)},   	
 N	{GPIOF,     GPIO_Pin_0 , EXTI_PortSourceGPIOF, EXTI_PinSource0 },   	// c16 pf0 ,
 X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00001400)),     ((uint16_t)0x0001) , ((uint8_t)0x05), ((uint8_t)0x00) },   	
 N	{GPIOF,     GPIO_Pin_1 , EXTI_PortSourceGPIOF, EXTI_PinSource1 },   	// c17 pf1 ,
@@ -19887,8 +21000,8 @@ X	{((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00001400)),     
 N};
 N
 N
-N//R A2
-N//C B10
+N
+N
 N
 N
 Nconst unsigned char keyMatrix[] = 
@@ -19897,7 +21010,7 @@ N // ROW0  ROW1	ROW2  ROW3	ROW4  ROW5  ROW6  ROW7
 N	
 N    0x00, 0x00, 0x00, 0x00, 0x00, 0xE3, 0x00, 0x00, //  COL0
 N    0xE6, 0x00, 0xE2, 0x00, 0x00, 0x00, 0x00, 0x00, //  COL1												
-N    0x00, 0xE7, 0x00, 0x00, 0x00, 0x00, 0xAF, 0x3E, //  COL2
+N    0x00, 0xE7, 0x00, 0x00, 0x00, 0x00, 0xE0, 0x3E, //  COL2
 N    0x51, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x46, 0x00, //  COL3
 N    0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  COL4
 N    0x50, 0x00, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, //  COL5
@@ -19910,8 +21023,8 @@ N    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  COL10
 N    0x45, 0x28, 0x44, 0x31, 0x00, 0x2A, 0x42, 0x43, //  COL11
 N    0x00, 0x37, 0x00, 0x0F, 0x12, 0x40, 0x41, 0x26, //  COL12
 N	0x00, 0x36, 0x3F, 0x0E, 0x0C, 0x30, 0x2E, 0x25, //  COL13
-N    0x38, 0xE0, 0x34, 0x33, 0x13, 0x2F, 0x2D, 0x27, //  COL14
-N    0x00, 0x1D, 0x29, 0x04, 0x14, 0x2B, 0x35, 0x1E, //  COL15
+N    0x38, 0xAF, 0x34, 0x33, 0x13, 0x2F, 0x2D, 0x27, //  COL14
+N    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  COL15
 N    0x05, 0x19, 0x0A, 0x09, 0x15, 0x17, 0x22, 0x21, //  COL16
 N    0x98, 0x06, 0x3D, 0x07, 0x08, 0x3C, 0x3B, 0x20  //  COL17		  			  
 N};
@@ -19927,10 +21040,12 @@ N/*F1~F12映射表*/
 Nremap_t remap[] = {
 N	{KEY_F1, BRIGHT_DOWN},			
 X	{0x3A, 0xBE},			
-N	{KEY_F2, BRIGHT_UP},						
-X	{0x3B, 0xBF},						
-N	{KEY_F4, WWW_SEARCH},					
-X	{0x3D, 0xC0},					
+N	{KEY_F2, BRIGHT_UP},			
+X	{0x3B, 0xBF},			
+N	{KEY_F3, WWW_HOME},				
+X	{0x3C, 0xC1},				
+N	{KEY_F4, SOFT_KEYBOARD},					
+X	{0x3D, 0xC7},					
 N	{KEY_F7, PRETRACK},			
 X	{0x40, 0xB1},			
 N	{KEY_F8, PLAY_PAUSE},	
@@ -19943,11 +21058,28 @@ N	{KEY_F11, VOL_DOWN},
 X	{0x44, 0xB7},				
 N	{KEY_F12, VOL_UP},
 X	{0x45, 0xB6},
-N	{KEY_PRINT, LOCK}	//这里用来表示弹光驱键
+N	{KEY_PRINT, LOCK}	
 X	{0x46, 0xBA}	
 N};
 N
 N
+N
+N	
+N
+N
+N
+N
+N/*上下左右映射表*/
+Nremap_t remap2[] = {
+N	{KEY_L_ARROW, KEY_HOME},
+X	{0x50, 0x4A},
+N	{KEY_R_ARROW, KEY_END},
+X	{0x4F, 0x4D},
+N	{KEY_UP_ARROW, KEY_PGUP},
+X	{0x52, 0x4B},
+N	{KEY_DN_ARROW, KEY_PGDN}
+X	{0x51, 0x4E}
+N};
 N
 N
 N
@@ -19963,16 +21095,228 @@ N    .col_table = (KeyIOMap*)cMap,
 N	.map = (uint8_t*)keyMatrix,
 N	.remap = remap,
 N	.remap_num = sizeof(remap) / sizeof(remap_t),
-N	.fn_led_status = 0x01
+N	.remap2 = remap2,
+N	.remap2_num = sizeof(remap2) / sizeof(remap_t)
 N};
 N
 N
+Nint g_ParseState_t = kiAP2PacketParseStateSOP1;
+Nint buffer_offset = 0;
+Nuint8_t *g_packets = NULL;;
+Xuint8_t *g_packets = 0;;
+Nuint16_t g_packetLen ;
+N
+Nint iAP2PacketParseBuffer ( uint8_t*  buffer,
+N                                uint32_t        bufferLen
+N                               )
+N
+N{
+N	  uint8_t* pbuffer = buffer;
+N	  int pbuffer_len =0;
+N	  
+N	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+X	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,215);
+N	  if(pbuffer ==NULL)
+X	  if(pbuffer ==0)
+N		return -1;
+N	  
+N	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+X	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,219,pbuffer_len,bufferLen);
+N		while(pbuffer_len < bufferLen)
+N		{
+N		
+N		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,223,pbuffer_len,bufferLen);
+N		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,__LINE__,g_ParseState_t);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,224,g_ParseState_t);
+N	   switch(g_ParseState_t)
+N		{ 
+N		  case kiAP2PacketParseStateSOP1:
+N				memset(g_usbdata_head,0,9);
+N				buffer_offset = 0;
+N				g_packetLen = 0;
+N			if(*pbuffer==kIAP2PacketSYNC )
+N				{
+N					g_ParseState_t	= kiAP2PacketParseStateSOP2;
+N					g_usbdata_head[kIAP2PacketIndexSYNC]=(uint8)kIAP2PacketSYNC;
+N				}
+N						
+N				
+N				pbuffer++;
+N				break;
+N				
+N		   case kiAP2PacketParseStateSOP2:
+N				 if(*pbuffer==kIAP2PacketSOP)
+N				 {
+N								g_ParseState_t	= kiAP2PacketParseStateLEN1;
+N					 g_usbdata_head[kIAP2PacketIndexSOP]=(uint8)kIAP2PacketSOP;
+N					
+N					 pbuffer++;
+N				 }
+N			else if(*pbuffer==kIAP2PacketSOPOrig )
+N				{
+N						g_ParseState_t	= kiAP2PacketParseStateLEN1;
+N					
+N					g_usbdata_head[kIAP2PacketIndexSOP]=(uint8)kIAP2PacketSOPOrig;
+N					pbuffer++;
+N				}		
+N				else if(*pbuffer==kIAP2PacketSYNC )
+N				{
+N					 g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+N				}  
+N				
+N				break;
+N			 
+N				case  kiAP2PacketParseStateLEN1:
+N					g_packetLen = (((uint16_t) *pbuffer) << 8);
+N				g_ParseState_t	= kiAP2PacketParseStateLEN2;
+N								g_usbdata_head[kIAP2PacketIndexLEN1]=(uint8)*pbuffer;
+N	
+N				   pbuffer++;
+N					break;
+N				case  kiAP2PacketParseStateLEN2:
+N				g_packetLen += ((uint16_t) *pbuffer);
+N				//g_ParseState_t  = kiAP2PacketParseStateLEN2;
+N				  // pbuffer++;
+N				if (((g_packetLen <= 65535) &&
+N							g_packetLen >= kIAP2PacketHeaderLen) ||
+N							kIAP2PacketDetectLEN == g_packetLen ||
+N							kIAP2PacketDetectNACKLEN == g_packetLen)
+N				{
+N					  g_ParseState_t = kiAP2PacketParseStateCTRL;
+N							g_usbdata_head[kIAP2PacketIndexLEN2]=(uint8)*pbuffer;
+N					   pbuffer++;
+N				}
+N				else
+N				{
+N					 g_ParseState_t = kiAP2PacketParseStateSOP1;
+N				}
+N				
+N					break;
+N				
+N				   case kiAP2PacketParseStateCTRL:
+N						 g_usbdata_head[kIAP2PacketIndexCTRL]=(uint8)*pbuffer;
+N					 pbuffer++;
+N						 g_ParseState_t = kiAP2PacketParseStateSEQ;
+N						 break;
+N					 case kiAP2PacketParseStateSEQ:
+N						 g_usbdata_head[kIAP2PacketIndexCTRL]=(uint8)*pbuffer;
+N						 if(g_usbdata_head[kIAP2PacketIndexLEN1] == 0x20 && g_usbdata_head[kIAP2PacketIndexLEN1] == 0x00 &&
+N									 g_usbdata_head[kIAP2PacketIndexCTRL] == 0xee && 0x10==  *pbuffer	 )
+N							{
+N								//huanghanjing	todo usb package
+N								
+N									 g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+N								Driver_RxDone(g_usbdata_head,6);
+N							}
+N							else	
+N							{							
+N						 g_ParseState_t = kiAP2PacketParseStateACK;
+N								 g_usbdata_head[kIAP2PacketIndexSEQ] =* pbuffer;
+N							}
+N							 pbuffer++;
+N						 break;
+N					  case kiAP2PacketParseStateACK:
+N						 g_ParseState_t = kiAP2PacketParseStateSESSID;
+N						 g_usbdata_head[kIAP2PacketIndexACK] =* pbuffer;
+N						pbuffer++;
+N						 break;
+N						case kiAP2PacketParseStateSESSID:
+N						{
+N					   
+N						g_ParseState_t = kiAP2PacketParseStateCHK;
+N						 g_usbdata_head[kIAP2PacketIndexSESSID] =* pbuffer;
+N						pbuffer++;
+N							
+N					   
+N					}
+N							break;
+N						case kiAP2PacketParseStateCHK:
+N					
+N									{
+N										 g_usbdata_head[kIAP2PacketIndexCHK] =* pbuffer;
+N										
+N												if(  (g_usbdata_head[kIAP2PacketIndexLEN1] == 0x04 &&
+N											g_usbdata_head[kIAP2PacketIndexLEN1] == 0x00 &&
+N				kIAP2PacketDetectNACKCTRL	== g_usbdata_head[kIAP2PacketIndexCTRL] &&
+N				kIAP2PacketDetectNACKSEQ	== g_usbdata_head[kIAP2PacketIndexSEQ] &&
+N				kIAP2PacketDetectNACKACK	== g_usbdata_head[kIAP2PacketIndexACK]	&&
+N				kIAP2PacketDetectNACKSESSID == g_usbdata_head[kIAP2PacketIndexSESSID]))
+N										{
+N												//huanghanjing	todo usb package
+N											  g_ParseState_t = kiAP2PacketParseStateSOP1 ; 
+N													Driver_RxDone(g_usbdata_head,8);
+N										} 
+N										else{
+N										g_ParseState_t = kiAP2PacketParseStatePAYLOAD;
+N												
+N											g_usbdata->data_size = g_packetLen;
+N											if(g_usbdata->pdata!=NULL)
+X											if(g_usbdata->pdata!=0)
+N												free(g_usbdata->pdata);
+N										g_usbdata->pdata = malloc(g_usbdata->data_size);
+N											memset(g_usbdata->pdata,0,g_usbdata->data_size);
+N											memcpy(g_usbdata->pdata,g_usbdata_head,9);
+N											buffer_offset = 9;
+N										}
+N								pbuffer++;
+N										
+N						
+N					}
+N						 break;
+N						 
+N					 case kiAP2PacketParseStatePAYLOAD:
+N					{
+N										g_usbdata->pdata[buffer_offset]= *pbuffer;
+N										buffer_offset++;
+N										pbuffer++;
+N										if(buffer_offset == g_packetLen)
+N										{
+N											g_ParseState_t =  kiAP2PacketParseStateSOP1;
+N											Driver_RxDone(g_usbdata->pdata,g_packetLen);
+N											//huanghanjing	todoi
+N											
+N											
+N										}
+N									}
+N					 break;
+N					case kiAP2PacketParseStateFINISH:
+N					case kiAP2PacketParseStateDETECT:
+N					case kiAP2PacketParseStateDETECTBAD:
+N						break;
+N				
+N					 
+N		}
+N		}
+N	
+N	  return 0;
+N	}
 N
 N
 N
 N
-N
-N
+Nvoid usb_send_data_buffer(uint8_t *pdata, uint16 data_size )
+N{
+N    if(data_size > 0)
+N    	{
+N    	#if 1 //printf debug msg
+N		SEGGER_RTT_printf(0,"usb_send_data_buffer data_size=%d\n",data_size);
+N    	for(int i = 0;i<data_size;i++)
+N    		{ 
+N    		SEGGER_RTT_printf(0,"0x%02x ",pdata[i]);
+N    		}
+N		SEGGER_RTT_printf(0," \n usb_send_data_buffer \n");
+N		#endif 
+N		
+N		if(USB_EP_Tx(1,pdata,data_size) != SUCCESS)
+N			{
+N					SEGGER_RTT_printf(0," \n usb_send_data_buffer error \n");
+N				//f_send_kb = 0;
+N			}
+N		SEGGER_RTT_printf(0," \n usb_send_data_buffer suceessful \n");
+N			//SysTick_Delay_Ms(100);
+N    	}
+N	}	
 N
 N
 N
@@ -19996,65 +21340,56 @@ N
 N
 N
 N
-N
 Nvoid hotKey(matrix_t* matrix)
 N{
-N	static uint8_t b_flag = 0x00;
 N	static uint8_t lock_flag = 0x00;
-N	
-N	if(lock_flag == 0x00 && get_key(&(matrix->buf), KEY_FN))
-X	if(lock_flag == 0x00 && get_key(&(matrix->buf), 0xAF))
+N		
+N	if(get_key(&(matrix->buf), KEY_FN))
+X	if(get_key(&(matrix->buf), 0xAF))
 N	{
-N		lock_flag = 0x01;
-N		matrix->fn_led_status ^= 1;
+N		/*抬起FN键*/
 N		key_up(&(matrix->buf), KEY_FN);
 X		key_up(&(matrix->buf), 0xAF);
-N		GPIO_WriteBit(FN_PORT, FN_PIN, (BitAction)matrix->fn_led_status);
-X		GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), (BitAction)matrix->fn_led_status);
-N		return ;
-N	}else if(lock_flag == 0x01 && !get_key(&(matrix->buf), KEY_FN))
-X	}else if(lock_flag == 0x01 && !get_key(&(matrix->buf), 0xAF))
-N	{
-N		lock_flag = 0x00;
-N		key_up(&(matrix->buf), KEY_FN);
-X		key_up(&(matrix->buf), 0xAF);
-N		return ;
+N		
+N		/*FN+ESC Fn锁切换判断*/
+N		if(get_key(&(matrix->buf), KEY_ESC) && !lock_flag)
+X		if(get_key(&(matrix->buf), 0x29) && !lock_flag)
+N		{
+N			lock_flag = 0x01;
+N			matrix->fn_led_status ^= 1;
+N			/*操作FN指示灯*/
+N			GPIO_WriteBit(FN_PORT, GPIO_Pin_13, (BitAction)(matrix->fn_led_status));
+X			GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), (BitAction)(matrix->fn_led_status));
+N			
+N		}else if(get_key(&(matrix->buf), KEY_ESC) == 0x00 && lock_flag)
+X		}else if(get_key(&(matrix->buf), 0x29) == 0x00 && lock_flag)
+N		{
+N			lock_flag = 0x00;
+N		}
+N		
+N		key_up(&(matrix->buf), KEY_ESC);
+X		key_up(&(matrix->buf), 0x29);
+N		
+N		
+N		/*FN组合亮灯, 输出图标功能*/
+N		if(matrix->fn_led_status)
+N		{		
+N			remap_fun(matrix, matrix->remap, matrix->remap_num);
+N		}
+N		
+N		/*映射上下左右*/
+N		remap_fun(matrix, matrix->remap2, matrix->remap2_num);
 N	}
-N	
-N	if(matrix->fn_led_status)
+N	else
 N	{
-N		remap_fun(matrix, matrix->remap, matrix->remap_num);
-N		
-N		if(get_key(&matrix->buf, KEY_F3))
-X		if(get_key(&matrix->buf, 0x3C))
+N		/*没按下FN键*/
+N		if(!(matrix->fn_led_status))
 N		{
-N			key_up(&matrix->buf, KEY_F3);
-X			key_up(&matrix->buf, 0x3C);
-N			key_down(&matrix->buf, KEY_L_WIN);
-X			key_down(&matrix->buf, 0xE3);
-N			key_down(&matrix->buf, KEY_TAB);
-X			key_down(&matrix->buf, 0x2B);
+N			/*单按灭灯,输入图标功能*/
+N			remap_fun(matrix, matrix->remap, matrix->remap_num);
 N		}
-N		
-N		/*背光调节*/
-N		if(get_key(&matrix->buf, KEY_F6) && b_flag == 0x00)
-X		if(get_key(&matrix->buf, 0x3F) && b_flag == 0x00)
-N		{
-N			b_flag = 0x01;
-N		}
-N		else if(get_key(&matrix->buf, KEY_F6) == 0x00 && b_flag == 0x01)
-X		else if(get_key(&matrix->buf, 0x3F) == 0x00 && b_flag == 0x01)
-N		{
-N			b_flag = 0x00;
-N			set_bright_light();
-N		}
-N		
-N		key_up(&matrix->buf, KEY_F6);
-X		key_up(&matrix->buf, 0x3F);
 N	}
-N
 N}
-N
 N
 N
 N
@@ -20098,8 +21433,10 @@ N			case BRIGHT_DOWN:
 X			case 0xBE:			
 N			case BRIGHT_UP:			
 X			case 0xBF:			
-N			case WWW_SEARCH:								
-X			case 0xC0:								
+N			case WWW_HOME:				
+X			case 0xC1:				
+N			case SOFT_KEYBOARD:					
+X			case 0xC7:					
 N			case PRETRACK:			
 X			case 0xB1:			
 N			case PLAY_PAUSE:	
@@ -20112,8 +21449,8 @@ N			case VOL_DOWN:
 X			case 0xB7:				
 N			case VOL_UP:
 X			case 0xB6:
-N			case LOCK: //这里临时用来表示弹光驱键
-X			case 0xBA: 
+N			case LOCK:
+X			case 0xBA:
 N				if(matrix->acpi_send_flag == 0x00)
 N				{
 N					matrix->acpi_send[0] = t_buff[i];
@@ -20226,10 +21563,10 @@ N			media_buffer[1] = 0xEA;
 N			media_buffer[2] = 0x00; 
 N		break; 
 N			
-N		/*锁屏 //这里临时用来表示弹光驱键*/
+N		/*锁屏*/
 N		case LOCK:			
 X		case 0xBA:			
-N			media_buffer[1] = 0xB8; 
+N			media_buffer[1] = 0x30; 
 N			media_buffer[2] = 0x00; 
 N		break;
 N			
@@ -20246,12 +21583,19 @@ X		case 0xBF:
 N			media_buffer[1] = 0x6F; 
 N			media_buffer[2] = 0x00; 
 N		break;        
-N			
-N		/*搜索*/
-N		case WWW_SEARCH:		
-X		case 0xC0:		
-N			media_buffer[1] = 0x21; 
+N		
+N		/*主页*/
+N		case WWW_HOME:		
+X		case 0xC1:		
+N			media_buffer[1] = 0x23; 
 N			media_buffer[2] = 0x02; 
+N		break;
+N			
+N		/*软键盘*/
+N		case SOFT_KEYBOARD:		
+X		case 0xC7:		
+N			media_buffer[1] = 0xAE; 
+N			media_buffer[2] = 0x01; 
 N		break;
 N	}
 N}
@@ -20268,11 +21612,13 @@ N	//发送多媒体键，ACPI键
 N	if(matrix->acpi_send_flag == 0x01)
 N	{
 N		//发送多媒体键
-N		build_media_key(matrix, media_buffer, sizeof(media_buffer));		
+N		build_media_key(matrix, media_buffer, sizeof(media_buffer));
+N		
+N		//SEGGER_RTT_printf(0, "%02x %02x %02x %02x\n", matrix->acpi_send[0], media_buffer[0], media_buffer[1], media_buffer[2]);
+N		
 N		USB_EP_Tx(ep_consumer, media_buffer, sizeof(media_buffer));
 X		USB_EP_Tx(0x02, media_buffer, sizeof(media_buffer));
 N		matrix->acpi_send_flag = 0x02;
-N		SEGGER_RTT_printf(0,">>>>>>>>>>>>>>>>>>>>");
 N		
 N	}
 N	else if(matrix->acpi_send_flag == 0x03)
@@ -20290,38 +21636,6 @@ N
 N
 N
 N
-Nvoid init_light_pin(void)
-N{
-N	set_IO_PinMode(CAPS_PORT, CAPS_PIN, GPIO_ModeOut_PD_noINT);
-X	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), 0x06);
-N	set_IO_PinMode(FN_PORT, FN_PIN, GPIO_ModeOut_PD_noINT);
-X	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), 0x06);
-N	set_IO_PinMode(POWER_PORT, POWER_PIN, GPIO_ModeOut_PD_noINT);
-X	set_IO_PinMode(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0400), 0x06);
-N	GPIO_WriteBit(CAPS_PORT, CAPS_PIN, Bit_SET);
-X	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0200), Bit_SET);
-N	GPIO_WriteBit(FN_PORT, FN_PIN, Bit_SET);
-X	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000800)), ((uint16_t)0x2000), Bit_SET);
-N	GPIO_WriteBit(POWER_PORT, POWER_PIN, Bit_RESET);
-X	GPIO_WriteBit(((GPIO_TypeDef *) ((((uint32_t)0x40000000) + 0x08000000) + 0x00000000)), ((uint16_t)0x0400), Bit_RESET);
-N}
-N
-N
-N
-N
-Nvoid init_device_rcc(void)
-N{
-N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-X	RCC_AHBPeriphClockCmd(((uint32_t)0x00020000), ENABLE);
-N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-X	RCC_AHBPeriphClockCmd(((uint32_t)0x00040000), ENABLE);
-N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
-X	RCC_AHBPeriphClockCmd(((uint32_t)0x00080000), ENABLE);
-N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);
-X	RCC_AHBPeriphClockCmd(((uint32_t)0x00400000), ENABLE);
-N}
-N
-N
 N
 N
 N
@@ -20334,24 +21648,94 @@ N  * @note
 N  * @retval 
 N  *****************************************************************************
 N*/
+Nuint8_t  g_hid_report[6];
+Nint b_config = 0;
 Nint main(void)
 N{
+N	I2C_InitTypeDef* g_I2C_1_InitStruct;
+N    int usb_receive_len;
+N	 uint8 data_offset=0;
+N	 ListUsbData * usbdata;
 N
-N	init_device_rcc();
+N
 N	
 N	Systick_Init();
+N	I2C_DeInit(I2C1);
+X	I2C_DeInit(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)));
+N	I2C_StructInit(g_I2C_1_InitStruct);
+N	I2C_Init(I2C1,g_I2C_1_InitStruct);
+X	I2C_Init(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),g_I2C_1_InitStruct);
+N	I2C_Cmd(I2C1,ENABLE);
+X	I2C_Cmd(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
 N	USB_Init();
 N
-N	init_light_pin();
+N
+N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+X	RCC_AHBPeriphClockCmd(((uint32_t)0x00020000), ENABLE);
+N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+X	RCC_AHBPeriphClockCmd(((uint32_t)0x00040000), ENABLE);
+N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+X	RCC_AHBPeriphClockCmd(((uint32_t)0x00080000), ENABLE);
+N	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);
+X	RCC_AHBPeriphClockCmd(((uint32_t)0x00400000), ENABLE);
 N	
-N	//pwm_timer_Init();
-N	TIM_Config();
 N	
-N	SEGGER_RTT_printf(0, "start\n");
-N 
+N	SEGGER_RTT_printf(0, "g2g start\n");
+N	ListUsbData_Init(g_usbdata);
+N	
+N	ListUsbData_Init(g_usbdata_list);
+N	
+N   while(1)
+N   	{
+N   	  SysTick_Delay_Ms(5000);
+N			break;
+N   	}
+N
+N   
+N   SEGGER_RTT_printf(0,"xxxx b_config == 1\n");
+N	//USB_Init();
+N//	ListUsbData_Init(g_usbdata);
+N	
+N	//	I2C_Init(I2C_TypeDef * I2Cx,I2C_InitTypeDef * I2C_InitStruct)
+N		
+N		//Test_IO_Config();
+N		
+N		//GPIO_SetBits(GPIOA,GPIO_Pin_5);
+N		
+N		
+N		Iap2CtrlSession g_Iap2CtrlSession;
+N		Iap2Link_Init(g_pIap2Link, (Iap2LinkTransferFn)Driver_TransferStart);
+N		Iap2CtrlSession_Init(&g_Iap2CtrlSession);
+N		//Iap2Link_RegSession(g_pIap2Link, &g_Iap2CtrlSession);
+N		Iap2Link_Start(g_pIap2Link);
+N
+N
+N	
 N	while (1)
 N	{
 N
+N	  Iap2Link_Start(g_pIap2Link);
+N
+N		Driver_Check();
+N		data_offset =0;
+N		memset(g_hid_report,0,6);
+N		Iap2Link_Run(g_pIap2Link);
+N
+N				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
+N				usbdata = ListUsbData_Remove(g_usbdata_list);
+N		if(usbdata!=NULL )
+X		if(usbdata!=0 )
+N			{
+N			
+N			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,783);
+N			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
+N			free(usbdata->pdata);
+N			free(usbdata);
+N			}
+N		SysTick_Delay_Ms(1000);
+N		if(!g_start_key)
+N				continue;
 N
 N		matrix_scan_key(&matrix);
 N		matrix_scan_again(&matrix);
@@ -20370,6 +21754,8 @@ N		/*发送多媒体键*/
 N		send_acpi_media_keycode(&matrix);
 N		
 N	}
+W "..\user\main.c" 717 9 variable "usb_receive_len"  was declared but never referenced
+W "..\user\main.c" 718 9 variable "data_offset"  was set but never used
 N}
 N
 N

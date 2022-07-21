@@ -37,6 +37,7 @@
 .\objects\systick.o: ..\usb\inc\usb_core.h
 .\objects\systick.o: ..\usb\inc\usb_desc.h
 .\objects\systick.o: ..\user\main.h
+.\objects\systick.o: ..\user\keyboard.h
 .\objects\systick.o: ..\RTT\SEGGER_RTT.h
 .\objects\systick.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\systick.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

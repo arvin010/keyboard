@@ -42,6 +42,7 @@
 .\objects\driver.o: ..\usb\inc\usb_core.h
 .\objects\driver.o: ..\usb\inc\usb_desc.h
 .\objects\driver.o: ..\user\main.h
+.\objects\driver.o: ..\user\keyboard.h
 .\objects\driver.o: ..\RTT\SEGGER_RTT.h
 .\objects\driver.o: ..\RTT\SEGGER_RTT_Conf.h
 .\objects\driver.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

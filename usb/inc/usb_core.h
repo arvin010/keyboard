@@ -308,6 +308,10 @@ typedef M_EPBOUT_STATUS* PM_EPBOUT_STATUS;
 #define ep_hid_vendor_tx  0x04
 #define ep_hid_vendor_rx  0x05
 
+#define ep_iap2_vendor_tx  0x01
+#define ep_iap2_vendor_rx  0x00
+
+
 #define LEN_BOOT_KEYBOARD_DATA   8
 #define LEN_TOUCHPAD_DATA        5
 #define LEN_CONSUMER_DATA        2
@@ -337,7 +341,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS, int);
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
 ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-void USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 
 uint8_t USB_ReadRegister(uint8_t USB_Refister);
 void USB_PDCTRLConfig(uint8_t PDCT);

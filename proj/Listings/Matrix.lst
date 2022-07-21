@@ -13067,6 +13067,9 @@ NITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 Nvoid I2C_ClearITPendingBit(I2C_TypeDef* I2Cx, uint32_t I2C_IT);
 N
 N
+Nint i2c_senddata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+Nint i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr,uint8_t *pBuffer, uint32_t bufferSize);
+N
 N#ifdef __cplusplus
 S}
 N#endif
@@ -18154,8 +18157,10 @@ N/* Endpoint transfer types */
 N#define M_EP_TFMASK     		0x03
 N#define M_EP_CONTROL    		0x00
 N#define M_EP_ISO        		0x01
-N#define M_EP_BULK       		0x10
-N#define M_EP_INTR       		0x11
+N//#define M_EP_BULK       		0x10
+N//#define M_EP_INTR       		0x11
+N#define M_EP_BULK       		0x02
+N#define M_EP_INTR       		0x03
 N
 N/* Standard Device Feature Selectors */
 N#define M_FTR_EPHALT			  0x0000
@@ -18173,6 +18178,9 @@ Nextern uint16_t_uint8_t StatusInfo;
 Nextern const uint8_t LanguageId[];
 Nextern const uint8_t ManufacturerStringDescriptor[];
 Nextern const uint8_t ProductStringDescriptor[];
+N
+Nextern const uint8_t iapStringDescriptor[];
+N
 Nextern const uint8_t SerialNumberSringDescriptor[];
 Nextern const uint8_t USB_FSDeviceDescriptor[];
 Nextern const uint8_t USB_FSConfigDescriptor[];
@@ -18186,6 +18194,8 @@ Nextern const uint16_t USB_FSDeviceDescriptorSize;
 Nextern const uint16_t USB_FSConfigDescriptorSize;
 Nextern const uint16_t LanguageIdSize;
 Nextern const uint16_t ManufacturerStringDescriptorSize;
+Nextern const uint16_t iapStringDescriptorSize;
+N
 Nextern const uint16_t ProductStringDescriptorSize;
 Nextern const uint16_t SerialNumberSringDescriptorSize;
 Nextern const uint16_t USB_HID_FSReportDescriptor_1Size;
@@ -18257,6 +18267,7 @@ S
 S
 S
 S#include "usb_core.h"
+S#include "keyboard.h"
 S#include "SEGGER_RTT.h"
 S#include "SysTick.h"
 S
@@ -18278,6 +18289,103 @@ S/* Public typedef -------------------------------------------------------------
 S
 S#define _debug_
 S
+Senum IAP2PacketEnums
+S{
+S    /* Start of packet bytes */
+S    kIAP2PacketSYNC        = 0xFF,
+S    kIAP2PacketSOP         = 0x5A,
+S    kIAP2PacketSOPOrig     = 0x55,
+S
+S    kIAP2PacketSOPLen      = 2,
+S
+S    kiAP2PacketVersion     = 1,
+S
+S    /* Packet field index */
+S    kIAP2PacketIndexSYNC   = 0,   /* Start of packet byte 1 */
+S    kIAP2PacketIndexSOP    = 1,   /* Start of packet byte 2 */
+S    kIAP2PacketIndexLEN1   = 2,   /* Packet length MSB */
+S    kIAP2PacketIndexLEN2   = 3,   /* Packet length LSB */
+S    kIAP2PacketIndexCTRL   = 4,   /* Control flags */
+S    kIAP2PacketIndexSEQ    = 5,   /* SEQ number */
+S    kIAP2PacketIndexACK    = 6,   /* ACK number */
+S    kIAP2PacketIndexSESSID = 7,   /* Session ID */
+S    kIAP2PacketIndexCHK    = 8,   /* Header checksum */
+S
+S    /* iAP 1.0/2.0 packet detect: FF 55 02 00 EE 10 */
+S    kIAP2PacketDetectLEN    = 0x0200,
+S    kIAP2PacketDetectCTRL   = 0xEE,
+S    kIAP2PacketDetectSEQ    = 0x10,
+S
+S    /* iAP 1.0/2.0 packet detect BAD ACK: FF 55 04 00 02 04 EE 08 */
+S    kIAP2PacketDetectNACKLEN    = 0x0400,
+S    kIAP2PacketDetectNACKCTRL   = 0x02,
+S    kIAP2PacketDetectNACKSEQ    = 0x04,
+S    kIAP2PacketDetectNACKACK    = 0xEE,
+S    kIAP2PacketDetectNACKSESSID = 0x08,
+S
+S    /*
+S    ** Packet Header Len
+S    ** SOP(2) + LEN(2) + CONTROL(1) + SEQ(1) + ACK(1) + SESSID(1) + CHK(1)
+S    */
+S    kIAP2PacketHeaderLen = 9,
+S    kIAP2PacketChksumLen = 1,   /* checksum byte length */
+S
+S    kiAP2PacketLenMax = 0xFFFF,
+S    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+S
+S    /* BitMask defines for bits in control byte */
+S    kIAP2PacketControlMaskSYN = 0x80,   /* synchronization */
+S    kIAP2PacketControlMaskACK = 0x40,   /* acknowledgement */
+S    kIAP2PacketControlMaskEAK = 0x20,   /* extended acknowledgement */
+S    kIAP2PacketControlMaskRST = 0x10,   /* reset */
+S    kIAP2PacketControlMaskSUS = 0x08,   /* suspend (sleep) */
+S
+S    kIAP2PacketSynDataIdxVersion           = 0,
+S    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+S    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+S    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+S    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+S    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+S    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+S
+S    kIAP2PacketSynDataBaseLen              = 10,
+S
+S    kIAP2PacketSynDataIdxSessionInfo       = 10,
+S
+S    kIAP2PacketSynSessionIdxID             = 0,
+S    kIAP2PacketSynSessionIdxType           = 1,
+S    kIAP2PacketSynSessionIdxVersion        = 2,
+S    kIAP2PacketSynSessionSize              = 3,
+S
+S    /* Session ID 0x0 shall not be used for any session types */
+S    kIAP2PacketReservedSessionID           = 0,
+S
+S    kIAP2PacketMaxSessions                 = 10,
+S
+S    kIAP2PacketSynOptionMaskLP             = 0x80,
+S    kIAP2PacketSynOptionMaskHP             = 0x40
+S};
+S
+Stypedef enum
+S{
+S    kiAP2PacketParseStateSOP1 = 0,
+S    kiAP2PacketParseStateSOP2,
+S    kiAP2PacketParseStateLEN1,
+S    kiAP2PacketParseStateLEN2,
+S    kiAP2PacketParseStateCTRL,
+S    kiAP2PacketParseStateSEQ,
+S    kiAP2PacketParseStateACK,
+S    kiAP2PacketParseStateSESSID,
+S    kiAP2PacketParseStateCHK,
+S    kiAP2PacketParseStatePAYLOAD,
+S    kiAP2PacketParseStatePAYLOADCHK,
+S    kiAP2PacketParseStateFINISH,
+S    kiAP2PacketParseStateDETECT,
+S    kiAP2PacketParseStateDETECTBAD,
+S
+S    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+S
+S} kiAP2PacketParseState_t;
 S/* Public define ----------------------------------------------------------------*/
 S
 S//#define ApplicationAddress    ((uint32_t)0x08002000)   //APP程序起始地址
@@ -18582,6 +18690,10 @@ N#define ep_hid_keyboard   0x02
 N#define ep_hid_vendor_tx  0x04
 N#define ep_hid_vendor_rx  0x05
 N
+N#define ep_iap2_vendor_tx  0x01
+N#define ep_iap2_vendor_rx  0x00
+N
+N
 N#define LEN_BOOT_KEYBOARD_DATA   8
 N#define LEN_TOUCHPAD_DATA        5
 N#define LEN_CONSUMER_DATA        2
@@ -18612,7 +18724,7 @@ N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
 NErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
-Nvoid USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
+Nint USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len);
 N
 Nuint8_t USB_ReadRegister(uint8_t USB_Refister);
 Nvoid USB_PDCTRLConfig(uint8_t PDCT);
@@ -18626,6 +18738,39 @@ N
 N/************************* (C) COPYRIGHT JD-DZ.COM *****END OF FILE*********************/
 N
 L 57 "..\user\main.h" 2
+N#include "keyboard.h"
+L 1 "..\user\keyboard.h" 1
+N#ifndef __KEYBOARD_H
+N#define __KEYBOARD_H
+N
+N
+Nextern uint8_t Vendor_data_Buffer[];
+Nextern uint8_t	ep2_send_buf[];
+N
+N
+N
+N
+N
+N
+Nvoid send_boot_keyboard_code(uint8_t* dat, uint8_t len);
+N//void send_touchpad_code(uint8_t* dat, uint8_t len);
+N//void send_consumer_code(uint8_t* dat, uint8_t len);
+N//void send_sysctrl_code(uint8_t* dat, uint8_t len);
+N
+N
+Nvoid send_hid_keyboard_code(uint8_t* dat, uint8_t len);
+N
+Nvoid ep2_send_data(uint8_t rpt_type, uint8_t* dat, uint8_t len);
+Nvoid USB_Transmit_VendorData(uint8_t* dat, uint8_t len);
+Nvoid USB_Receive_VendorData(uint8_t* dat, uint8_t len);
+N
+N
+N
+N
+N#endif /* __KEYBOARD_H */
+N
+N/************************** (C) COPYRIGHT JD-DZ.COM **********************END OF FILE****/
+L 58 "..\user\main.h" 2
 N#include "SEGGER_RTT.h"
 L 1 "..\RTT\SEGGER_RTT.h" 1
 N/*********************************************************************
@@ -19515,7 +19660,7 @@ N
 N#endif
 N
 N/*************************** End of file ****************************/
-L 58 "..\user\main.h" 2
+L 59 "..\user\main.h" 2
 N#include "SysTick.h"
 L 1 "..\user\SysTick.h" 1
 N#ifndef __SysTick_h__
@@ -19525,6 +19670,8 @@ N#include "main.h"
 N
 N
 N
+Nvoid SysTick_Delay_Ms(__IO uint32_t nTime);
+Xvoid SysTick_Delay_Ms(volatile uint32_t nTime);
 N
 Nvoid Systick_Init(void);
 Nuint32_t GetTime(void);
@@ -19535,7 +19682,7 @@ N
 N
 N
 N
-L 59 "..\user\main.h" 2
+L 60 "..\user\main.h" 2
 N
 N
 N#define FN_PORT		GPIOC	
@@ -19555,6 +19702,103 @@ N/* Public typedef -------------------------------------------------------------
 N
 N#define _debug_
 N
+Nenum IAP2PacketEnums
+N{
+N    /* Start of packet bytes */
+N    kIAP2PacketSYNC        = 0xFF,
+N    kIAP2PacketSOP         = 0x5A,
+N    kIAP2PacketSOPOrig     = 0x55,
+N
+N    kIAP2PacketSOPLen      = 2,
+N
+N    kiAP2PacketVersion     = 1,
+N
+N    /* Packet field index */
+N    kIAP2PacketIndexSYNC   = 0,   /* Start of packet byte 1 */
+N    kIAP2PacketIndexSOP    = 1,   /* Start of packet byte 2 */
+N    kIAP2PacketIndexLEN1   = 2,   /* Packet length MSB */
+N    kIAP2PacketIndexLEN2   = 3,   /* Packet length LSB */
+N    kIAP2PacketIndexCTRL   = 4,   /* Control flags */
+N    kIAP2PacketIndexSEQ    = 5,   /* SEQ number */
+N    kIAP2PacketIndexACK    = 6,   /* ACK number */
+N    kIAP2PacketIndexSESSID = 7,   /* Session ID */
+N    kIAP2PacketIndexCHK    = 8,   /* Header checksum */
+N
+N    /* iAP 1.0/2.0 packet detect: FF 55 02 00 EE 10 */
+N    kIAP2PacketDetectLEN    = 0x0200,
+N    kIAP2PacketDetectCTRL   = 0xEE,
+N    kIAP2PacketDetectSEQ    = 0x10,
+N
+N    /* iAP 1.0/2.0 packet detect BAD ACK: FF 55 04 00 02 04 EE 08 */
+N    kIAP2PacketDetectNACKLEN    = 0x0400,
+N    kIAP2PacketDetectNACKCTRL   = 0x02,
+N    kIAP2PacketDetectNACKSEQ    = 0x04,
+N    kIAP2PacketDetectNACKACK    = 0xEE,
+N    kIAP2PacketDetectNACKSESSID = 0x08,
+N
+N    /*
+N    ** Packet Header Len
+N    ** SOP(2) + LEN(2) + CONTROL(1) + SEQ(1) + ACK(1) + SESSID(1) + CHK(1)
+N    */
+N    kIAP2PacketHeaderLen = 9,
+N    kIAP2PacketChksumLen = 1,   /* checksum byte length */
+N
+N    kiAP2PacketLenMax = 0xFFFF,
+N    kiAP2PacketMaxPayloadSize = (kiAP2PacketLenMax - kIAP2PacketHeaderLen - kIAP2PacketChksumLen),
+N
+N    /* BitMask defines for bits in control byte */
+N    kIAP2PacketControlMaskSYN = 0x80,   /* synchronization */
+N    kIAP2PacketControlMaskACK = 0x40,   /* acknowledgement */
+N    kIAP2PacketControlMaskEAK = 0x20,   /* extended acknowledgement */
+N    kIAP2PacketControlMaskRST = 0x10,   /* reset */
+N    kIAP2PacketControlMaskSUS = 0x08,   /* suspend (sleep) */
+N
+N    kIAP2PacketSynDataIdxVersion           = 0,
+N    kIAP2PacketSynDataIdxMaxOutstanding    = 1,
+N    kIAP2PacketSynDataIdxMaxPacketSize     = 2,
+N    kIAP2PacketSynDataIdxRetransmitTimeout = 4,
+N    kIAP2PacketSynDataIdxCumAckTimeout     = 6,
+N    kIAP2PacketSynDataIdxMaxRetransmit     = 8,
+N    kIAP2PacketSynDataIdxMaxCumACK         = 9,
+N
+N    kIAP2PacketSynDataBaseLen              = 10,
+N
+N    kIAP2PacketSynDataIdxSessionInfo       = 10,
+N
+N    kIAP2PacketSynSessionIdxID             = 0,
+N    kIAP2PacketSynSessionIdxType           = 1,
+N    kIAP2PacketSynSessionIdxVersion        = 2,
+N    kIAP2PacketSynSessionSize              = 3,
+N
+N    /* Session ID 0x0 shall not be used for any session types */
+N    kIAP2PacketReservedSessionID           = 0,
+N
+N    kIAP2PacketMaxSessions                 = 10,
+N
+N    kIAP2PacketSynOptionMaskLP             = 0x80,
+N    kIAP2PacketSynOptionMaskHP             = 0x40
+N};
+N
+Ntypedef enum
+N{
+N    kiAP2PacketParseStateSOP1 = 0,
+N    kiAP2PacketParseStateSOP2,
+N    kiAP2PacketParseStateLEN1,
+N    kiAP2PacketParseStateLEN2,
+N    kiAP2PacketParseStateCTRL,
+N    kiAP2PacketParseStateSEQ,
+N    kiAP2PacketParseStateACK,
+N    kiAP2PacketParseStateSESSID,
+N    kiAP2PacketParseStateCHK,
+N    kiAP2PacketParseStatePAYLOAD,
+N    kiAP2PacketParseStatePAYLOADCHK,
+N    kiAP2PacketParseStateFINISH,
+N    kiAP2PacketParseStateDETECT,
+N    kiAP2PacketParseStateDETECTBAD,
+N
+N    kiAP2PacketParseStateLAST = kiAP2PacketParseStateDETECTBAD
+N
+N} kiAP2PacketParseState_t;
 N/* Public define ----------------------------------------------------------------*/
 N
 N//#define ApplicationAddress    ((uint32_t)0x08002000)   //APP程序起始地址
