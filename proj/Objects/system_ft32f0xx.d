@@ -1,0 +1,9 @@
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\src\system_ft32f0xx.c
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\FT32f0xx.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\ft32f072x8.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\core_cm0.h
+.\objects\system_ft32f0xx.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\core_cmInstr.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\core_cmFunc.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\ft32f0xx.h
+.\objects\system_ft32f0xx.o: ..\FTLib\CMSIS\inc\system_ft32f0xx.h

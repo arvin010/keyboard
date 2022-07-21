@@ -1,0 +1,10 @@
+.\objects\usb_desc.o: ..\usb\src\usb_desc.c
+.\objects\usb_desc.o: ..\usb\inc\usb_desc.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\ft32f0xx.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\ft32f072x8.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\core_cm0.h
+.\objects\usb_desc.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\core_cmInstr.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\core_cmFunc.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\ft32f0xx.h
+.\objects\usb_desc.o: ..\FTLib\CMSIS\inc\system_ft32f0xx.h
