@@ -781,10 +781,13 @@ int main(void)
 		Iap2Link_Run(g_pIap2Link);
 		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 
+if(ListUsbData_Count()> 0)
+{
 				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
 				startCriticalSection();
 				usbdata = ListUsbData_Remove(g_usbdata_list);
 				endCriticalSection();
+				}
 						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 		if(usbdata!=NULL )
 			{

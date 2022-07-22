@@ -13685,7 +13685,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count(ListUsbData* pNode);
+int ListUsbData_Count( );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 

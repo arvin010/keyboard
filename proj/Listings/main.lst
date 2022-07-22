@@ -20886,7 +20886,8 @@ NListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 NListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 NBool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
 Xuint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-Nint ListUsbData_Count(ListUsbData* pNode);
+W "..\iap2\ListUsbData.h" 19 5 Deprecated declaration ListUsbData_Count - give arg types
+Nint ListUsbData_Count(/*ListUsbData* pNode*/);
 Nvoid ListUsbData_RemoveAll(ListUsbData* pNode);
 N
 N#endif
@@ -21736,31 +21737,34 @@ N		Iap2Link_Run(g_pIap2Link);
 N		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 N
+Nif(ListUsbData_Count()> 0)
+N{
 N				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
 N				startCriticalSection();
 N				usbdata = ListUsbData_Remove(g_usbdata_list);
 N				endCriticalSection();
+N				}
 N						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,788);
+X						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,791);
 N		if(usbdata!=NULL )
 X		if(usbdata!=0 )
 N			{
 N			
 N			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
+X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,795);
 N			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,797);
 N			free(usbdata->pdata);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
 N			free(usbdata);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,798);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
 N			}
 N
 N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
+X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,804);
 N		//SysTick_Delay_Ms(1000);
 N		if(!g_start_key)
 N				continue;

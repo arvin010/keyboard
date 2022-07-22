@@ -16,7 +16,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 Bool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count(ListUsbData* pNode);
+int ListUsbData_Count(/*ListUsbData* pNode*/);
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 #endif

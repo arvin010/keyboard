@@ -4,7 +4,7 @@
 #include "ListUsbData.h"
 #include <stdlib.h>
 #include <string.h>
-
+int g_count = 0;
 void ListUsbData_Init(ListUsbData* pList)
 {
 
@@ -50,6 +50,8 @@ END:
 	
 //	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 //	PF(DL_LISTEX, ("List_AddTail(), count=%d\n", List_Count(pHead)));
+	g_count++;
+
 	return pHead;
 }
 
@@ -61,6 +63,7 @@ void ListUsbData_RemoveAll(ListUsbData* pNode)
 	{
 		pTemp = ListUsbData_Remove(pNode);
 	}
+	g_count = 0;
 }
 
 //Remove a node form list
@@ -131,6 +134,9 @@ END:
 	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 	
 //	PF(DL_LISTEX, ("List_Remove(), count=%d\n", List_Count(pHead)));
+	if(g_count>0)
+		g_count--;
+
 	return pHead;
 }
 
@@ -160,8 +166,10 @@ Bool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode)
 	return False;
 }
 
-int ListUsbData_Count(ListUsbData* pNode)
+int ListUsbData_Count(/*ListUsbData* pNode*/)
 {
+return  g_count;
+#if 0
 	ListUsbData* pHead = pNode;
 	int nCount = 0;
 
@@ -184,5 +192,6 @@ int ListUsbData_Count(ListUsbData* pNode)
 	}	
 
 	return nCount;
+	#endif
 }
 

@@ -14350,7 +14350,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count(ListUsbData* pNode);
+int ListUsbData_Count( );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 
@@ -15103,24 +15103,27 @@ int main(void)
 		Iap2Link_Run(g_pIap2Link);
 		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 
+if(ListUsbData_Count()> 0)
+{
 				
 				startCriticalSection();
 				usbdata = ListUsbData_Remove(g_usbdata_list);
 				endCriticalSection();
-						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,788);
+				}
+						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,791);
 		if(usbdata!=0 )
 			{
 			
-			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
+			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,795);
 			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,797);
 			free(usbdata->pdata);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
 			free(usbdata);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,798);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
 			}
 
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,804);
 		
 		if(!g_start_key)
 				continue;

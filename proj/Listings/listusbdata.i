@@ -262,7 +262,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count(ListUsbData* pNode);
+int ListUsbData_Count( );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 
@@ -1429,7 +1429,7 @@ extern __declspec(__nothrow) void _membitmovewb(void *  , const void *  , int  ,
  
 
 # 7 "..\\iap2\\ListUsbData.c"
-
+int g_count = 0;
 void ListUsbData_Init(ListUsbData* pList)
 {
 
@@ -1475,6 +1475,8 @@ END:
 	
 
 
+	g_count++;
+
 	return pHead;
 }
 
@@ -1486,6 +1488,7 @@ void ListUsbData_RemoveAll(ListUsbData* pNode)
 	{
 		pTemp = ListUsbData_Remove(pNode);
 	}
+	g_count = 0;
 }
 
 
@@ -1494,67 +1497,70 @@ ListUsbData* ListUsbData_Remove(ListUsbData* pNode)
 {
 	ListUsbData* pHead = pNode;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,72);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,75);
 	
 	if(!(pNode))
 		{
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,76);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,79);
 		   return 0;
 		}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,79);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,82);
 
 	
 	if(pNode->m_pPre == 0)
 	{
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,85);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,88);
 		pHead = pNode->m_pNext;
 		if(pHead)
 		{
 			pHead->m_pPre = 0;
 		}
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,92);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,95);
 		goto END;
 	}
 	else
 	{
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,98);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,101);
 		pNode->m_pPre->m_pNext = pNode->m_pNext;
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,101);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,104);
 		if(pNode->m_pNext)
 		{
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,105);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,108);
 			pNode->m_pNext->m_pPre = pNode->m_pPre;
 		}
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,109);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,112);
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,111);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,114);
 
 	while(pHead->m_pPre)
 	{
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,115);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,118);
 		pHead = pHead->m_pPre;
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,118);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,121);
 	}
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,121);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,124);
 
 END:
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,125);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,128);
 	pNode->m_pPre = 0;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,128);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,131);
 	pNode->m_pNext = 0;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,131);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,134);
 	
+
+	if(g_count>0)
+		g_count--;
 
 	return pHead;
 }
@@ -1585,29 +1591,9 @@ uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode)
 	return 0;
 }
 
-int ListUsbData_Count(ListUsbData* pNode)
+int ListUsbData_Count( )
 {
-	ListUsbData* pHead = pNode;
-	int nCount = 0;
-
-	if(pNode == 0)
-	{
-		return 0;
-	}
-
-	while(pHead)
-	{
-		pHead = pHead->m_pPre;
-		nCount++;
-	}
-
-	pNode = pNode->m_pNext;
-	while(pNode)
-	{
-		pNode = pNode->m_pNext;
-		nCount++;
-	}	
-
-	return nCount;
+return  g_count;
+# 196 "..\\iap2\\ListUsbData.c"
 }
 
