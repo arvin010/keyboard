@@ -17,15 +17,16 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
      if(!(pNode))
 	 	return Null;
 	//ASRT(pNode);
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 	pNode->m_pNext = Null;
 	if(pHead == Null)
 	{
 		pNode->m_pPre = Null;
 		pHead = pNode;
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 		goto END;
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 
 	//Get the tail node
 	while(pListNode->m_pNext)
@@ -33,17 +34,21 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
 		pListNode = pListNode->m_pNext;
 		//ASRT(pListNode != pNode);
 		 if(!(pListNode != pNode))
+		 	{
+		 	
+		//	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 	 	return Null;
+		 	}
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 
 	pListNode->m_pNext = pNode;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 	pNode->m_pPre = pListNode;
 END:
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+//	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 //	PF(DL_LISTEX, ("List_AddTail(), count=%d\n", List_Count(pHead)));
 	return pHead;
 }

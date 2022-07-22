@@ -133,12 +133,12 @@ void USB_IRQHandler(void)
 	//SEGGER_RTT_printf(0,"USB_IRQHandler ###usb_intrin =0x%02x usb_intrusb =0x%02x ###usb_introut =0x%02x\n",usb_intrin,usb_intrusb,usb_introut);
 	if(usb_introut!=0 || usb_intrin!=0)
 		{
-		SEGGER_RTT_printf(0,"USB_IRQHandler ###usb_intrin =0x%02x usb_intrusb =0x%02x ###usb_introut =0x%02x\n",usb_intrin,usb_intrusb,usb_introut);
+		//SEGGER_RTT_printf(0,"USB_IRQHandler ###usb_intrin =0x%02x usb_intrusb =0x%02x ###usb_introut =0x%02x\n",usb_intrin,usb_intrusb,usb_introut);
 		}
 	if(usb_introut!=0)
 		{
 		   
-		   SEGGER_RTT_printf(0,"USB_IRQHandler ############################################# usb_introut =0x%02x \n",usb_introut);
+		 //  SEGGER_RTT_printf(0,"USB_IRQHandler ############################################# usb_introut =0x%02x \n",usb_introut);
 		}
 	/*Check for resume from suspend mode, Add call to resume routine here */
 	if((usb_intrusb & 0x02) != RESET)							//RESUME
@@ -192,23 +192,22 @@ void USB_IRQHandler(void)
 	if((usb_introut & USB_IT_OUT_EP2_FLAG) != RESET) //huanghanjing
 	{
 	
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,__LINE__);
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG USB_EP_Rx(2 \n");
 	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, M_EP_MAXP);
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+	//SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 	for(int i=0;i<recv_data_len;i++)
 		SEGGER_RTT_printf(0,"22 0x%02x ",Vendor_data_Buffer[i]);
 		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
 		
-		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+	//	SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 		pUsbData->pdata = malloc(recv_data_len);
-		
-		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+		memcpy(pUsbData->pdata,Vendor_data_Buffer,recv_data_len);
+	//	SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 		pUsbData->m_isUsed = 0;
 		pUsbData->m_pNext = NULL;
 		pUsbData->m_pPre = NULL;
 		pUsbData->data_size = recv_data_len;
 		
-		SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 111 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 
 			ListUsbData_AddTail(g_usbdata_list,pUsbData);
 	SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
@@ -1771,10 +1770,10 @@ static uint32_t ConfigureIfs(void)
 	pcfg = (PSTD_CFG_DSCR)gpCurCfg;
 	pbyIfVal = (BYTE*)&gbyCurIfVal;	//½Ó¿Ú
 
-	SEGGER_RTT_printf(0,"ConfigureIfs;  pcfg->bNumInterfaces=%d\n",pcfg->bNumInterfaces);
+	//SEGGER_RTT_printf(0,"ConfigureIfs;  pcfg->bNumInterfaces=%d\n",pcfg->bNumInterfaces);
 	for (byIf=0; byIf < pcfg->bNumInterfaces; byIf++, pbyIfVal++) 
 	{
-		SEGGER_RTT_printf(0,"ConfigureIfs; byIf=%d	byAltIf=%d pbyIfVal=%d\n",byIf,byAltIf ,*pbyIfVal);
+		//SEGGER_RTT_printf(0,"ConfigureIfs; byIf=%d	byAltIf=%d pbyIfVal=%d\n",byIf,byAltIf ,*pbyIfVal);
 		/* Advance pointer to selected alternate interface descriptor */
 		if (*pbyIfVal) 
 		{
@@ -1784,14 +1783,14 @@ static uint32_t ConfigureIfs(void)
 			{
 				byNumEPs = pif->bNumEndpoints;
 				
-				SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d\n",byNumEPs,byAltIf);
+				//SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d\n",byNumEPs,byAltIf);
 				pby += sizeof(STD_IF_DSCR) + byNumEPs * sizeof(STD_EP_DSCR) /*+ sizeof(STD_HID_DSCR)*/;
 				pif  = (PSTD_IF_DSCR)pby;
 				/* Check an alternate setting > number of alternates not specified */
 				if (!pif->bAlternateSetting)
 				{
 				
-				SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d !pif->bAlternateSetting\n",byNumEPs,byAltIf);
+				//SEGGER_RTT_printf(0,"ConfigureIfs; byAltIf=%d	byNumEPs=%d !pif->bAlternateSetting\n",byNumEPs,byAltIf);
 					return FALSE;
 				}
 			} 
@@ -1799,51 +1798,51 @@ static uint32_t ConfigureIfs(void)
 
 		/* Store pointer to interface in global array */
 		gpCurIf[byIf] = pif;
-		SEGGER_RTT_printf(0,"aa ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
+		//SEGGER_RTT_printf(0,"aa ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
 
 		/* Loop through all endpoints in interface */
 		byNumEPs = pif->bNumEndpoints;
 		
-		SEGGER_RTT_printf(0,"bbb ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
+		//SEGGER_RTT_printf(0,"bbb ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
 		pby += sizeof(STD_IF_DSCR) /*+ sizeof(STD_HID_DSCR)*/;	//endpoint
 		
-		SEGGER_RTT_printf(0,"ccc ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
+		//SEGGER_RTT_printf(0,"ccc ConfigureIfs;	pif->bNumEndpoints=%d\n",pif->bNumEndpoints);
 		for ( byEP = 0; byEP < byNumEPs; byEP++ )
 		{
 		
-		SEGGER_RTT_printf(0,"ddd ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+		//SEGGER_RTT_printf(0,"ddd ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			pep = (PSTD_EP_DSCR)pby;
-			SEGGER_RTT_printf(0,"ee ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+			//SEGGER_RTT_printf(0,"ee ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 
 			/* Configure the endpoint */
 			MWRITE_BYTE(M_REG_INDEX, (pep->bEndpointAddress & 0x0F));
 			
-			SEGGER_RTT_printf(0,"ff ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+			//SEGGER_RTT_printf(0,"ff ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			/* Round up max packet size to a multiple of 8 for writing to MaxP registers */
 			by = (BYTE)((pep->wMaxPacketSize + 7) >> 3);
 			
-			SEGGER_RTT_printf(0,"33 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+			//SEGGER_RTT_printf(0,"33 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 			if(pep->bEndpointAddress & 0x80)
 			{
 			
-			SEGGER_RTT_printf(0,"444 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+			//SEGGER_RTT_printf(0,"444 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 				MWRITE_BYTE(M_REG_INMAXP, by);
 				by = MREAD_BYTE(M_REG_INCSR2);
 				
-				SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+				//SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 				
-				SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",(pep->bmAttributes & M_EP_TFMASK));
+				//SEGGER_RTT_printf(0,"66 ConfigureIfs;	pep->bmAttributes=0x%02x\n",(pep->bmAttributes & M_EP_TFMASK));
 				switch (pep->bmAttributes & M_EP_TFMASK)
 				{
 					case M_EP_ISO:
 						
-						SEGGER_RTT_printf(0,"555 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
+					//	SEGGER_RTT_printf(0,"555 ConfigureIfs;	pep->bEndpointAddress=0x%02x\n",pep->bEndpointAddress);
 						by |= M_INCSR2_ISO;
 					break;
 					case M_EP_BULK:
 					case M_EP_INTR:		
 						
-						SEGGER_RTT_printf(0,"777 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+					//	SEGGER_RTT_printf(0,"777 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by &= ~M_INCSR2_ISO;
 					break;
 				}
@@ -1862,18 +1861,18 @@ static uint32_t ConfigureIfs(void)
 				MWRITE_BYTE(M_REG_OUTMAXP, by);
 				by = MREAD_BYTE(M_REG_OUTCSR2);
 				
-				SEGGER_RTT_printf(0,"999 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+				//SEGGER_RTT_printf(0,"999 ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 				switch (pep->bmAttributes & M_EP_TFMASK)
 				{
 					case M_EP_ISO:
 						
-						SEGGER_RTT_printf(0,"hhh ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+					//	SEGGER_RTT_printf(0,"hhh ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by |= M_OUTCSR2_ISO;
 					break;
 					case M_EP_BULK:
 					case M_EP_INTR:
 						
-						SEGGER_RTT_printf(0,"ffff ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
+					///	SEGGER_RTT_printf(0,"ffff ConfigureIfs;	pep->bmAttributes=0x%02x\n",pep->bmAttributes);
 						by &= ~M_OUTCSR2_ISO;
 					break;
 				}
