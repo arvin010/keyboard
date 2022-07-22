@@ -18891,6 +18891,11 @@ Nvoid FIFORead(int, int, void*);
 Nvoid FIFOWrite(int, int, void*);
 Nvoid USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 NITStatus USB_GetITStatus(uint32_t USB_IT);
+Nvoid localIrqEnable(void);
+Nvoid localIrqDisable(void);
+Nvoid startCriticalSection(void);
+W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
+Nvoid endCriticalSection();
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20214,6 +20219,7 @@ N		pTm->m_timerList = pTimer;
 N	}
 N	else
 N	{
+W "..\iap2\SwTimer.c" 149 3 function "List_AddTail" declared implicitly
 N		List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
 N	}
 N}	
@@ -20225,8 +20231,10 @@ N
 N	if(Null == pTm || Null == pTm->m_timerList) return;
 X	if(0 == pTm || 0 == pTm->m_timerList) return;
 N	
+W "..\iap2\SwTimer.c" 159 5 function "List_isIn" declared implicitly
 N	if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
 N	{
+W "..\iap2\SwTimer.c" 161 32 function "List_Remove" declared implicitly
 N		pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
 N	}
 N}

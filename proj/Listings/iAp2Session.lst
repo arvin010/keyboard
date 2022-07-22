@@ -18914,6 +18914,11 @@ Nvoid FIFORead(int, int, void*);
 Nvoid FIFOWrite(int, int, void*);
 Nvoid USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 NITStatus USB_GetITStatus(uint32_t USB_IT);
+Nvoid localIrqEnable(void);
+Nvoid localIrqDisable(void);
+Nvoid startCriticalSection(void);
+W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
+Nvoid endCriticalSection();
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20589,6 +20594,7 @@ N		pSessionMgr->m_State = IAP2_STATE_TX_RSP;
 N	}
 N	
 N	return IAP2RC_SUCCESS;
+W "..\iap2\iAp2Session.c" 65 6 variable "nRc"  was set but never used
 N}
 N
 Nint SessionMgr_FsmTxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)
@@ -20608,6 +20614,7 @@ N		pSessionMgr->m_State = IAP2_STATE_RX_ACK;
 N		return IAP2RC_SUCCESS;
 N	}
 N	return IAP2RC_FAILED;
+W "..\iap2\iAp2Session.c" 114 6 variable "nLen"  was declared but never referenced
 N}
 N
 Nint SessionMgr_FsmRxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)
@@ -20697,14 +20704,14 @@ N		pSessionMgr->EventProc(pSessionMgr, nEventId);
 N		return IAP2RC_SUCCESS;
 N	}
 N
+W "..\iap2\iAp2Session.c" 210 2 enumerated type mixed with another type
 N	FSM(IAP2_STATE_TX_REQ, SessionMgr_FsmTxReq);
-X	if(IAP2_STATE_TX_REQ == pSessionMgr->m_State) { return SessionMgr_FsmTxReq(pSessionMgr, nEventId, pPkt); };
+W "..\iap2\iAp2Session.c" 211 2 enumerated type mixed with another type
 N	FSM(IAP2_STATE_RX_REQ, SessionMgr_FsmRxReq);
-X	if(IAP2_STATE_RX_REQ == pSessionMgr->m_State) { return SessionMgr_FsmRxReq(pSessionMgr, nEventId, pPkt); };
+W "..\iap2\iAp2Session.c" 212 2 enumerated type mixed with another type
 N	FSM(IAP2_STATE_TX_RSP, SessionMgr_FsmTxRsp);
-X	if(IAP2_STATE_TX_RSP == pSessionMgr->m_State) { return SessionMgr_FsmTxRsp(pSessionMgr, nEventId, pPkt); };
+W "..\iap2\iAp2Session.c" 213 2 enumerated type mixed with another type
 N	FSM(IAP2_STATE_RX_RSP, SessionMgr_FsmRxRsp);
-X	if(IAP2_STATE_RX_RSP == pSessionMgr->m_State) { return SessionMgr_FsmRxRsp(pSessionMgr, nEventId, pPkt); };
 N	FSM(IAP2_STATE_TX_ACK, SessionMgr_FsmTxAck);
 X	if(IAP2_STATE_TX_ACK == pSessionMgr->m_State) { return SessionMgr_FsmTxAck(pSessionMgr, nEventId, pPkt); };
 N	FSM(IAP2_STATE_RX_ACK, SessionMgr_FsmRxAck);

@@ -12629,6 +12629,10 @@ void FIFORead(int, int, void*);
 void FIFOWrite(int, int, void*);
 void USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 ITStatus USB_GetITStatus(uint32_t USB_IT);
+void localIrqEnable(void);
+void localIrqDisable(void);
+void startCriticalSection(void);
+void endCriticalSection();
 
 
 
@@ -15100,21 +15104,23 @@ int main(void)
 		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 
 				
+				startCriticalSection();
 				usbdata = ListUsbData_Remove(g_usbdata_list);
-						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,786);
+				endCriticalSection();
+						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,788);
 		if(usbdata!=0 )
 			{
 			
-			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,790);
+			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
 			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
-			free(usbdata->pdata);
 					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
-			free(usbdata);
+			free(usbdata->pdata);
 					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
+			free(usbdata);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,798);
 			}
 
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
 		
 		if(!g_start_key)
 				continue;

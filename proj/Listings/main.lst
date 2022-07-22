@@ -18568,6 +18568,11 @@ Nvoid FIFORead(int, int, void*);
 Nvoid FIFOWrite(int, int, void*);
 Nvoid USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 NITStatus USB_GetITStatus(uint32_t USB_IT);
+Nvoid localIrqEnable(void);
+Nvoid localIrqDisable(void);
+Nvoid startCriticalSection(void);
+W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
+Nvoid endCriticalSection();
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20688,7 +20693,9 @@ N
 NBool Driver_TransferStart(Irb* pIrb);
 Xuint8 Driver_TransferStart(Irb* pIrb);
 Nvoid Driver_RxDone(const void* pData, int len);
+W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
 Nvoid Driver_Check();
+W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
 Nvoid Driver_TxDone();
 N
 N
@@ -21730,28 +21737,30 @@ N		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 N
 N				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
+N				startCriticalSection();
 N				usbdata = ListUsbData_Remove(g_usbdata_list);
+N				endCriticalSection();
 N						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,786);
+X						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,788);
 N		if(usbdata!=NULL )
 X		if(usbdata!=0 )
 N			{
 N			
 N			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,790);
+X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
 N			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
 N			free(usbdata->pdata);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
 N			free(usbdata);
 N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
+X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,798);
 N			}
 N
 N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
+X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
 N		//SysTick_Delay_Ms(1000);
 N		if(!g_start_key)
 N				continue;
@@ -21773,6 +21782,8 @@ N		/*·¢ËÍ¶àÃ½Ìå¼ü*/
 N		send_acpi_media_keycode(&matrix);
 N		
 N	}
+W "..\user\main.c" 717 9 variable "usb_receive_len"  was declared but never referenced
+W "..\user\main.c" 718 9 variable "data_offset"  was set but never used
 N}
 N
 N

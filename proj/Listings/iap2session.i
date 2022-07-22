@@ -12882,6 +12882,10 @@ void FIFORead(int, int, void*);
 void FIFOWrite(int, int, void*);
 void USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 ITStatus USB_GetITStatus(uint32_t USB_IT);
+void localIrqEnable(void);
+void localIrqDisable(void);
+void startCriticalSection(void);
+void endCriticalSection();
 
 
 

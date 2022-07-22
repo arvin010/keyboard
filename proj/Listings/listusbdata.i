@@ -1442,15 +1442,16 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
      if(!(pNode))
 	 	return 0;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,20);
+	
 	pNode->m_pNext = 0;
 	if(pHead == 0)
 	{
 		pNode->m_pPre = 0;
 		pHead = pNode;
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,27);
 		goto END;
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,28);
 
 	
 	while(pListNode->m_pNext)
@@ -1458,17 +1459,21 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
 		pListNode = pListNode->m_pNext;
 		
 		 if(!(pListNode != pNode))
+		 	{
+		 	
+		
 	 	return 0;
+		 	}
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,38);
+	
 
 	pListNode->m_pNext = pNode;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,42);
+	
 	pNode->m_pPre = pListNode;
 END:
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,46);
+
 
 	return pHead;
 }
@@ -1489,66 +1494,66 @@ ListUsbData* ListUsbData_Remove(ListUsbData* pNode)
 {
 	ListUsbData* pHead = pNode;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,67);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,72);
 	
 	if(!(pNode))
 		{
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,71);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,76);
 		   return 0;
 		}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,74);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,79);
 
 	
 	if(pNode->m_pPre == 0)
 	{
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,80);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,85);
 		pHead = pNode->m_pNext;
 		if(pHead)
 		{
 			pHead->m_pPre = 0;
 		}
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,87);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,92);
 		goto END;
 	}
 	else
 	{
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,93);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,98);
 		pNode->m_pPre->m_pNext = pNode->m_pNext;
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,96);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,101);
 		if(pNode->m_pNext)
 		{
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,100);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,105);
 			pNode->m_pNext->m_pPre = pNode->m_pPre;
 		}
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,104);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,109);
 	}
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,106);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,111);
 
 	while(pHead->m_pPre)
 	{
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,110);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,115);
 		pHead = pHead->m_pPre;
 		
-		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,113);
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,118);
 	}
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,116);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,121);
 
 END:
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,120);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,125);
 	pNode->m_pPre = 0;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,123);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,128);
 	pNode->m_pNext = 0;
 	
-	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,126);
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,131);
 	
 
 	return pHead;

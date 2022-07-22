@@ -41,6 +41,41 @@ typedef M_EP0_STATUS*  PM_EP0_STATUS;
 
 
 extern int b_config;
+static uint8_t usbIrqStatus;
+
+// KH Tsai NOTE: Interrupt Enable, for M0
+void localIrqEnable(void) {
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	usbIrqStatus = 1;
+
+	  NVIC_InitStructure.NVIC_IRQChannel = USB_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+}
+
+
+void localIrqDisable(void) {
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+		  NVIC_InitStructure.NVIC_IRQChannel = USB_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&NVIC_InitStructure);
+    usbIrqStatus = 0;
+}
+
+void startCriticalSection(void) {
+    if(usbIrqStatus) {
+        localIrqDisable();
+    }
+}
+
+void endCriticalSection() {
+    localIrqEnable();
+}
 
 
 /* Private define ----------------------------------------------------------------*/
@@ -191,10 +226,10 @@ void USB_IRQHandler(void)
 	
 	if((usb_introut & USB_IT_OUT_EP2_FLAG) != RESET) //huanghanjing
 	{
-	
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG USB_EP_Rx(2 \n");
+	startCriticalSection();
+//	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG USB_EP_Rx(2 \n");
 	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, M_EP_MAXP);
-	//SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 	for(int i=0;i<recv_data_len;i++)
 		SEGGER_RTT_printf(0,"22 0x%02x ",Vendor_data_Buffer[i]);
 		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
@@ -210,7 +245,8 @@ void USB_IRQHandler(void)
 		
 
 			ListUsbData_AddTail(g_usbdata_list,pUsbData);
-	SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+			endCriticalSection();
+	//SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 
 		#ifdef _debug_
 		//Vendor_data_Buffer[0]++;

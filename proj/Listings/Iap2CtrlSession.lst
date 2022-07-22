@@ -18923,6 +18923,11 @@ Nvoid FIFORead(int, int, void*);
 Nvoid FIFOWrite(int, int, void*);
 Nvoid USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 NITStatus USB_GetITStatus(uint32_t USB_IT);
+Nvoid localIrqEnable(void);
+Nvoid localIrqDisable(void);
+Nvoid startCriticalSection(void);
+W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
+Nvoid endCriticalSection();
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20782,6 +20787,8 @@ SEnd:
 S	return RC_FAILED;
 N#endif
 N	
+W "..\iap2\Iap2CtrlSession.c" 84 10 variable "fd"  was declared but never referenced
+W "..\iap2\Iap2CtrlSession.c" 114 13 variable "payloadLen"  was declared but never referenced
 N}
 N
 Nstatic int Iap2CtrlSession_ChallengeRsp(const Iap2CtrlSessionMsg* pReq, uint8* pData, uint16* pLen)
@@ -20945,6 +20952,8 @@ N return err;
 N
 N 
 N 
+W "..\iap2\Iap2CtrlSession.c" 200 9 variable "fd"  was declared but never referenced
+W "..\iap2\Iap2CtrlSession.c" 308 12 variable "payloadLen"  was declared but never referenced
 N}
 N
 N

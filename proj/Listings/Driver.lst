@@ -18913,6 +18913,11 @@ Nvoid FIFORead(int, int, void*);
 Nvoid FIFOWrite(int, int, void*);
 Nvoid USB_ITConfig(uint32_t USB_IT, FunctionalState NewState);
 NITStatus USB_GetITStatus(uint32_t USB_IT);
+Nvoid localIrqEnable(void);
+Nvoid localIrqDisable(void);
+Nvoid startCriticalSection(void);
+W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
+Nvoid endCriticalSection();
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20323,7 +20328,9 @@ N
 NBool Driver_TransferStart(Irb* pIrb);
 Xuint8 Driver_TransferStart(Irb* pIrb);
 Nvoid Driver_RxDone(const void* pData, int len);
+W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
 Nvoid Driver_Check();
+W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
 Nvoid Driver_TxDone();
 N
 N

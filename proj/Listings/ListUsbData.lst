@@ -1897,8 +1897,7 @@ N     if(!(pNode))
 N	 	return Null;
 X	 	return 0;
 N	//ASRT(pNode);
-N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,20);
+N	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 N	pNode->m_pNext = Null;
 X	pNode->m_pNext = 0;
 N	if(pHead == Null)
@@ -1907,10 +1906,12 @@ N	{
 N		pNode->m_pPre = Null;
 X		pNode->m_pPre = 0;
 N		pHead = pNode;
+N		
+W "..\iap2\ListUsbData.c" 27 3 function "SEGGER_RTT_printf" declared implicitly
+N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,27);
 N		goto END;
 N	}
-N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,28);
 N
 N	//Get the tail node
 N	while(pListNode->m_pNext)
@@ -1918,21 +1919,22 @@ N	{
 N		pListNode = pListNode->m_pNext;
 N		//ASRT(pListNode != pNode);
 N		 if(!(pListNode != pNode))
+N		 	{
+N		 	
+N		//	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 N	 	return Null;
 X	 	return 0;
+N		 	}
 N	}
-N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,38);
+N	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 N
 N	pListNode->m_pNext = pNode;
 N	
-N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,42);
+N	//SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 N	pNode->m_pPre = pListNode;
 NEND:
 N	
-N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,46);
+N//	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
 N//	PF(DL_LISTEX, ("List_AddTail(), count=%d\n", List_Count(pHead)));
 N	return pHead;
 N}
@@ -1953,18 +1955,19 @@ NListUsbData* ListUsbData_Remove(ListUsbData* pNode)
 N{
 N	ListUsbData* pHead = pNode;
 N	
+W "..\iap2\ListUsbData.c" 72 2 function "SEGGER_RTT_printf" declared implicitly
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,67);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,72);
 N	//ASRT(pNode);
 N	if(!(pNode))
 N		{
 N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,71);
+X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,76);
 N		   return Null;
 X		   return 0;
 N		}
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,74);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,79);
 N
 N	//Head of list
 N	if(pNode->m_pPre == Null)
@@ -1972,7 +1975,7 @@ X	if(pNode->m_pPre == 0)
 N	{
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,80);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,85);
 N		pHead = pNode->m_pNext;
 N		if(pHead)
 N		{
@@ -1981,59 +1984,59 @@ X			pHead->m_pPre = 0;
 N		}
 N		
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,87);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,92);
 N		goto END;
 N	}
 N	else
 N	{
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,93);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,98);
 N		pNode->m_pPre->m_pNext = pNode->m_pNext;
 N		
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,96);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,101);
 N		if(pNode->m_pNext)
 N		{
 N		
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,100);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,105);
 N			pNode->m_pNext->m_pPre = pNode->m_pPre;
 N		}
 N		
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,104);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,109);
 N	}
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,106);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,111);
 N
 N	while(pHead->m_pPre)
 N	{
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,110);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,115);
 N		pHead = pHead->m_pPre;
 N		
 N		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,113);
+X		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,118);
 N	}
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,116);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,121);
 N
 NEND:
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,120);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,125);
 N	pNode->m_pPre = Null;
 X	pNode->m_pPre = 0;
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,123);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,128);
 N	pNode->m_pNext = Null;
 X	pNode->m_pNext = 0;
 N	
 N	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,126);
+X	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,131);
 N	
 N//	PF(DL_LISTEX, ("List_Remove(), count=%d\n", List_Count(pHead)));
 N	return pHead;
