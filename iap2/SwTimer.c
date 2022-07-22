@@ -29,7 +29,6 @@ void SwTimer_ReStart(SwTimer* pTimer)
 {
 	pTimer->m_dwInitTicks = GET_TICKS();
 	pTimer->m_isStart = 1;
-	
 }
 
 void SwTimer_Stop(SwTimer* pTimer)

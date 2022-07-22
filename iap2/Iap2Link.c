@@ -171,6 +171,8 @@ Bool Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 reS
 	
 	if(!pIap2Link->TransferStart(pIrb))
 	{
+	
+	SEGGER_RTT_printf(0,"Iap2Link_TxData	return Falsee \n");
 		return False;
 	}
 
@@ -370,6 +372,7 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, Bool isSuccess)
 	
 	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 	//Check if it is a handshake packet
+	#if 0
 	if(IAP2_STATE_INIT == pIap2Link->m_State)
 	{
 	
@@ -377,7 +380,7 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, Bool isSuccess)
 		Iap2Link_handShake(pIap2Link, eventId);
 		return ;
 	}
-
+#endif
 	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 
 	pPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
@@ -437,7 +440,7 @@ void Iap2Link_Run(Iap2Link* pIap2Link)
 
 //if( )
 
-	//SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
+	SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
 
 	if(pIap2Link->m_ReTxTimer.m_isStart
 		&& SwTimer_isTimerOutEx(&pIap2Link->m_ReTxTimer))

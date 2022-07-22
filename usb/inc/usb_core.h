@@ -336,7 +336,7 @@ void USB_FS_IRQHandler(void);
 void USB_Suspend(void);
 void USB_Reset(void);
 void EndpointBulkIn(M_EPBIN_STATUS, int);
-void EndpointBulkOut(M_EPBOUT_STATUS, int);
+int EndpointBulkOut(M_EPBOUT_STATUS, int);
 
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);

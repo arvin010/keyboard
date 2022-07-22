@@ -12848,7 +12848,7 @@ void USB_FS_IRQHandler(void);
 void USB_Suspend(void);
 void USB_Reset(void);
 void EndpointBulkIn(M_EPBIN_STATUS, int);
-void EndpointBulkOut(M_EPBOUT_STATUS, int);
+int EndpointBulkOut(M_EPBOUT_STATUS, int);
 
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
@@ -13643,7 +13643,6 @@ uint32_t GetTime(void);
 
 
 struct _tagSwTimer;
-
 typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 struct _tagTimerManager;
 typedef struct _tagSwTimer
@@ -13723,7 +13722,6 @@ void SwTimer_ReStart(SwTimer* pTimer)
 {
 	pTimer->m_dwInitTicks = GetTime();
 	pTimer->m_isStart = 1;
-	
 }
 
 void SwTimer_Stop(SwTimer* pTimer)
@@ -13758,12 +13756,12 @@ uint8 SwTimer_isTimerOut(uint32 initTicks, uint32 newTicks, uint32 timeOutTicks)
 		
 		totalTicks = 0xFFFFFFFF - initTicks + newTicks;
 		
-		SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,67);
+		SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,66);
 	}
 	else
 	{
 	
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,72);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,71);
 		totalTicks = newTicks - initTicks;
 	}
 	

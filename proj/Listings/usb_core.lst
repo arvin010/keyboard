@@ -18386,7 +18386,7 @@ Svoid USB_FS_IRQHandler(void);
 Svoid USB_Suspend(void);
 Svoid USB_Reset(void);
 Svoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Svoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Sint EndpointBulkOut(M_EPBOUT_STATUS, int);
 S
 Svoid USB_Endpoint0(int);
 Svoid USB_Remote_Wakeup(void);
@@ -19994,7 +19994,7 @@ Nvoid USB_FS_IRQHandler(void);
 Nvoid USB_Suspend(void);
 Nvoid USB_Reset(void);
 Nvoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Nint EndpointBulkOut(M_EPBOUT_STATUS, int);
 N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
@@ -20573,8 +20573,31 @@ N	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION
 X	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,195);
 N	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, M_EP_MAXP);
 X	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, 64);
-N	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
-X	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,197,recv_data_len);
+N	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+X	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,197,recv_data_len);
+N	for(int i=0;i<recv_data_len;i++)
+N		SEGGER_RTT_printf(0,"22 0x%02x ",Vendor_data_Buffer[i]);
+N		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
+N		
+N		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+X		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,202,recv_data_len);
+N		pUsbData->pdata = malloc(recv_data_len);
+N		
+N		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+X		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,205,recv_data_len);
+N		pUsbData->m_isUsed = 0;
+N		pUsbData->m_pNext = NULL;
+X		pUsbData->m_pNext = 0;
+N		pUsbData->m_pPre = NULL;
+X		pUsbData->m_pPre = 0;
+N		pUsbData->data_size = recv_data_len;
+N		
+N		SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 111 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+X		SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 111 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,211,recv_data_len);
+N
+N			ListUsbData_AddTail(g_usbdata_list,pUsbData);
+N	SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+X	SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,214,recv_data_len);
 N
 N		#ifdef _debug_
 N		//Vendor_data_Buffer[0]++;
@@ -20590,7 +20613,7 @@ X	if((usb_introut & ((uint32_t) 0x00000220)) != RESET)
 N	{
 N	
 N	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,211);
+X	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,228);
 N		USB_EP_Rx(ep_hid_vendor_rx, Vendor_data_Buffer, M_EP_MAXP);
 X		USB_EP_Rx(0x05, Vendor_data_Buffer, 64);
 N		
@@ -20845,7 +20868,7 @@ N  *			It assumes a transfer is complete when a packet of less than MaxP is rece
 N  * @retval None
 N  *****************************************************************************
 N*/
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
+Nint EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
 N{
 N	int     nBytes;
 N	BYTE    byOutCSR;
@@ -20892,7 +20915,7 @@ N			{
 N				/* Call to function to handle buffer over run */
 N				MWRITE_BYTE(M_REG_OUTCSR1, 0);
 X				*((BYTE *)(0x40005c00+20)) = 0;
-N				return;
+N				return nBytes;
 N			}
 N
 N			/* Unload FIFO */
@@ -20918,6 +20941,7 @@ N			byOutCSR = MREAD_BYTE(M_REG_OUTCSR1);
 X			byOutCSR = *((BYTE *)(0x40005c00+20));
 N		}
 N	}
+N	return nBytes;
 N}
 N
 N/******************************************************************************
@@ -22684,9 +22708,9 @@ N	tEp1out.nBuffLen = data_len; 	//M_EP_MAXP
 N	tEp1out.pData = ptr;
 N	tEp1out.nBytesRecv = 0;
 N
-N	EndpointBulkOut(tEp1out, M_EP_NORMAL);
-X	EndpointBulkOut(tEp1out, 0);
-N	return tEp1out.nBytesRecv;
+N	return EndpointBulkOut(tEp1out, M_EP_NORMAL);
+X	return EndpointBulkOut(tEp1out, 0);
+N	//return tEp1out.nBytesRecv;
 N}
 N
 N

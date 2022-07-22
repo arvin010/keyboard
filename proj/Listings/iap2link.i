@@ -12860,7 +12860,7 @@ void USB_FS_IRQHandler(void);
 void USB_Suspend(void);
 void USB_Reset(void);
 void EndpointBulkIn(M_EPBIN_STATUS, int);
-void EndpointBulkOut(M_EPBOUT_STATUS, int);
+int EndpointBulkOut(M_EPBOUT_STATUS, int);
 
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
@@ -13655,7 +13655,6 @@ uint32_t GetTime(void);
 
 
 struct _tagSwTimer;
-
 typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 struct _tagTimerManager;
 typedef struct _tagSwTimer
@@ -14246,6 +14245,8 @@ uint8 Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 re
 	
 	if(!pIap2Link->TransferStart(pIrb))
 	{
+	
+	SEGGER_RTT_printf(0,"Iap2Link_TxData	return Falsee \n");
 		return 0;
 	}
 
@@ -14259,13 +14260,13 @@ uint8 Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 re
 
 uint8 Iap2Link_ReTx(Iap2Link* pIap2Link)
 {
-	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,187);
+	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,189);
 
 	if(!pIap2Link->TransferStart(&pIap2Link->m_Irb))
 	{
 		return 0;
 	}
-	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,193);
+	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,195);
 
 	SwTimer_Start(&pIap2Link->m_ReTxTimer, 1, pIap2Link->m_ReSendTimeMs);
 
@@ -14434,7 +14435,7 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess)
 	Iap2LinkPkt* pPkt = 0;
 	Iap2Event eventId = isSuccess? IAP2_EVENT_TRANSFER_SUCCESS : IAP2_EVENT_TRANSFER_FAILED;
 
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,362);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,364);
 
 	if(!isSuccess && pIap2Link->m_ReTxTimer.m_isStart)
 	{
@@ -14443,17 +14444,10 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess)
 		return;
 	}
 	
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,371);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,373);
 	
-	if(IAP2_STATE_INIT == pIap2Link->m_State)
-	{
-	
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,376);
-		Iap2Link_handShake(pIap2Link, eventId);
-		return ;
-	}
-
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,381);
+# 384 "..\\iap2\\Iap2Link.c"
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,384);
 
 	pPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
 	if(pIrb->m_ActLen && !pIrb->m_isTx)	
@@ -14464,7 +14458,7 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess)
 			return;
 		}
 		
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,392);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,395);
 		
 		if(pPkt->m_CtrlByte.m_SlpBit)
 		{
@@ -14481,16 +14475,16 @@ void Iap2Link_TransferDone(Iap2Link* pIap2Link, uint8 isSuccess)
 		else if(pPkt->m_CtrlByte.m_AckBit && pPkt->m_CtrlByte.m_EakBit)
 		{
 		
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,409);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,412);
 			
 			Iap2Link_Payload_Eak(pIap2Link, eventId, pPkt);
 			return ;
 		}
 		
-	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,415);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,418);
 	}
 
-	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,418,pIap2Link->m_State);
+	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,421,pIap2Link->m_State);
 
 	switch(pIap2Link->m_State)
 	{
@@ -14512,18 +14506,18 @@ void Iap2Link_Run(Iap2Link* pIap2Link)
 
 
 
-	
+	SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
 
 	if(pIap2Link->m_ReTxTimer.m_isStart
 		&& SwTimer_isTimerOutEx(&pIap2Link->m_ReTxTimer))
 	{
 	
-	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,446);
+	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,449);
 		if(pIap2Link->m_ReTxCount <= pIap2Link->m_MaxReTxCount
 			|| 0xFF == pIap2Link->m_MaxReTxCount)
 		{
 		
-		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,451);
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,454);
 			Iap2Link_ReTx(pIap2Link);
 		}
 	}

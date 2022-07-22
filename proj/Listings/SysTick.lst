@@ -18540,7 +18540,7 @@ Nvoid USB_FS_IRQHandler(void);
 Nvoid USB_Suspend(void);
 Nvoid USB_Reset(void);
 Nvoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Nint EndpointBulkOut(M_EPBOUT_STATUS, int);
 N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);

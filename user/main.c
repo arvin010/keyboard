@@ -767,25 +767,37 @@ int main(void)
 	
 	while (1)
 	{
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 
-	  Iap2Link_Start(g_pIap2Link);
+	//  Iap2Link_Start(g_pIap2Link);
+	
 
 		Driver_Check();
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 		data_offset =0;
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 		memset(g_hid_report,0,6);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 		Iap2Link_Run(g_pIap2Link);
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 
 				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
 				usbdata = ListUsbData_Remove(g_usbdata_list);
+						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 		if(usbdata!=NULL )
 			{
 			
 			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 			free(usbdata->pdata);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 			free(usbdata);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 			}
-		SysTick_Delay_Ms(1000);
+
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+		//SysTick_Delay_Ms(1000);
 		if(!g_start_key)
 				continue;
 

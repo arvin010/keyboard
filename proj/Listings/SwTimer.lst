@@ -18878,7 +18878,7 @@ Nvoid USB_FS_IRQHandler(void);
 Nvoid USB_Suspend(void);
 Nvoid USB_Reset(void);
 Nvoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Nint EndpointBulkOut(M_EPBOUT_STATUS, int);
 N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
@@ -20004,7 +20004,6 @@ N#define MS_STICKS 			1	//Hot many ticks per ms, it is for timer
 N#define TIMER_TASK_INTERVAL 1
 N#define MAX_TEMP_BUF_SIZE 	SECTOR_SIZE
 Nstruct _tagSwTimer;
-N
 Ntypedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 Nstruct _tagTimerManager;
 Ntypedef struct _tagSwTimer
@@ -20089,7 +20088,6 @@ N{
 N	pTimer->m_dwInitTicks = GET_TICKS();
 X	pTimer->m_dwInitTicks = GetTime();
 N	pTimer->m_isStart = 1;
-N	
 N}
 N
 Nvoid SwTimer_Stop(SwTimer* pTimer)
@@ -20129,13 +20127,13 @@ N		//tick counter overflow
 N		totalTicks = 0xFFFFFFFF - initTicks + newTicks;
 N		
 N		SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,67);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,66);
 N	}
 N	else
 N	{
 N	
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,72);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,71);
 N		totalTicks = newTicks - initTicks;
 N	}
 N	
@@ -20216,7 +20214,6 @@ N		pTm->m_timerList = pTimer;
 N	}
 N	else
 N	{
-W "..\iap2\SwTimer.c" 150 3 function "List_AddTail" declared implicitly
 N		List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
 N	}
 N}	
@@ -20228,10 +20225,8 @@ N
 N	if(Null == pTm || Null == pTm->m_timerList) return;
 X	if(0 == pTm || 0 == pTm->m_timerList) return;
 N	
-W "..\iap2\SwTimer.c" 160 5 function "List_isIn" declared implicitly
 N	if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
 N	{
-W "..\iap2\SwTimer.c" 162 32 function "List_Remove" declared implicitly
 N		pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
 N	}
 N}

@@ -167,27 +167,27 @@
                           AREA ||i.Iap2Link_AckInit||, CODE, READONLY, ALIGN=1
 
                   Iap2Link_AckInit PROC
-;;;231    
-;;;232    int Iap2Link_AckInit(Iap2LinkPkt* pAckPkt, const Iap2LinkPkt* pPkt)
+;;;233    
+;;;234    int Iap2Link_AckInit(Iap2LinkPkt* pAckPkt, const Iap2LinkPkt* pPkt)
 000000  b57f              PUSH     {r0-r6,lr}
-;;;233    {
+;;;235    {
 000002  4605              MOV      r5,r0
 000004  460c              MOV      r4,r1
-;;;234    	CtrlByte ctrlByte;
-;;;235    	int nLen = 0;
+;;;236    	CtrlByte ctrlByte;
+;;;237    	int nLen = 0;
 000006  2600              MOVS     r6,#0
-;;;236    
-;;;237    	AS_UINT8(ctrlByte) = 0;
+;;;238    
+;;;239    	AS_UINT8(ctrlByte) = 0;
 000008  2100              MOVS     r1,#0
 00000a  9103              STR      r1,[sp,#0xc]
-;;;238    	ctrlByte.m_AckBit = 1;
+;;;240    	ctrlByte.m_AckBit = 1;
 00000c  4668              MOV      r0,sp
 00000e  7b00              LDRB     r0,[r0,#0xc]
 000010  2140              MOVS     r1,#0x40
 000012  4388              BICS     r0,r0,r1
 000014  3040              ADDS     r0,r0,#0x40
 000016  9003              STR      r0,[sp,#0xc]
-;;;239    	nLen = Iap2LinkPkt_Init(pAckPkt
+;;;241    	nLen = Iap2LinkPkt_Init(pAckPkt
 000018  2000              MOVS     r0,#0
 00001a  9000              STR      r0,[sp,#0]
 00001c  9001              STR      r0,[sp,#4]
@@ -198,61 +198,61 @@
 000026  9903              LDR      r1,[sp,#0xc]
 000028  f7fffffe          BL       Iap2LinkPkt_Init
 00002c  4606              MOV      r6,r0
-;;;240    		, ctrlByte
-;;;241    		, pPkt->m_AckSeqNum
-;;;242    		, pPkt->m_SeqNum
-;;;243    		, 0
-;;;244    		, Null
+;;;242    		, ctrlByte
+;;;243    		, pPkt->m_AckSeqNum
+;;;244    		, pPkt->m_SeqNum
 ;;;245    		, 0
-;;;246    		);
-;;;247    	
-;;;248    	//Send ACK
-;;;249    	return nLen;
+;;;246    		, Null
+;;;247    		, 0
+;;;248    		);
+;;;249    	
+;;;250    	//Send ACK
+;;;251    	return nLen;
 00002e  4630              MOV      r0,r6
-;;;250    }
+;;;252    }
 000030  b004              ADD      sp,sp,#0x10
 000032  bd70              POP      {r4-r6,pc}
-;;;251    
+;;;253    
                           ENDP
 
 
                           AREA ||i.Iap2Link_Init||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_Init PROC
-;;;479    
-;;;480    void Iap2Link_Init(Iap2Link* pIap2Link, Iap2LinkTransferFn Transfer)
+;;;482    
+;;;483    void Iap2Link_Init(Iap2Link* pIap2Link, Iap2LinkTransferFn Transfer)
 000000  b570              PUSH     {r4-r6,lr}
-;;;481    {
+;;;484    {
 000002  4604              MOV      r4,r0
 000004  460d              MOV      r5,r1
-;;;482    	memset(pIap2Link, 0, sizeof(Iap2Link));
+;;;485    	memset(pIap2Link, 0, sizeof(Iap2Link));
 000006  4910              LDR      r1,|L4.72|
 000008  4620              MOV      r0,r4
 00000a  f7fffffe          BL       __aeabi_memclr
-;;;483    	
-;;;484    	pIap2Link->TransferStart = Transfer;
+;;;486    	
+;;;487    	pIap2Link->TransferStart = Transfer;
 00000e  480e              LDR      r0,|L4.72|
 000010  1f00              SUBS     r0,r0,#4
 000012  1821              ADDS     r1,r4,r0
 000014  4628              MOV      r0,r5
 000016  f7fffffe          BL       __aeabi_uwrite4
-;;;485    
-;;;486    	//Init the data pointer
-;;;487    	pIap2Link->m_pReqPkt = (Iap2LinkPkt*)&pIap2Link->_ReqPkt;
+;;;488    
+;;;489    	//Init the data pointer
+;;;490    	pIap2Link->m_pReqPkt = (Iap2LinkPkt*)&pIap2Link->_ReqPkt;
 00001a  480b              LDR      r0,|L4.72|
 00001c  383f              SUBS     r0,r0,#0x3f
 00001e  1821              ADDS     r1,r4,r0
 000020  4620              MOV      r0,r4
 000022  3036              ADDS     r0,r0,#0x36
 000024  f7fffffe          BL       __aeabi_uwrite4
-;;;488    	pIap2Link->m_pRspPkt = (Iap2LinkPkt*)&pIap2Link->_RspPkt;
+;;;491    	pIap2Link->m_pRspPkt = (Iap2LinkPkt*)&pIap2Link->_RspPkt;
 000028  4807              LDR      r0,|L4.72|
 00002a  383b              SUBS     r0,r0,#0x3b
 00002c  1821              ADDS     r1,r4,r0
 00002e  4620              MOV      r0,r4
 000030  3080              ADDS     r0,r0,#0x80
 000032  f7fffffe          BL       __aeabi_uwrite4
-;;;489    	pIap2Link->m_pAckPkt = &pIap2Link->_AckPkt;
+;;;492    	pIap2Link->m_pAckPkt = &pIap2Link->_AckPkt;
 000036  4804              LDR      r0,|L4.72|
 000038  3837              SUBS     r0,r0,#0x37
 00003a  1821              ADDS     r1,r4,r0
@@ -260,9 +260,9 @@
 00003e  3849              SUBS     r0,r0,#0x49
 000040  1820              ADDS     r0,r4,r0
 000042  f7fffffe          BL       __aeabi_uwrite4
-;;;490    }
+;;;493    }
 000046  bd70              POP      {r4-r6,pc}
-;;;491    
+;;;494    
                           ENDP
 
                   |L4.72|
@@ -271,13 +271,13 @@
                           AREA ||i.Iap2Link_Notify||, CODE, READONLY, ALIGN=1
 
                   Iap2Link_Notify PROC
-;;;221    
-;;;222    void Iap2Link_Notify(Iap2Link* pIap2Link, Iap2Event eventId)
+;;;223    
+;;;224    void Iap2Link_Notify(Iap2Link* pIap2Link, Iap2Event eventId)
 000000  b5f8              PUSH     {r3-r7,lr}
-;;;223    {
+;;;225    {
 000002  4604              MOV      r4,r0
 000004  460d              MOV      r5,r1
-;;;224    	pIap2Link->m_pSessionMgr->EventProc(pIap2Link->m_pSessionMgr, eventId);
+;;;226    	pIap2Link->m_pSessionMgr->EventProc(pIap2Link->m_pSessionMgr, eventId);
 000006  4620              MOV      r0,r4
 000008  302b              ADDS     r0,r0,#0x2b
 00000a  f7fffffe          BL       __aeabi_uread4
@@ -292,51 +292,51 @@
 000022  4629              MOV      r1,r5
 000024  9800              LDR      r0,[sp,#0]
 000026  47b0              BLX      r6
-;;;225    }
+;;;227    }
 000028  bdf8              POP      {r3-r7,pc}
-;;;226    
+;;;228    
                           ENDP
 
 
                           AREA ||i.Iap2Link_Payload_Eak||, CODE, READONLY, ALIGN=1
 
                   Iap2Link_Payload_Eak PROC
-;;;251    
-;;;252    Iap2Rc Iap2Link_Payload_Eak(Iap2Link* pIap2Link, Iap2Event event, const Iap2LinkPkt* pPkt)
+;;;253    
+;;;254    Iap2Rc Iap2Link_Payload_Eak(Iap2Link* pIap2Link, Iap2Event event, const Iap2LinkPkt* pPkt)
 000000  4603              MOV      r3,r0
-;;;253    {
-;;;254    	return IAP2RC_SUCCESS;
+;;;255    {
+;;;256    	return IAP2RC_SUCCESS;
 000002  2000              MOVS     r0,#0
-;;;255    }
+;;;257    }
 000004  4770              BX       lr
-;;;256    
+;;;258    
                           ENDP
 
 
                           AREA ||i.Iap2Link_Payload_SyncLink||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_Payload_SyncLink PROC
-;;;256    
-;;;257    Iap2Rc Iap2Link_Payload_SyncLink(Iap2Link* pIap2Link, Iap2Event event, const Iap2LinkPkt* pPkt)
+;;;258    
+;;;259    Iap2Rc Iap2Link_Payload_SyncLink(Iap2Link* pIap2Link, Iap2Event event, const Iap2LinkPkt* pPkt)
 000000  b5fe              PUSH     {r1-r7,lr}
-;;;258    {
+;;;260    {
 000002  4604              MOV      r4,r0
 000004  460d              MOV      r5,r1
 000006  4616              MOV      r6,r2
-;;;259    	//int i = 0;
-;;;260    	int nLen = 0;
+;;;261    	//int i = 0;
+;;;262    	int nLen = 0;
 000008  2700              MOVS     r7,#0
-;;;261    	
-;;;262    	if(IAP2_EVENT_TRANSFER_SUCCESS == event)
+;;;263    	
+;;;264    	if(IAP2_EVENT_TRANSFER_SUCCESS == event)
 00000a  2d06              CMP      r5,#6
 00000c  d136              BNE      |L7.124|
-;;;263    	{
-;;;264    		if(IAP2_STATE_TX_LINK_SYNC == pIap2Link->m_State)
+;;;265    	{
+;;;266    		if(IAP2_STATE_TX_LINK_SYNC == pIap2Link->m_State)
 00000e  7820              LDRB     r0,[r4,#0]
 000010  2801              CMP      r0,#1
 000012  d10c              BNE      |L7.46|
-;;;265    		{
-;;;266    			Iap2Link_RcvData(pIap2Link, pIap2Link->m_pRspPkt, LINK_SYNC_PKT_SIZE);
+;;;267    		{
+;;;268    			Iap2Link_RcvData(pIap2Link, pIap2Link->m_pRspPkt, LINK_SYNC_PKT_SIZE);
 000014  481a              LDR      r0,|L7.128|
 000016  1820              ADDS     r0,r4,r0
 000018  f7fffffe          BL       __aeabi_uread4
@@ -345,18 +345,18 @@
 000020  9001              STR      r0,[sp,#4]
 000022  4620              MOV      r0,r4
 000024  f7fffffe          BL       Iap2Link_RcvData
-;;;267    			pIap2Link->m_State = IAP2_STATE_RX_LINK_SYNC;
+;;;269    			pIap2Link->m_State = IAP2_STATE_RX_LINK_SYNC;
 000028  2002              MOVS     r0,#2
 00002a  7020              STRB     r0,[r4,#0]
 00002c  e026              B        |L7.124|
                   |L7.46|
-;;;268    		}
-;;;269    		else if(IAP2_STATE_RX_LINK_SYNC == pIap2Link->m_State)
+;;;270    		}
+;;;271    		else if(IAP2_STATE_RX_LINK_SYNC == pIap2Link->m_State)
 00002e  7820              LDRB     r0,[r4,#0]
 000030  2802              CMP      r0,#2
 000032  d11a              BNE      |L7.106|
-;;;270    		{
-;;;271    			nLen = Iap2Link_AckInit(pIap2Link->m_pAckPkt, pPkt);
+;;;272    		{
+;;;273    			nLen = Iap2Link_AckInit(pIap2Link->m_pAckPkt, pPkt);
 000034  4812              LDR      r0,|L7.128|
 000036  1d00              ADDS     r0,r0,#4
 000038  1820              ADDS     r0,r4,r0
@@ -365,7 +365,7 @@
 000040  9001              STR      r0,[sp,#4]
 000042  f7fffffe          BL       Iap2Link_AckInit
 000046  4607              MOV      r7,r0
-;;;272    			Iap2Link_TxData(pIap2Link, pIap2Link->m_pAckPkt, nLen, 0, 0);
+;;;274    			Iap2Link_TxData(pIap2Link, pIap2Link->m_pAckPkt, nLen, 0, 0);
 000048  480d              LDR      r0,|L7.128|
 00004a  1d00              ADDS     r0,r0,#4
 00004c  1820              ADDS     r0,r4,r0
@@ -378,33 +378,33 @@
 00005c  4620              MOV      r0,r4
 00005e  9901              LDR      r1,[sp,#4]
 000060  f7fffffe          BL       Iap2Link_TxData
-;;;273    			pIap2Link->m_State = IAP2_STATE_TX_ACK;
+;;;275    			pIap2Link->m_State = IAP2_STATE_TX_ACK;
 000064  2003              MOVS     r0,#3
 000066  7020              STRB     r0,[r4,#0]
 000068  e008              B        |L7.124|
                   |L7.106|
-;;;274    		}
-;;;275    		else if(IAP2_STATE_TX_ACK == pIap2Link->m_State)
+;;;276    		}
+;;;277    		else if(IAP2_STATE_TX_ACK == pIap2Link->m_State)
 00006a  7820              LDRB     r0,[r4,#0]
 00006c  2803              CMP      r0,#3
 00006e  d105              BNE      |L7.124|
-;;;276    		{
-;;;277    			Iap2Link_Notify(pIap2Link, IAP2_EVENT_LINK_SYNC_DONE);
+;;;278    		{
+;;;279    			Iap2Link_Notify(pIap2Link, IAP2_EVENT_LINK_SYNC_DONE);
 000070  2105              MOVS     r1,#5
 000072  4620              MOV      r0,r4
 000074  f7fffffe          BL       Iap2Link_Notify
-;;;278    			pIap2Link->m_State = IAP2_STATE_LINK_DONE;
+;;;280    			pIap2Link->m_State = IAP2_STATE_LINK_DONE;
 000078  2005              MOVS     r0,#5
 00007a  7020              STRB     r0,[r4,#0]
                   |L7.124|
-;;;279    		}
-;;;280    	}
-;;;281    
-;;;282    	return IAP2RC_SUCCESS;
+;;;281    		}
+;;;282    	}
+;;;283    
+;;;284    	return IAP2RC_SUCCESS;
 00007c  2000              MOVS     r0,#0
-;;;283    }
+;;;285    }
 00007e  bdfe              POP      {r1-r7,pc}
-;;;284    
+;;;286    
                           ENDP
 
                   |L7.128|
@@ -413,71 +413,71 @@
                           AREA ||i.Iap2Link_RcvData||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_RcvData PROC
-;;;200    //Secudule a receive proc
-;;;201    Bool Iap2Link_RcvData(Iap2Link* pIap2Link, void* pBuff, int len)
+;;;202    //Secudule a receive proc
+;;;203    Bool Iap2Link_RcvData(Iap2Link* pIap2Link, void* pBuff, int len)
 000000  b5f8              PUSH     {r3-r7,lr}
-;;;202    {
+;;;204    {
 000002  4605              MOV      r5,r0
 000004  460f              MOV      r7,r1
 000006  4616              MOV      r6,r2
-;;;203    	Irb* pIrb = &pIap2Link->m_Irb;
+;;;205    	Irb* pIrb = &pIap2Link->m_Irb;
 000008  209f              MOVS     r0,#0x9f
 00000a  00c0              LSLS     r0,r0,#3
 00000c  182c              ADDS     r4,r5,r0
-;;;204    	//ASRT(len <= sizeof(Iap2LinkRspPkt));
-;;;205    	if(!(len <= sizeof(Iap2LinkRspPkt)))
+;;;206    	//ASRT(len <= sizeof(Iap2LinkRspPkt));
+;;;207    	if(!(len <= sizeof(Iap2LinkRspPkt)))
 00000e  4812              LDR      r0,|L8.88|
 000010  4286              CMP      r6,r0
 000012  d901              BLS      |L8.24|
-;;;206    		 return FALSE ;
+;;;208    		 return FALSE ;
 000014  2000              MOVS     r0,#0
                   |L8.22|
-;;;207    	SEGGER_RTT_printf(0,"Iap2Link_RcvData pIrb->m_isTx 	= false \n");
-;;;208    		
-;;;209    	pIrb->m_isTx = False;
-;;;210    	pIrb->m_pBuff = (uint8*)pBuff;
-;;;211    	pIrb->m_Len 	= len;
-;;;212    	pIrb->m_ActLen 	= 0;
-;;;213    
-;;;214    	//PF(DL_MAIN, ("Receive data[%d] start.\n", len));
-;;;215    	if(!pIap2Link->TransferStart(pIrb))
-;;;216    	{
-;;;217    		return False;
-;;;218    	}
-;;;219    	return True;
-;;;220    }
+;;;209    	SEGGER_RTT_printf(0,"Iap2Link_RcvData pIrb->m_isTx 	= false \n");
+;;;210    		
+;;;211    	pIrb->m_isTx = False;
+;;;212    	pIrb->m_pBuff = (uint8*)pBuff;
+;;;213    	pIrb->m_Len 	= len;
+;;;214    	pIrb->m_ActLen 	= 0;
+;;;215    
+;;;216    	//PF(DL_MAIN, ("Receive data[%d] start.\n", len));
+;;;217    	if(!pIap2Link->TransferStart(pIrb))
+;;;218    	{
+;;;219    		return False;
+;;;220    	}
+;;;221    	return True;
+;;;222    }
 000016  bdf8              POP      {r3-r7,pc}
                   |L8.24|
 000018  a110              ADR      r1,|L8.92|
-00001a  2000              MOVS     r0,#0                 ;207
+00001a  2000              MOVS     r0,#0                 ;209
 00001c  f7fffffe          BL       SEGGER_RTT_printf
-000020  2000              MOVS     r0,#0                 ;209
-000022  7020              STRB     r0,[r4,#0]            ;209
-000024  1c61              ADDS     r1,r4,#1              ;210
-000026  4638              MOV      r0,r7                 ;210
+000020  2000              MOVS     r0,#0                 ;211
+000022  7020              STRB     r0,[r4,#0]            ;211
+000024  1c61              ADDS     r1,r4,#1              ;212
+000026  4638              MOV      r0,r7                 ;212
 000028  f7fffffe          BL       __aeabi_uwrite4
-00002c  b2b1              UXTH     r1,r6                 ;211
-00002e  7161              STRB     r1,[r4,#5]            ;211
-000030  0a09              LSRS     r1,r1,#8              ;211
-000032  71a1              STRB     r1,[r4,#6]            ;211
-000034  2100              MOVS     r1,#0                 ;212
-000036  71e1              STRB     r1,[r4,#7]            ;212
-000038  7221              STRB     r1,[r4,#8]            ;212
+00002c  b2b1              UXTH     r1,r6                 ;213
+00002e  7161              STRB     r1,[r4,#5]            ;213
+000030  0a09              LSRS     r1,r1,#8              ;213
+000032  71a1              STRB     r1,[r4,#6]            ;213
+000034  2100              MOVS     r1,#0                 ;214
+000036  71e1              STRB     r1,[r4,#7]            ;214
+000038  7221              STRB     r1,[r4,#8]            ;214
 00003a  4807              LDR      r0,|L8.88|
-00003c  30c5              ADDS     r0,r0,#0xc5           ;215
-00003e  1828              ADDS     r0,r5,r0              ;215
+00003c  30c5              ADDS     r0,r0,#0xc5           ;217
+00003e  1828              ADDS     r0,r5,r0              ;217
 000040  f7fffffe          BL       __aeabi_uread4
-000044  9000              STR      r0,[sp,#0]            ;215
-000046  4620              MOV      r0,r4                 ;215
-000048  9900              LDR      r1,[sp,#0]            ;215
-00004a  4788              BLX      r1                    ;215
-00004c  2800              CMP      r0,#0                 ;215
+000044  9000              STR      r0,[sp,#0]            ;217
+000046  4620              MOV      r0,r4                 ;217
+000048  9900              LDR      r1,[sp,#0]            ;217
+00004a  4788              BLX      r1                    ;217
+00004c  2800              CMP      r0,#0                 ;217
 00004e  d100              BNE      |L8.82|
 000050  e7e1              B        |L8.22|
                   |L8.82|
-000052  2001              MOVS     r0,#1                 ;219
+000052  2001              MOVS     r0,#1                 ;221
 000054  e7df              B        |L8.22|
-;;;221    
+;;;223    
                           ENDP
 
 000056  0000              DCW      0x0000
@@ -502,19 +502,19 @@
                           AREA ||i.Iap2Link_ReTx||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_ReTx PROC
-;;;184    
-;;;185    Bool Iap2Link_ReTx(Iap2Link* pIap2Link)
+;;;186    
+;;;187    Bool Iap2Link_ReTx(Iap2Link* pIap2Link)
 000000  b570              PUSH     {r4-r6,lr}
-;;;186    {
+;;;188    {
 000002  4604              MOV      r4,r0
-;;;187    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-000004  23bb              MOVS     r3,#0xbb
+;;;189    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+000004  23bd              MOVS     r3,#0xbd
 000006  4a13              LDR      r2,|L9.84|
 000008  a113              ADR      r1,|L9.88|
 00000a  2000              MOVS     r0,#0
 00000c  f7fffffe          BL       SEGGER_RTT_printf
-;;;188    
-;;;189    	if(!pIap2Link->TransferStart(&pIap2Link->m_Irb))
+;;;190    
+;;;191    	if(!pIap2Link->TransferStart(&pIap2Link->m_Irb))
 000010  4818              LDR      r0,|L9.116|
 000012  1820              ADDS     r0,r4,r0
 000014  f7fffffe          BL       __aeabi_uread4
@@ -526,38 +526,38 @@
 000022  2800              CMP      r0,#0
 000024  d100              BNE      |L9.40|
                   |L9.38|
-;;;190    	{
-;;;191    		return False;
-;;;192    	}
-;;;193    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-;;;194    
-;;;195    	SwTimer_Start(&pIap2Link->m_ReTxTimer, IAP2_LINK_INIT_TIMERID, pIap2Link->m_ReSendTimeMs);
+;;;192    	{
+;;;193    		return False;
+;;;194    	}
+;;;195    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 ;;;196    
-;;;197    	return True;
-;;;198    }
+;;;197    	SwTimer_Start(&pIap2Link->m_ReTxTimer, IAP2_LINK_INIT_TIMERID, pIap2Link->m_ReSendTimeMs);
+;;;198    
+;;;199    	return True;
+;;;200    }
 000026  bd70              POP      {r4-r6,pc}
                   |L9.40|
-000028  23c1              MOVS     r3,#0xc1              ;193
+000028  23c3              MOVS     r3,#0xc3              ;195
 00002a  4a0a              LDR      r2,|L9.84|
 00002c  a10a              ADR      r1,|L9.88|
-00002e  2000              MOVS     r0,#0                 ;193
+00002e  2000              MOVS     r0,#0                 ;195
 000030  f7fffffe          BL       SEGGER_RTT_printf
 000034  480f              LDR      r0,|L9.116|
-000036  381f              SUBS     r0,r0,#0x1f           ;195
-000038  1821              ADDS     r1,r4,r0              ;195
-00003a  7d48              LDRB     r0,[r1,#0x15]         ;195
-00003c  7d09              LDRB     r1,[r1,#0x14]         ;195
-00003e  0200              LSLS     r0,r0,#8              ;195
-000040  4308              ORRS     r0,r0,r1              ;195
-000042  4602              MOV      r2,r0                 ;195
-000044  2101              MOVS     r1,#1                 ;195
+000036  381f              SUBS     r0,r0,#0x1f           ;197
+000038  1821              ADDS     r1,r4,r0              ;197
+00003a  7d48              LDRB     r0,[r1,#0x15]         ;197
+00003c  7d09              LDRB     r1,[r1,#0x14]         ;197
+00003e  0200              LSLS     r0,r0,#8              ;197
+000040  4308              ORRS     r0,r0,r1              ;197
+000042  4602              MOV      r2,r0                 ;197
+000044  2101              MOVS     r1,#1                 ;197
 000046  480b              LDR      r0,|L9.116|
-000048  382f              SUBS     r0,r0,#0x2f           ;195
-00004a  1820              ADDS     r0,r4,r0              ;195
+000048  382f              SUBS     r0,r0,#0x2f           ;197
+00004a  1820              ADDS     r0,r4,r0              ;197
 00004c  f7fffffe          BL       SwTimer_Start
-000050  2001              MOVS     r0,#1                 ;197
+000050  2001              MOVS     r0,#1                 ;199
 000052  e7e8              B        |L9.38|
-;;;199    
+;;;201    
                           ENDP
 
                   |L9.84|
@@ -579,14 +579,14 @@
                           AREA ||i.Iap2Link_RegSession||, CODE, READONLY, ALIGN=1
 
                   Iap2Link_RegSession PROC
-;;;456    
-;;;457    void Iap2Link_RegSession(Iap2Link* pIap2Link, SessionMgr* pSession)
+;;;459    
+;;;460    void Iap2Link_RegSession(Iap2Link* pIap2Link, SessionMgr* pSession)
 000000  b570              PUSH     {r4-r6,lr}
-;;;458    {
+;;;461    {
 000002  4604              MOV      r4,r0
 000004  460d              MOV      r5,r1
-;;;459    //	ASRT(pIap2Link->m_SessionCount < IAP2_MAX_PAYLOAD_COUNT);
-;;;460    	memcpy(&pIap2Link->m_Session[pIap2Link->m_SessionCount++], pSession, sizeof(SessionIden));
+;;;462    //	ASRT(pIap2Link->m_SessionCount < IAP2_MAX_PAYLOAD_COUNT);
+;;;463    	memcpy(&pIap2Link->m_Session[pIap2Link->m_SessionCount++], pSession, sizeof(SessionIden));
 000006  212f              MOVS     r1,#0x2f
 000008  5d0a              LDRB     r2,[r1,r4]
 00000a  5d09              LDRB     r1,[r1,r4]
@@ -602,140 +602,167 @@
 00001e  2203              MOVS     r2,#3
 000020  4629              MOV      r1,r5
 000022  f7fffffe          BL       __aeabi_memcpy
-;;;461    
-;;;462    	pIap2Link->m_pSessionMgr = pSession;
+;;;464    
+;;;465    	pIap2Link->m_pSessionMgr = pSession;
 000026  4621              MOV      r1,r4
 000028  312b              ADDS     r1,r1,#0x2b
 00002a  4628              MOV      r0,r5
 00002c  f7fffffe          BL       __aeabi_uwrite4
-;;;463    }
+;;;466    }
 000030  bd70              POP      {r4-r6,pc}
-;;;464    
+;;;467    
                           ENDP
 
 
                           AREA ||i.Iap2Link_Run||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_Run PROC
-;;;434    
-;;;435    void Iap2Link_Run(Iap2Link* pIap2Link)
-000000  b510              PUSH     {r4,lr}
-;;;436    {
-000002  4604              MOV      r4,r0
 ;;;437    
-;;;438    //if( )
-;;;439    
-;;;440    	//SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
-;;;441    
-;;;442    	if(pIap2Link->m_ReTxTimer.m_isStart
-000004  4817              LDR      r0,|L11.100|
+;;;438    void Iap2Link_Run(Iap2Link* pIap2Link)
+000000  b510              PUSH     {r4,lr}
+;;;439    {
+000002  4604              MOV      r4,r0
+;;;440    
+;;;441    //if( )
+;;;442    
+;;;443    	SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
+000004  481c              LDR      r0,|L11.120|
 000006  1820              ADDS     r0,r4,r0
 000008  7d00              LDRB     r0,[r0,#0x14]
-00000a  07c0              LSLS     r0,r0,#31
-00000c  0fc0              LSRS     r0,r0,#31
-00000e  2800              CMP      r0,#0
-000010  d026              BEQ      |L11.96|
-;;;443    		&& SwTimer_isTimerOutEx(&pIap2Link->m_ReTxTimer))
-000012  4814              LDR      r0,|L11.100|
-000014  1820              ADDS     r0,r4,r0
-000016  f7fffffe          BL       SwTimer_isTimerOutEx
-00001a  2800              CMP      r0,#0
-00001c  d020              BEQ      |L11.96|
-;;;444    	{
-;;;445    	
-;;;446    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-00001e  23ff              MOVS     r3,#0xff
-000020  33bf              ADDS     r3,r3,#0xbf
-000022  4a11              LDR      r2,|L11.104|
-000024  a111              ADR      r1,|L11.108|
-000026  2000              MOVS     r0,#0
-000028  f7fffffe          BL       SEGGER_RTT_printf
-;;;447    		if(pIap2Link->m_ReTxCount <= pIap2Link->m_MaxReTxCount
-00002c  2027              MOVS     r0,#0x27
-00002e  0140              LSLS     r0,r0,#5
-000030  1820              ADDS     r0,r4,r0
-000032  7d00              LDRB     r0,[r0,#0x14]
-000034  2127              MOVS     r1,#0x27
-000036  0149              LSLS     r1,r1,#5
-000038  1861              ADDS     r1,r4,r1
-00003a  7d49              LDRB     r1,[r1,#0x15]
-00003c  4288              CMP      r0,r1
-00003e  dd05              BLE      |L11.76|
-;;;448    			|| IAP2_LINK_RETX_COUNT_UNLIMITIED == pIap2Link->m_MaxReTxCount)
+00000a  07c3              LSLS     r3,r0,#31
+00000c  0fdb              LSRS     r3,r3,#31
+00000e  4a1b              LDR      r2,|L11.124|
+000010  a11b              ADR      r1,|L11.128|
+000012  2000              MOVS     r0,#0
+000014  f7fffffe          BL       SEGGER_RTT_printf
+;;;444    
+;;;445    	if(pIap2Link->m_ReTxTimer.m_isStart
+000018  4817              LDR      r0,|L11.120|
+00001a  1820              ADDS     r0,r4,r0
+00001c  7d00              LDRB     r0,[r0,#0x14]
+00001e  07c0              LSLS     r0,r0,#31
+000020  0fc0              LSRS     r0,r0,#31
+000022  2800              CMP      r0,#0
+000024  d026              BEQ      |L11.116|
+;;;446    		&& SwTimer_isTimerOutEx(&pIap2Link->m_ReTxTimer))
+000026  4814              LDR      r0,|L11.120|
+000028  1820              ADDS     r0,r4,r0
+00002a  f7fffffe          BL       SwTimer_isTimerOutEx
+00002e  2800              CMP      r0,#0
+000030  d020              BEQ      |L11.116|
+;;;447    	{
+;;;448    	
+;;;449    	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+000032  23ff              MOVS     r3,#0xff
+000034  33c2              ADDS     r3,r3,#0xc2
+000036  4a11              LDR      r2,|L11.124|
+000038  a11f              ADR      r1,|L11.184|
+00003a  2000              MOVS     r0,#0
+00003c  f7fffffe          BL       SEGGER_RTT_printf
+;;;450    		if(pIap2Link->m_ReTxCount <= pIap2Link->m_MaxReTxCount
 000040  2027              MOVS     r0,#0x27
 000042  0140              LSLS     r0,r0,#5
 000044  1820              ADDS     r0,r4,r0
-000046  7d40              LDRB     r0,[r0,#0x15]
-000048  28ff              CMP      r0,#0xff
-00004a  d109              BNE      |L11.96|
-                  |L11.76|
-;;;449    		{
-;;;450    		
-;;;451    		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-00004c  23ff              MOVS     r3,#0xff
-00004e  33c4              ADDS     r3,r3,#0xc4
-000050  4a05              LDR      r2,|L11.104|
-000052  a106              ADR      r1,|L11.108|
-000054  2000              MOVS     r0,#0
-000056  f7fffffe          BL       SEGGER_RTT_printf
-;;;452    			Iap2Link_ReTx(pIap2Link);
-00005a  4620              MOV      r0,r4
-00005c  f7fffffe          BL       Iap2Link_ReTx
+000046  7d00              LDRB     r0,[r0,#0x14]
+000048  2127              MOVS     r1,#0x27
+00004a  0149              LSLS     r1,r1,#5
+00004c  1861              ADDS     r1,r4,r1
+00004e  7d49              LDRB     r1,[r1,#0x15]
+000050  4288              CMP      r0,r1
+000052  dd05              BLE      |L11.96|
+;;;451    			|| IAP2_LINK_RETX_COUNT_UNLIMITIED == pIap2Link->m_MaxReTxCount)
+000054  2027              MOVS     r0,#0x27
+000056  0140              LSLS     r0,r0,#5
+000058  1820              ADDS     r0,r4,r0
+00005a  7d40              LDRB     r0,[r0,#0x15]
+00005c  28ff              CMP      r0,#0xff
+00005e  d109              BNE      |L11.116|
                   |L11.96|
-;;;453    		}
-;;;454    	}
-;;;455    }
-000060  bd10              POP      {r4,pc}
-;;;456    
+;;;452    		{
+;;;453    		
+;;;454    		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+000060  23ff              MOVS     r3,#0xff
+000062  33c7              ADDS     r3,r3,#0xc7
+000064  4a05              LDR      r2,|L11.124|
+000066  a114              ADR      r1,|L11.184|
+000068  2000              MOVS     r0,#0
+00006a  f7fffffe          BL       SEGGER_RTT_printf
+;;;455    			Iap2Link_ReTx(pIap2Link);
+00006e  4620              MOV      r0,r4
+000070  f7fffffe          BL       Iap2Link_ReTx
+                  |L11.116|
+;;;456    		}
+;;;457    	}
+;;;458    }
+000074  bd10              POP      {r4,pc}
+;;;459    
                           ENDP
 
-000062  0000              DCW      0x0000
-                  |L11.100|
+000076  0000              DCW      0x0000
+                  |L11.120|
                           DCD      0x000004d2
-                  |L11.104|
+                  |L11.124|
                           DCD      |symbol_number.65|
-                  |L11.108|
-00006c  23232320          DCB      "### function=%s line=%d\n",0
-000070  66756e63
-000074  74696f6e
-000078  3d257320
-00007c  6c696e65
-000080  3d25640a
-000084  00      
-000085  00                DCB      0
-000086  00                DCB      0
-000087  00                DCB      0
+                  |L11.128|
+000080  23232320          DCB      "### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",0
+000084  66756e63
+000088  74696f6e
+00008c  3d257320
+000090  70496170
+000094  324c696e
+000098  6b2d3e6d
+00009c  5f526554
+0000a0  7854696d
+0000a4  65722e6d
+0000a8  5f697353
+0000ac  74617274
+0000b0  3d25640a
+0000b4  00      
+0000b5  00                DCB      0
+0000b6  00                DCB      0
+0000b7  00                DCB      0
+                  |L11.184|
+0000b8  23232320          DCB      "### function=%s line=%d\n",0
+0000bc  66756e63
+0000c0  74696f6e
+0000c4  3d257320
+0000c8  6c696e65
+0000cc  3d25640a
+0000d0  00      
+0000d1  00                DCB      0
+0000d2  00                DCB      0
+0000d3  00                DCB      0
 
                           AREA ||i.Iap2Link_SendSyncPkt||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_SendSyncPkt PROC
-;;;284    
-;;;285    Iap2Rc Iap2Link_SendSyncPkt(Iap2Link* pIap2Link)
+;;;286    
+;;;287    Iap2Rc Iap2Link_SendSyncPkt(Iap2Link* pIap2Link)
 000000  b570              PUSH     {r4-r6,lr}
-;;;286    {
+;;;288    {
 000002  b088              SUB      sp,sp,#0x20
 000004  4604              MOV      r4,r0
-;;;287    	int i = 0;
+;;;289    	int i = 0;
 000006  bf00              NOP      
-;;;288    	CtrlByte ctrlByte;
-;;;289    	LinkPayload linkPayload;
-;;;290    	Iap2LinkPkt* pPkt = pIap2Link->m_pReqPkt;
+;;;290    	CtrlByte ctrlByte;
+;;;291    	LinkPayload linkPayload;
+;;;292    	Iap2LinkPkt* pPkt = pIap2Link->m_pReqPkt;
 000008  4821              LDR      r0,|L12.144|
 00000a  1820              ADDS     r0,r4,r0
 00000c  f7fffffe          BL       __aeabi_uread4
 000010  4606              MOV      r6,r0
-;;;291    	
-;;;292    	//Valid initialization packet
-;;;293    	Iap2Link_Notify(pIap2Link, IAP2_EVENT_HAND_SHAKE);
+;;;293    	
+;;;294    	//Valid initialization packet
+;;;295    	Iap2Link_Notify(pIap2Link, IAP2_EVENT_HAND_SHAKE);
 000012  2102              MOVS     r1,#2
 000014  4620              MOV      r0,r4
 000016  f7fffffe          BL       Iap2Link_Notify
-;;;294    
-;;;295    	//Sends a SYN packet containing desired connection parameters in the Link Synchronization Payload
-;;;296    	LinkPayload_Init(&linkPayload);
+;;;296    
+;;;297    	//Sends a SYN packet containing desired connection parameters in the Link Synchronization Payload
+;;;298    	LinkPayload_Init(&linkPayload);
 00001a  a803              ADD      r0,sp,#0xc
 00001c  f7fffffe          BL       LinkPayload_Init
-;;;297    	memcpy(linkPayload.m_Session, pIap2Link->m_Session, sizeof(SessionIden) * pIap2Link->m_SessionCount);
+;;;299    	memcpy(linkPayload.m_Session, pIap2Link->m_Session, sizeof(SessionIden) * pIap2Link->m_SessionCount);
 000020  202f              MOVS     r0,#0x2f
 000022  5d00              LDRB     r0,[r0,r4]
 000024  0041              LSLS     r1,r0,#1
@@ -745,18 +772,18 @@
 00002c  a805              ADD      r0,sp,#0x14
 00002e  3002              ADDS     r0,#2
 000030  f7fffffe          BL       __aeabi_memcpy
-;;;298    
-;;;299    	AS_UINT8(ctrlByte) = 0;
+;;;300    
+;;;301    	AS_UINT8(ctrlByte) = 0;
 000034  2100              MOVS     r1,#0
 000036  9107              STR      r1,[sp,#0x1c]
-;;;300    	ctrlByte.m_SynBit = 1;
+;;;302    	ctrlByte.m_SynBit = 1;
 000038  4668              MOV      r0,sp
 00003a  7f00              LDRB     r0,[r0,#0x1c]
 00003c  2180              MOVS     r1,#0x80
 00003e  4388              BICS     r0,r0,r1
 000040  3080              ADDS     r0,r0,#0x80
 000042  9007              STR      r0,[sp,#0x1c]
-;;;301    	i = Iap2LinkPkt_Init(pPkt
+;;;303    	i = Iap2LinkPkt_Init(pPkt
 000044  202f              MOVS     r0,#0x2f
 000046  5d00              LDRB     r0,[r0,r4]
 000048  0041              LSLS     r1,r0,#1
@@ -779,15 +806,15 @@
 00006a  9907              LDR      r1,[sp,#0x1c]
 00006c  f7fffffe          BL       Iap2LinkPkt_Init
 000070  4605              MOV      r5,r0
-;;;302    		, ctrlByte
-;;;303    		, pIap2Link->m_NextSentPSN++
-;;;304    		, 0
-;;;305    		, 0
-;;;306    		, &linkPayload
-;;;307    		, LINK_PAYLOAD_HEAD_SIZE + sizeof(SessionIden) * pIap2Link->m_SessionCount
-;;;308    		);
-;;;309    
-;;;310    	Iap2Link_TxData(pIap2Link, pPkt, i, IAP2_RETX_INTERVAL, IAP2_MAX_RETX_COUNT);
+;;;304    		, ctrlByte
+;;;305    		, pIap2Link->m_NextSentPSN++
+;;;306    		, 0
+;;;307    		, 0
+;;;308    		, &linkPayload
+;;;309    		, LINK_PAYLOAD_HEAD_SIZE + sizeof(SessionIden) * pIap2Link->m_SessionCount
+;;;310    		);
+;;;311    
+;;;312    	Iap2Link_TxData(pIap2Link, pPkt, i, IAP2_RETX_INTERVAL, IAP2_MAX_RETX_COUNT);
 000072  200a              MOVS     r0,#0xa
 000074  237d              MOVS     r3,#0x7d
 000076  00db              LSLS     r3,r3,#3
@@ -796,16 +823,16 @@
 00007c  9000              STR      r0,[sp,#0]
 00007e  4620              MOV      r0,r4
 000080  f7fffffe          BL       Iap2Link_TxData
-;;;311    	pIap2Link->m_State = IAP2_STATE_TX_LINK_SYNC;
+;;;313    	pIap2Link->m_State = IAP2_STATE_TX_LINK_SYNC;
 000084  2001              MOVS     r0,#1
 000086  7020              STRB     r0,[r4,#0]
-;;;312    	
-;;;313    	return IAP2RC_SUCCESS;
+;;;314    	
+;;;315    	return IAP2RC_SUCCESS;
 000088  2000              MOVS     r0,#0
-;;;314    }
+;;;316    }
 00008a  b008              ADD      sp,sp,#0x20
 00008c  bd70              POP      {r4-r6,pc}
-;;;315    
+;;;317    
                           ENDP
 
 00008e  0000              DCW      0x0000
@@ -815,30 +842,30 @@
                           AREA ||i.Iap2Link_Sleep||, CODE, READONLY, ALIGN=1
 
                   Iap2Link_Sleep PROC
-;;;227    
-;;;228    void Iap2Link_Sleep(Iap2Link* pIap2Link)
+;;;229    
+;;;230    void Iap2Link_Sleep(Iap2Link* pIap2Link)
 000000  4770              BX       lr
-;;;229    {
-;;;230    }
-;;;231    
+;;;231    {
+;;;232    }
+;;;233    
                           ENDP
 
 
                           AREA ||i.Iap2Link_Start||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_Start PROC
-;;;464    
-;;;465    void Iap2Link_Start(Iap2Link* pIap2Link)
+;;;467    
+;;;468    void Iap2Link_Start(Iap2Link* pIap2Link)
 000000  b538              PUSH     {r3-r5,lr}
-;;;466    {
+;;;469    {
 000002  4604              MOV      r4,r0
-;;;467    	//DetectiAP2Support
-;;;468    	
-;;;469    	SEGGER_RTT_printf(0,"Iap2Link_Start.\n");
+;;;470    	//DetectiAP2Support
+;;;471    	
+;;;472    	SEGGER_RTT_printf(0,"Iap2Link_Start.\n");
 000004  a10d              ADR      r1,|L14.60|
 000006  2000              MOVS     r0,#0
 000008  f7fffffe          BL       SEGGER_RTT_printf
-;;;470    	if(!Iap2Link_TxData(pIap2Link, auth_init_data, sizeof(auth_init_data), IAP2_RETX_INTERVAL, IAP2_LINK_RETX_COUNT_UNLIMITIED))
+;;;473    	if(!Iap2Link_TxData(pIap2Link, auth_init_data, sizeof(auth_init_data), IAP2_RETX_INTERVAL, IAP2_LINK_RETX_COUNT_UNLIMITIED))
 00000c  20ff              MOVS     r0,#0xff
 00000e  237d              MOVS     r3,#0x7d
 000010  00db              LSLS     r3,r3,#3
@@ -849,27 +876,27 @@
 00001a  f7fffffe          BL       Iap2Link_TxData
 00001e  2800              CMP      r0,#0
 000020  d103              BNE      |L14.42|
-;;;471    	{
-;;;472    		SEGGER_RTT_printf(0,"xxxxxx Send initialization pkt failed.\n");
+;;;474    	{
+;;;475    		SEGGER_RTT_printf(0,"xxxxxx Send initialization pkt failed.\n");
 000022  a10c              ADR      r1,|L14.84|
 000024  f7fffffe          BL       SEGGER_RTT_printf
                   |L14.40|
-;;;473    		return ;
-;;;474    	}
-;;;475    	SEGGER_RTT_printf(0,"xxxxxxxxxxxxSend initialization pkt successful.\n");
-;;;476    	pIap2Link->m_State = IAP2_STATE_INIT;
-;;;477    	//pIap2Link->RxRsp = 
-;;;478    }
+;;;476    		return ;
+;;;477    	}
+;;;478    	SEGGER_RTT_printf(0,"xxxxxxxxxxxxSend initialization pkt successful.\n");
+;;;479    	pIap2Link->m_State = IAP2_STATE_INIT;
+;;;480    	//pIap2Link->RxRsp = 
+;;;481    }
 000028  bd38              POP      {r3-r5,pc}
                   |L14.42|
 00002a  a114              ADR      r1,|L14.124|
-00002c  2000              MOVS     r0,#0                 ;475
+00002c  2000              MOVS     r0,#0                 ;478
 00002e  f7fffffe          BL       SEGGER_RTT_printf
-000032  2000              MOVS     r0,#0                 ;476
-000034  7020              STRB     r0,[r4,#0]            ;476
+000032  2000              MOVS     r0,#0                 ;479
+000034  7020              STRB     r0,[r4,#0]            ;479
 000036  bf00              NOP      
 000038  e7f6              B        |L14.40|
-;;;479    
+;;;482    
                           ENDP
 
 00003a  0000              DCW      0x0000
@@ -963,19 +990,19 @@
                           AREA ||i.Iap2Link_TransferDone||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_TransferDone PROC
-;;;355    
-;;;356    void Iap2Link_TransferDone(Iap2Link* pIap2Link, Bool isSuccess)
+;;;357    
+;;;358    void Iap2Link_TransferDone(Iap2Link* pIap2Link, Bool isSuccess)
 000000  b5fe              PUSH     {r1-r7,lr}
-;;;357    {
+;;;359    {
 000002  4604              MOV      r4,r0
 000004  460e              MOV      r6,r1
-;;;358    	Irb* pIrb = &pIap2Link->m_Irb;
+;;;360    	Irb* pIrb = &pIap2Link->m_Irb;
 000006  209f              MOVS     r0,#0x9f
 000008  00c0              LSLS     r0,r0,#3
 00000a  1827              ADDS     r7,r4,r0
-;;;359    	Iap2LinkPkt* pPkt = Null;
+;;;361    	Iap2LinkPkt* pPkt = Null;
 00000c  2500              MOVS     r5,#0
-;;;360    	Iap2Event eventId = isSuccess? IAP2_EVENT_TRANSFER_SUCCESS : IAP2_EVENT_TRANSFER_FAILED;
+;;;362    	Iap2Event eventId = isSuccess? IAP2_EVENT_TRANSFER_SUCCESS : IAP2_EVENT_TRANSFER_FAILED;
 00000e  2e00              CMP      r6,#0
 000010  d001              BEQ      |L17.22|
 000012  2006              MOVS     r0,#6
@@ -984,19 +1011,19 @@
 000016  2007              MOVS     r0,#7
                   |L17.24|
 000018  9001              STR      r0,[sp,#4]
-;;;361    
-;;;362    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;363    
+;;;364    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 00001a  23ff              MOVS     r3,#0xff
-00001c  336b              ADDS     r3,r3,#0x6b
-00001e  4a5a              LDR      r2,|L17.392|
-000020  a15a              ADR      r1,|L17.396|
+00001c  336d              ADDS     r3,r3,#0x6d
+00001e  4a53              LDR      r2,|L17.364|
+000020  a153              ADR      r1,|L17.368|
 000022  2000              MOVS     r0,#0
 000024  f7fffffe          BL       SEGGER_RTT_printf
-;;;363    
-;;;364    	if(!isSuccess && pIap2Link->m_ReTxTimer.m_isStart)
+;;;365    
+;;;366    	if(!isSuccess && pIap2Link->m_ReTxTimer.m_isStart)
 000028  2e00              CMP      r6,#0
 00002a  d107              BNE      |L17.60|
-00002c  485e              LDR      r0,|L17.424|
+00002c  4857              LDR      r0,|L17.396|
 00002e  1820              ADDS     r0,r4,r0
 000030  7d00              LDRB     r0,[r0,#0x14]
 000032  07c0              LSLS     r0,r0,#31
@@ -1004,289 +1031,277 @@
 000036  2800              CMP      r0,#0
 000038  d000              BEQ      |L17.60|
                   |L17.58|
-;;;365    	{
-;;;366    		//Do nothing.
-;;;367    		//Waiting for time out and re-send.
-;;;368    		return;
-;;;369    	}
-;;;370    	
-;;;371    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;372    	//Check if it is a handshake packet
-;;;373    	if(IAP2_STATE_INIT == pIap2Link->m_State)
-;;;374    	{
-;;;375    	
-;;;376    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;377    		Iap2Link_handShake(pIap2Link, eventId);
-;;;378    		return ;
-;;;379    	}
-;;;380    
-;;;381    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;382    
-;;;383    	pPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
-;;;384    	if(pIrb->m_ActLen && !pIrb->m_isTx)	//Receive a packet
-;;;385    	{
-;;;386    		if(!Iap2Link_Verify(pIap2Link, pPkt, pIap2Link->m_Irb.m_ActLen))
-;;;387    		{
-;;;388    			SEGGER_RTT_printf(0,"Packet verify failed!\n");
-;;;389    			return;
-;;;390    		}
-;;;391    		
-;;;392    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;393    		//Check if it is a link packet
-;;;394    		if(pPkt->m_CtrlByte.m_SlpBit)
-;;;395    		{
-;;;396    			SEGGER_RTT_printf(0,"Link Sleep.\n");
-;;;397    			Iap2Link_Sleep(pIap2Link);
-;;;398    			return ;
-;;;399    		}
-;;;400    		else if(pPkt->m_CtrlByte.m_RstBit)
-;;;401    		{
-;;;402    			SEGGER_RTT_printf(0,"Link Reset.\n");
-;;;403    			Iap2Link_SendSyncPkt(pIap2Link);
-;;;404    			return ;
-;;;405    		}
-;;;406    		else if(pPkt->m_CtrlByte.m_AckBit && pPkt->m_CtrlByte.m_EakBit)
-;;;407    		{
-;;;408    		
-;;;409    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;410    			//Extended Acknowledgement Payload
-;;;411    			Iap2Link_Payload_Eak(pIap2Link, eventId, pPkt);
-;;;412    			return ;
-;;;413    		}
-;;;414    		
-;;;415    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-;;;416    	}
-;;;417    
-;;;418    	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,__LINE__,pIap2Link->m_State);
-;;;419    
-;;;420    	switch(pIap2Link->m_State)
-;;;421    	{
-;;;422    		case IAP2_STATE_TX_LINK_SYNC:
-;;;423    		case IAP2_STATE_RX_LINK_SYNC:
-;;;424    		case IAP2_STATE_TX_ACK:
-;;;425    			Iap2Link_Payload_SyncLink(pIap2Link, eventId, pPkt);
-;;;426    			break;
-;;;427    		case IAP2_STATE_LINK_DONE:
-;;;428    			SessionMgr_Fsm(pIap2Link->m_pSessionMgr, eventId, pPkt);
+;;;367    	{
+;;;368    		//Do nothing.
+;;;369    		//Waiting for time out and re-send.
+;;;370    		return;
+;;;371    	}
+;;;372    	
+;;;373    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;374    	//Check if it is a handshake packet
+;;;375    	#if 0
+;;;376    	if(IAP2_STATE_INIT == pIap2Link->m_State)
+;;;377    	{
+;;;378    	
+;;;379    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;380    		Iap2Link_handShake(pIap2Link, eventId);
+;;;381    		return ;
+;;;382    	}
+;;;383    #endif
+;;;384    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;385    
+;;;386    	pPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
+;;;387    	if(pIrb->m_ActLen && !pIrb->m_isTx)	//Receive a packet
+;;;388    	{
+;;;389    		if(!Iap2Link_Verify(pIap2Link, pPkt, pIap2Link->m_Irb.m_ActLen))
+;;;390    		{
+;;;391    			SEGGER_RTT_printf(0,"Packet verify failed!\n");
+;;;392    			return;
+;;;393    		}
+;;;394    		
+;;;395    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;396    		//Check if it is a link packet
+;;;397    		if(pPkt->m_CtrlByte.m_SlpBit)
+;;;398    		{
+;;;399    			SEGGER_RTT_printf(0,"Link Sleep.\n");
+;;;400    			Iap2Link_Sleep(pIap2Link);
+;;;401    			return ;
+;;;402    		}
+;;;403    		else if(pPkt->m_CtrlByte.m_RstBit)
+;;;404    		{
+;;;405    			SEGGER_RTT_printf(0,"Link Reset.\n");
+;;;406    			Iap2Link_SendSyncPkt(pIap2Link);
+;;;407    			return ;
+;;;408    		}
+;;;409    		else if(pPkt->m_CtrlByte.m_AckBit && pPkt->m_CtrlByte.m_EakBit)
+;;;410    		{
+;;;411    		
+;;;412    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;413    			//Extended Acknowledgement Payload
+;;;414    			Iap2Link_Payload_Eak(pIap2Link, eventId, pPkt);
+;;;415    			return ;
+;;;416    		}
+;;;417    		
+;;;418    	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;419    	}
+;;;420    
+;;;421    	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,__LINE__,pIap2Link->m_State);
+;;;422    
+;;;423    	switch(pIap2Link->m_State)
+;;;424    	{
+;;;425    		case IAP2_STATE_TX_LINK_SYNC:
+;;;426    		case IAP2_STATE_RX_LINK_SYNC:
+;;;427    		case IAP2_STATE_TX_ACK:
+;;;428    			Iap2Link_Payload_SyncLink(pIap2Link, eventId, pPkt);
 ;;;429    			break;
-;;;430    	}
-;;;431    	
-;;;432    }
+;;;430    		case IAP2_STATE_LINK_DONE:
+;;;431    			SessionMgr_Fsm(pIap2Link->m_pSessionMgr, eventId, pPkt);
+;;;432    			break;
+;;;433    	}
+;;;434    	
+;;;435    }
 00003a  bdfe              POP      {r1-r7,pc}
                   |L17.60|
-00003c  23ff              MOVS     r3,#0xff              ;371
-00003e  3374              ADDS     r3,r3,#0x74           ;371
-000040  4a51              LDR      r2,|L17.392|
-000042  a152              ADR      r1,|L17.396|
-000044  2000              MOVS     r0,#0                 ;371
+00003c  23ff              MOVS     r3,#0xff              ;373
+00003e  3376              ADDS     r3,r3,#0x76           ;373
+000040  4a4a              LDR      r2,|L17.364|
+000042  a14b              ADR      r1,|L17.368|
+000044  2000              MOVS     r0,#0                 ;373
 000046  f7fffffe          BL       SEGGER_RTT_printf
-00004a  7820              LDRB     r0,[r4,#0]            ;373
-00004c  2800              CMP      r0,#0                 ;373
-00004e  d10a              BNE      |L17.102|
-000050  23ff              MOVS     r3,#0xff              ;376
-000052  3379              ADDS     r3,r3,#0x79           ;376
-000054  4a4c              LDR      r2,|L17.392|
-000056  a14d              ADR      r1,|L17.396|
-000058  f7fffffe          BL       SEGGER_RTT_printf
-00005c  4620              MOV      r0,r4                 ;377
-00005e  9901              LDR      r1,[sp,#4]            ;377
-000060  f7fffffe          BL       Iap2Link_handShake
-000064  e7e9              B        |L17.58|
-                  |L17.102|
-000066  23ff              MOVS     r3,#0xff              ;381
-000068  337e              ADDS     r3,r3,#0x7e           ;381
-00006a  4a47              LDR      r2,|L17.392|
-00006c  a147              ADR      r1,|L17.396|
-00006e  2000              MOVS     r0,#0                 ;381
-000070  f7fffffe          BL       SEGGER_RTT_printf
-000074  209f              MOVS     r0,#0x9f              ;383
-000076  00c0              LSLS     r0,r0,#3              ;383
-000078  1820              ADDS     r0,r4,r0              ;383
-00007a  1c40              ADDS     r0,r0,#1              ;383
-00007c  f7fffffe          BL       __aeabi_uread4
-000080  4605              MOV      r5,r0                 ;383
-000082  7a39              LDRB     r1,[r7,#8]            ;384
-000084  79fa              LDRB     r2,[r7,#7]            ;384
-000086  0208              LSLS     r0,r1,#8              ;384
-000088  4310              ORRS     r0,r0,r2              ;384
-00008a  2800              CMP      r0,#0                 ;384
-00008c  d053              BEQ      |L17.310|
-00008e  7838              LDRB     r0,[r7,#0]            ;384
-000090  2800              CMP      r0,#0                 ;384
-000092  d150              BNE      |L17.310|
-000094  209f              MOVS     r0,#0x9f              ;386
-000096  00c0              LSLS     r0,r0,#3              ;386
-000098  1820              ADDS     r0,r4,r0              ;386
-00009a  7a01              LDRB     r1,[r0,#8]            ;386
-00009c  79c3              LDRB     r3,[r0,#7]            ;386
-00009e  0208              LSLS     r0,r1,#8              ;386
-0000a0  4318              ORRS     r0,r0,r3              ;386
-0000a2  4602              MOV      r2,r0                 ;386
-0000a4  4629              MOV      r1,r5                 ;386
-0000a6  4620              MOV      r0,r4                 ;386
-0000a8  f7fffffe          BL       Iap2Link_Verify
-0000ac  2800              CMP      r0,#0                 ;386
-0000ae  d103              BNE      |L17.184|
-0000b0  a13e              ADR      r1,|L17.428|
-0000b2  f7fffffe          BL       SEGGER_RTT_printf
-0000b6  e7c0              B        |L17.58|
-                  |L17.184|
-0000b8  23ff              MOVS     r3,#0xff              ;392
-0000ba  3389              ADDS     r3,r3,#0x89           ;392
-0000bc  4a32              LDR      r2,|L17.392|
-0000be  a133              ADR      r1,|L17.396|
-0000c0  2000              MOVS     r0,#0                 ;392
-0000c2  f7fffffe          BL       SEGGER_RTT_printf
-0000c6  7928              LDRB     r0,[r5,#4]            ;394
-0000c8  0700              LSLS     r0,r0,#28             ;394
-0000ca  0fc0              LSRS     r0,r0,#31             ;394
-0000cc  2800              CMP      r0,#0                 ;394
-0000ce  d007              BEQ      |L17.224|
-0000d0  a13c              ADR      r1,|L17.452|
-0000d2  2000              MOVS     r0,#0                 ;396
-0000d4  f7fffffe          BL       SEGGER_RTT_printf
-0000d8  4620              MOV      r0,r4                 ;397
-0000da  f7fffffe          BL       Iap2Link_Sleep
-0000de  e7ac              B        |L17.58|
-                  |L17.224|
-0000e0  7928              LDRB     r0,[r5,#4]            ;400
-0000e2  06c0              LSLS     r0,r0,#27             ;400
-0000e4  0fc0              LSRS     r0,r0,#31             ;400
-0000e6  2800              CMP      r0,#0                 ;400
-0000e8  d007              BEQ      |L17.250|
-0000ea  a13a              ADR      r1,|L17.468|
-0000ec  2000              MOVS     r0,#0                 ;402
-0000ee  f7fffffe          BL       SEGGER_RTT_printf
-0000f2  4620              MOV      r0,r4                 ;403
-0000f4  f7fffffe          BL       Iap2Link_SendSyncPkt
-0000f8  e79f              B        |L17.58|
-                  |L17.250|
-0000fa  7928              LDRB     r0,[r5,#4]            ;406
-0000fc  0640              LSLS     r0,r0,#25             ;406
-0000fe  0fc0              LSRS     r0,r0,#31             ;406
-000100  2800              CMP      r0,#0                 ;406
-000102  d011              BEQ      |L17.296|
-000104  7928              LDRB     r0,[r5,#4]            ;406
-000106  0680              LSLS     r0,r0,#26             ;406
-000108  0fc0              LSRS     r0,r0,#31             ;406
-00010a  2800              CMP      r0,#0                 ;406
-00010c  d00c              BEQ      |L17.296|
-00010e  23ff              MOVS     r3,#0xff              ;409
-000110  339a              ADDS     r3,r3,#0x9a           ;409
-000112  4a1d              LDR      r2,|L17.392|
-000114  a11d              ADR      r1,|L17.396|
-000116  2000              MOVS     r0,#0                 ;409
-000118  f7fffffe          BL       SEGGER_RTT_printf
-00011c  462a              MOV      r2,r5                 ;411
-00011e  4620              MOV      r0,r4                 ;411
-000120  9901              LDR      r1,[sp,#4]            ;411
-000122  f7fffffe          BL       Iap2Link_Payload_Eak
-000126  e788              B        |L17.58|
-                  |L17.296|
-000128  23ff              MOVS     r3,#0xff              ;415
-00012a  33a0              ADDS     r3,r3,#0xa0           ;415
-00012c  4a16              LDR      r2,|L17.392|
-00012e  a117              ADR      r1,|L17.396|
-000130  2000              MOVS     r0,#0                 ;415
-000132  f7fffffe          BL       SEGGER_RTT_printf
-                  |L17.310|
-000136  7820              LDRB     r0,[r4,#0]            ;418
-000138  23ff              MOVS     r3,#0xff              ;418
-00013a  33a3              ADDS     r3,r3,#0xa3           ;418
-00013c  4a12              LDR      r2,|L17.392|
-00013e  a129              ADR      r1,|L17.484|
-000140  9000              STR      r0,[sp,#0]            ;418
-000142  2000              MOVS     r0,#0                 ;418
-000144  f7fffffe          BL       SEGGER_RTT_printf
-000148  7820              LDRB     r0,[r4,#0]            ;420
-00014a  2801              CMP      r0,#1                 ;420
-00014c  d006              BEQ      |L17.348|
-00014e  2802              CMP      r0,#2                 ;420
-000150  d005              BEQ      |L17.350|
-000152  2803              CMP      r0,#3                 ;420
-000154  d004              BEQ      |L17.352|
-000156  2805              CMP      r0,#5                 ;420
-000158  d112              BNE      |L17.384|
-00015a  e007              B        |L17.364|
-                  |L17.348|
-00015c  bf00              NOP                            ;423
-                  |L17.350|
-00015e  bf00              NOP                            ;424
-                  |L17.352|
-000160  462a              MOV      r2,r5                 ;425
-000162  4620              MOV      r0,r4                 ;425
-000164  9901              LDR      r1,[sp,#4]            ;425
-000166  f7fffffe          BL       Iap2Link_Payload_SyncLink
-00016a  e009              B        |L17.384|
-                  |L17.364|
-00016c  4620              MOV      r0,r4                 ;428
-00016e  302b              ADDS     r0,r0,#0x2b           ;428
-000170  f7fffffe          BL       __aeabi_uread4
-000174  462a              MOV      r2,r5                 ;428
-000176  9000              STR      r0,[sp,#0]            ;428
-000178  9901              LDR      r1,[sp,#4]            ;428
-00017a  f7fffffe          BL       SessionMgr_Fsm
-00017e  bf00              NOP                            ;429
-                  |L17.384|
-000180  bf00              NOP                            ;426
-000182  bf00              NOP      
-000184  e759              B        |L17.58|
-;;;433    
+00004a  23ff              MOVS     r3,#0xff              ;384
+00004c  3381              ADDS     r3,r3,#0x81           ;384
+00004e  4a47              LDR      r2,|L17.364|
+000050  a147              ADR      r1,|L17.368|
+000052  2000              MOVS     r0,#0                 ;384
+000054  f7fffffe          BL       SEGGER_RTT_printf
+000058  209f              MOVS     r0,#0x9f              ;386
+00005a  00c0              LSLS     r0,r0,#3              ;386
+00005c  1820              ADDS     r0,r4,r0              ;386
+00005e  1c40              ADDS     r0,r0,#1              ;386
+000060  f7fffffe          BL       __aeabi_uread4
+000064  4605              MOV      r5,r0                 ;386
+000066  7a39              LDRB     r1,[r7,#8]            ;387
+000068  79fa              LDRB     r2,[r7,#7]            ;387
+00006a  0208              LSLS     r0,r1,#8              ;387
+00006c  4310              ORRS     r0,r0,r2              ;387
+00006e  2800              CMP      r0,#0                 ;387
+000070  d053              BEQ      |L17.282|
+000072  7838              LDRB     r0,[r7,#0]            ;387
+000074  2800              CMP      r0,#0                 ;387
+000076  d150              BNE      |L17.282|
+000078  209f              MOVS     r0,#0x9f              ;389
+00007a  00c0              LSLS     r0,r0,#3              ;389
+00007c  1820              ADDS     r0,r4,r0              ;389
+00007e  7a01              LDRB     r1,[r0,#8]            ;389
+000080  79c3              LDRB     r3,[r0,#7]            ;389
+000082  0208              LSLS     r0,r1,#8              ;389
+000084  4318              ORRS     r0,r0,r3              ;389
+000086  4602              MOV      r2,r0                 ;389
+000088  4629              MOV      r1,r5                 ;389
+00008a  4620              MOV      r0,r4                 ;389
+00008c  f7fffffe          BL       Iap2Link_Verify
+000090  2800              CMP      r0,#0                 ;389
+000092  d103              BNE      |L17.156|
+000094  a13e              ADR      r1,|L17.400|
+000096  f7fffffe          BL       SEGGER_RTT_printf
+00009a  e7ce              B        |L17.58|
+                  |L17.156|
+00009c  23ff              MOVS     r3,#0xff              ;395
+00009e  338c              ADDS     r3,r3,#0x8c           ;395
+0000a0  4a32              LDR      r2,|L17.364|
+0000a2  a133              ADR      r1,|L17.368|
+0000a4  2000              MOVS     r0,#0                 ;395
+0000a6  f7fffffe          BL       SEGGER_RTT_printf
+0000aa  7928              LDRB     r0,[r5,#4]            ;397
+0000ac  0700              LSLS     r0,r0,#28             ;397
+0000ae  0fc0              LSRS     r0,r0,#31             ;397
+0000b0  2800              CMP      r0,#0                 ;397
+0000b2  d007              BEQ      |L17.196|
+0000b4  a13c              ADR      r1,|L17.424|
+0000b6  2000              MOVS     r0,#0                 ;399
+0000b8  f7fffffe          BL       SEGGER_RTT_printf
+0000bc  4620              MOV      r0,r4                 ;400
+0000be  f7fffffe          BL       Iap2Link_Sleep
+0000c2  e7ba              B        |L17.58|
+                  |L17.196|
+0000c4  7928              LDRB     r0,[r5,#4]            ;403
+0000c6  06c0              LSLS     r0,r0,#27             ;403
+0000c8  0fc0              LSRS     r0,r0,#31             ;403
+0000ca  2800              CMP      r0,#0                 ;403
+0000cc  d007              BEQ      |L17.222|
+0000ce  a13a              ADR      r1,|L17.440|
+0000d0  2000              MOVS     r0,#0                 ;405
+0000d2  f7fffffe          BL       SEGGER_RTT_printf
+0000d6  4620              MOV      r0,r4                 ;406
+0000d8  f7fffffe          BL       Iap2Link_SendSyncPkt
+0000dc  e7ad              B        |L17.58|
+                  |L17.222|
+0000de  7928              LDRB     r0,[r5,#4]            ;409
+0000e0  0640              LSLS     r0,r0,#25             ;409
+0000e2  0fc0              LSRS     r0,r0,#31             ;409
+0000e4  2800              CMP      r0,#0                 ;409
+0000e6  d011              BEQ      |L17.268|
+0000e8  7928              LDRB     r0,[r5,#4]            ;409
+0000ea  0680              LSLS     r0,r0,#26             ;409
+0000ec  0fc0              LSRS     r0,r0,#31             ;409
+0000ee  2800              CMP      r0,#0                 ;409
+0000f0  d00c              BEQ      |L17.268|
+0000f2  23ff              MOVS     r3,#0xff              ;412
+0000f4  339d              ADDS     r3,r3,#0x9d           ;412
+0000f6  4a1d              LDR      r2,|L17.364|
+0000f8  a11d              ADR      r1,|L17.368|
+0000fa  2000              MOVS     r0,#0                 ;412
+0000fc  f7fffffe          BL       SEGGER_RTT_printf
+000100  462a              MOV      r2,r5                 ;414
+000102  4620              MOV      r0,r4                 ;414
+000104  9901              LDR      r1,[sp,#4]            ;414
+000106  f7fffffe          BL       Iap2Link_Payload_Eak
+00010a  e796              B        |L17.58|
+                  |L17.268|
+00010c  23ff              MOVS     r3,#0xff              ;418
+00010e  33a3              ADDS     r3,r3,#0xa3           ;418
+000110  4a16              LDR      r2,|L17.364|
+000112  a117              ADR      r1,|L17.368|
+000114  2000              MOVS     r0,#0                 ;418
+000116  f7fffffe          BL       SEGGER_RTT_printf
+                  |L17.282|
+00011a  7820              LDRB     r0,[r4,#0]            ;421
+00011c  23ff              MOVS     r3,#0xff              ;421
+00011e  33a6              ADDS     r3,r3,#0xa6           ;421
+000120  4a12              LDR      r2,|L17.364|
+000122  a129              ADR      r1,|L17.456|
+000124  9000              STR      r0,[sp,#0]            ;421
+000126  2000              MOVS     r0,#0                 ;421
+000128  f7fffffe          BL       SEGGER_RTT_printf
+00012c  7820              LDRB     r0,[r4,#0]            ;423
+00012e  2801              CMP      r0,#1                 ;423
+000130  d006              BEQ      |L17.320|
+000132  2802              CMP      r0,#2                 ;423
+000134  d005              BEQ      |L17.322|
+000136  2803              CMP      r0,#3                 ;423
+000138  d004              BEQ      |L17.324|
+00013a  2805              CMP      r0,#5                 ;423
+00013c  d112              BNE      |L17.356|
+00013e  e007              B        |L17.336|
+                  |L17.320|
+000140  bf00              NOP                            ;426
+                  |L17.322|
+000142  bf00              NOP                            ;427
+                  |L17.324|
+000144  462a              MOV      r2,r5                 ;428
+000146  4620              MOV      r0,r4                 ;428
+000148  9901              LDR      r1,[sp,#4]            ;428
+00014a  f7fffffe          BL       Iap2Link_Payload_SyncLink
+00014e  e009              B        |L17.356|
+                  |L17.336|
+000150  4620              MOV      r0,r4                 ;431
+000152  302b              ADDS     r0,r0,#0x2b           ;431
+000154  f7fffffe          BL       __aeabi_uread4
+000158  462a              MOV      r2,r5                 ;431
+00015a  9000              STR      r0,[sp,#0]            ;431
+00015c  9901              LDR      r1,[sp,#4]            ;431
+00015e  f7fffffe          BL       SessionMgr_Fsm
+000162  bf00              NOP                            ;432
+                  |L17.356|
+000164  bf00              NOP                            ;429
+000166  bf00              NOP      
+000168  e767              B        |L17.58|
+;;;436    
                           ENDP
 
-000186  0000              DCW      0x0000
-                  |L17.392|
+00016a  0000              DCW      0x0000
+                  |L17.364|
                           DCD      |symbol_number.64|
+                  |L17.368|
+000170  23232320          DCB      "### function=%s line=%d \n",0
+000174  66756e63
+000178  74696f6e
+00017c  3d257320
+000180  6c696e65
+000184  3d256420
+000188  0a00    
+00018a  00                DCB      0
+00018b  00                DCB      0
                   |L17.396|
-00018c  23232320          DCB      "### function=%s line=%d \n",0
-000190  66756e63
-000194  74696f6e
-000198  3d257320
-00019c  6c696e65
-0001a0  3d256420
-0001a4  0a00    
-0001a6  00                DCB      0
+                          DCD      0x000004d2
+                  |L17.400|
+000190  5061636b          DCB      "Packet verify failed!\n",0
+000194  65742076
+000198  65726966
+00019c  79206661
+0001a0  696c6564
+0001a4  210a00  
 0001a7  00                DCB      0
                   |L17.424|
-                          DCD      0x000004d2
-                  |L17.428|
-0001ac  5061636b          DCB      "Packet verify failed!\n",0
-0001b0  65742076
-0001b4  65726966
-0001b8  79206661
-0001bc  696c6564
-0001c0  210a00  
-0001c3  00                DCB      0
-                  |L17.452|
-0001c4  4c696e6b          DCB      "Link Sleep.\n",0
-0001c8  20536c65
-0001cc  65702e0a
-0001d0  00      
-0001d1  00                DCB      0
-0001d2  00                DCB      0
-0001d3  00                DCB      0
-                  |L17.468|
-0001d4  4c696e6b          DCB      "Link Reset.\n",0
-0001d8  20526573
-0001dc  65742e0a
-0001e0  00      
-0001e1  00                DCB      0
-0001e2  00                DCB      0
-0001e3  00                DCB      0
-                  |L17.484|
-0001e4  23232320          DCB      "### function=%s line=%d pIap2Link->m_State=%d\n",0
-0001e8  66756e63
-0001ec  74696f6e
-0001f0  3d257320
-0001f4  6c696e65
-0001f8  3d256420
-0001fc  70496170
-000200  324c696e
-000204  6b2d3e6d
-000208  5f537461
-00020c  74653d25
-000210  640a00  
-000213  00                DCB      0
+0001a8  4c696e6b          DCB      "Link Sleep.\n",0
+0001ac  20536c65
+0001b0  65702e0a
+0001b4  00      
+0001b5  00                DCB      0
+0001b6  00                DCB      0
+0001b7  00                DCB      0
+                  |L17.440|
+0001b8  4c696e6b          DCB      "Link Reset.\n",0
+0001bc  20526573
+0001c0  65742e0a
+0001c4  00      
+0001c5  00                DCB      0
+0001c6  00                DCB      0
+0001c7  00                DCB      0
+                  |L17.456|
+0001c8  23232320          DCB      "### function=%s line=%d pIap2Link->m_State=%d\n",0
+0001cc  66756e63
+0001d0  74696f6e
+0001d4  3d257320
+0001d8  6c696e65
+0001dc  3d256420
+0001e0  70496170
+0001e4  324c696e
+0001e8  6b2d3e6d
+0001ec  5f537461
+0001f0  74653d25
+0001f4  640a00  
+0001f7  00                DCB      0
 
                           AREA ||i.Iap2Link_TxData||, CODE, READONLY, ALIGN=2
 
@@ -1307,7 +1322,7 @@
 ;;;157    	SEGGER_RTT_printf(0,"Iap2Link_TxData sizeof(Iap2LinkReqPkt)=%d len=%d\n",sizeof(Iap2LinkReqPkt),len);
 000010  463b              MOV      r3,r7
 000012  224a              MOVS     r2,#0x4a
-000014  a121              ADR      r1,|L18.156|
+000014  a123              ADR      r1,|L18.164|
 000016  2000              MOVS     r0,#0
 000018  f7fffffe          BL       SEGGER_RTT_printf
 ;;;158    //	ASRT(len <= sizeof(Iap2LinkReqPkt));
@@ -1325,7 +1340,7 @@
 00002c  7508              STRB     r0,[r1,#0x14]
 ;;;162    	
 ;;;163    	SEGGER_RTT_printf(0,"Iap2Link_TxData pIrb->m_isTx 	= True \n");
-00002e  a128              ADR      r1,|L18.208|
+00002e  a12a              ADR      r1,|L18.216|
 000030  2000              MOVS     r0,#0
 000032  f7fffffe          BL       SEGGER_RTT_printf
 ;;;164    	pIrb->m_isTx 	= True;
@@ -1353,14 +1368,14 @@
 000058  7548              STRB     r0,[r1,#0x15]
 ;;;170    	pIap2Link->m_ReSendTimeMs = reSendTimeMs;
 00005a  b2b0              UXTH     r0,r6
-00005c  4926              LDR      r1,|L18.248|
+00005c  4928              LDR      r1,|L18.256|
 00005e  1861              ADDS     r1,r4,r1
 000060  7508              STRB     r0,[r1,#0x14]
 000062  0a00              LSRS     r0,r0,#8
 000064  7548              STRB     r0,[r1,#0x15]
 ;;;171    	
 ;;;172    	if(!pIap2Link->TransferStart(pIrb))
-000066  4824              LDR      r0,|L18.248|
+000066  4826              LDR      r0,|L18.256|
 000068  301f              ADDS     r0,r0,#0x1f
 00006a  1820              ADDS     r0,r4,r0
 00006c  f7fffffe          BL       __aeabi_uread4
@@ -1369,69 +1384,83 @@
 000074  9900              LDR      r1,[sp,#0]
 000076  4788              BLX      r1
 000078  2800              CMP      r0,#0
-00007a  d101              BNE      |L18.128|
-                  |L18.124|
+00007a  d105              BNE      |L18.136|
 ;;;173    	{
-;;;174    		return False;
-;;;175    	}
-;;;176    
-;;;177    	if(maxTxCount && reSendTimeMs)
-;;;178    	{
-;;;179    		SwTimer_Start(&pIap2Link->m_ReTxTimer, IAP2_LINK_INIT_TIMERID, reSendTimeMs);
-;;;180    	}
-;;;181    	
-;;;182    	return True;
-;;;183    }
-00007c  b005              ADD      sp,sp,#0x14
-00007e  bdf0              POP      {r4-r7,pc}
-                  |L18.128|
-000080  980a              LDR      r0,[sp,#0x28]         ;177
-000082  2800              CMP      r0,#0                 ;177
-000084  d008              BEQ      |L18.152|
-000086  2e00              CMP      r6,#0                 ;177
-000088  d006              BEQ      |L18.152|
-00008a  4632              MOV      r2,r6                 ;179
-00008c  2101              MOVS     r1,#1                 ;179
-00008e  481a              LDR      r0,|L18.248|
-000090  3810              SUBS     r0,r0,#0x10           ;179
-000092  1820              ADDS     r0,r4,r0              ;179
-000094  f7fffffe          BL       SwTimer_Start
-                  |L18.152|
-000098  2001              MOVS     r0,#1                 ;182
-00009a  e7ef              B        |L18.124|
-;;;184    
+;;;174    	
+;;;175    	SEGGER_RTT_printf(0,"Iap2Link_TxData	return Falsee \n");
+00007c  a121              ADR      r1,|L18.260|
+00007e  f7fffffe          BL       SEGGER_RTT_printf
+;;;176    		return False;
+000082  2000              MOVS     r0,#0
+                  |L18.132|
+;;;177    	}
+;;;178    
+;;;179    	if(maxTxCount && reSendTimeMs)
+;;;180    	{
+;;;181    		SwTimer_Start(&pIap2Link->m_ReTxTimer, IAP2_LINK_INIT_TIMERID, reSendTimeMs);
+;;;182    	}
+;;;183    	
+;;;184    	return True;
+;;;185    }
+000084  b005              ADD      sp,sp,#0x14
+000086  bdf0              POP      {r4-r7,pc}
+                  |L18.136|
+000088  980a              LDR      r0,[sp,#0x28]         ;179
+00008a  2800              CMP      r0,#0                 ;179
+00008c  d008              BEQ      |L18.160|
+00008e  2e00              CMP      r6,#0                 ;179
+000090  d006              BEQ      |L18.160|
+000092  4632              MOV      r2,r6                 ;181
+000094  2101              MOVS     r1,#1                 ;181
+000096  481a              LDR      r0,|L18.256|
+000098  3810              SUBS     r0,r0,#0x10           ;181
+00009a  1820              ADDS     r0,r4,r0              ;181
+00009c  f7fffffe          BL       SwTimer_Start
+                  |L18.160|
+0000a0  2001              MOVS     r0,#1                 ;184
+0000a2  e7ef              B        |L18.132|
+;;;186    
                           ENDP
 
-                  |L18.156|
-00009c  49617032          DCB      "Iap2Link_TxData sizeof(Iap2LinkReqPkt)=%d len=%d\n",0
-0000a0  4c696e6b
-0000a4  5f547844
-0000a8  61746120
-0000ac  73697a65
-0000b0  6f662849
-0000b4  6170324c
-0000b8  696e6b52
-0000bc  6571506b
-0000c0  74293d25
-0000c4  64206c65
-0000c8  6e3d2564
-0000cc  0a00    
-0000ce  00                DCB      0
-0000cf  00                DCB      0
-                  |L18.208|
-0000d0  49617032          DCB      "Iap2Link_TxData pIrb->m_isTx \t= True \n",0
-0000d4  4c696e6b
-0000d8  5f547844
-0000dc  61746120
-0000e0  70497262
-0000e4  2d3e6d5f
-0000e8  69735478
-0000ec  20093d20
-0000f0  54727565
-0000f4  200a00  
-0000f7  00                DCB      0
-                  |L18.248|
+                  |L18.164|
+0000a4  49617032          DCB      "Iap2Link_TxData sizeof(Iap2LinkReqPkt)=%d len=%d\n",0
+0000a8  4c696e6b
+0000ac  5f547844
+0000b0  61746120
+0000b4  73697a65
+0000b8  6f662849
+0000bc  6170324c
+0000c0  696e6b52
+0000c4  6571506b
+0000c8  74293d25
+0000cc  64206c65
+0000d0  6e3d2564
+0000d4  0a00    
+0000d6  00                DCB      0
+0000d7  00                DCB      0
+                  |L18.216|
+0000d8  49617032          DCB      "Iap2Link_TxData pIrb->m_isTx \t= True \n",0
+0000dc  4c696e6b
+0000e0  5f547844
+0000e4  61746120
+0000e8  70497262
+0000ec  2d3e6d5f
+0000f0  69735478
+0000f4  20093d20
+0000f8  54727565
+0000fc  200a00  
+0000ff  00                DCB      0
+                  |L18.256|
                           DCD      0x000004e2
+                  |L18.260|
+000104  49617032          DCB      "Iap2Link_TxData\treturn Falsee \n",0
+000108  4c696e6b
+00010c  5f547844
+000110  61746109
+000114  72657475
+000118  726e2046
+00011c  616c7365
+000120  65200a00
 
                           AREA ||i.Iap2Link_Verify||, CODE, READONLY, ALIGN=2
 
@@ -1527,133 +1556,133 @@
                           AREA ||i.Iap2Link_handShake||, CODE, READONLY, ALIGN=2
 
                   Iap2Link_handShake PROC
-;;;315    
-;;;316    Iap2Rc Iap2Link_handShake(Iap2Link* pIap2Link, Iap2Event eventId)
+;;;317    
+;;;318    Iap2Rc Iap2Link_handShake(Iap2Link* pIap2Link, Iap2Event eventId)
 000000  b5f8              PUSH     {r3-r7,lr}
-;;;317    {
+;;;319    {
 000002  4604              MOV      r4,r0
 000004  460d              MOV      r5,r1
-;;;318    	//Detect iAP2 Support
-;;;319    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 000\n");
+;;;320    	//Detect iAP2 Support
+;;;321    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 000\n");
 000006  a12e              ADR      r1,|L20.192|
 000008  2000              MOVS     r0,#0
 00000a  f7fffffe          BL       SEGGER_RTT_printf
-;;;320    	if(eventId != IAP2_EVENT_TRANSFER_SUCCESS)
+;;;322    	if(eventId != IAP2_EVENT_TRANSFER_SUCCESS)
 00000e  2d06              CMP      r5,#6
 000010  d005              BEQ      |L20.30|
-;;;321    	{
-;;;322    		SEGGER_RTT_printf(0,"iAp2 Link hand shake fialed.\n");
+;;;323    	{
+;;;324    		SEGGER_RTT_printf(0,"iAp2 Link hand shake fialed.\n");
 000012  a132              ADR      r1,|L20.220|
 000014  2000              MOVS     r0,#0
 000016  f7fffffe          BL       SEGGER_RTT_printf
-;;;323    		return IAP2RC_FAILED;
+;;;325    		return IAP2RC_FAILED;
 00001a  2001              MOVS     r0,#1
                   |L20.28|
-;;;324    	}
-;;;325    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 11\n");
-;;;326    
-;;;327    	if(pIap2Link->m_Irb.m_isTx)
-;;;328    	{
-;;;329    	
-;;;330    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 222\n");
-;;;331    		SwTimer_Stop(&pIap2Link->m_ReTxTimer);
-;;;332    		Iap2Link_RcvData(pIap2Link, pIap2Link->m_pAckPkt, sizeof(auth_init_data));
-;;;333    		return IAP2RC_PENDING;
-;;;334    	}
-;;;335    	
-;;;336    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 333\n");
-;;;337    	if(0 == memcmp(auth_init_data, pIap2Link->m_Irb.m_pBuff, pIap2Link->m_Irb.m_ActLen))
-;;;338    	{
-;;;339    	
-;;;340    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 444\n");
-;;;341    		Iap2Link_SendSyncPkt(pIap2Link);
-;;;342    	}
-;;;343    	else
-;;;344    	{
-;;;345    	
-;;;346    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 555\n");
-;;;347    		//indicate lack of backward compatibility
-;;;348    		static uint8 lack_of_backward_compatibility[] = {0xFF,0x55,0x0E,0x00,0x13,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xEB};
-;;;349    		Iap2Link_TxData(pIap2Link, lack_of_backward_compatibility, sizeof(lack_of_backward_compatibility), 0, 0);
-;;;350    	}
-;;;351    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 666\n");
-;;;352    
-;;;353    	return IAP2RC_SUCCESS;
-;;;354    }
+;;;326    	}
+;;;327    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 11\n");
+;;;328    
+;;;329    	if(pIap2Link->m_Irb.m_isTx)
+;;;330    	{
+;;;331    	
+;;;332    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 222\n");
+;;;333    		SwTimer_Stop(&pIap2Link->m_ReTxTimer);
+;;;334    		Iap2Link_RcvData(pIap2Link, pIap2Link->m_pAckPkt, sizeof(auth_init_data));
+;;;335    		return IAP2RC_PENDING;
+;;;336    	}
+;;;337    	
+;;;338    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 333\n");
+;;;339    	if(0 == memcmp(auth_init_data, pIap2Link->m_Irb.m_pBuff, pIap2Link->m_Irb.m_ActLen))
+;;;340    	{
+;;;341    	
+;;;342    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 444\n");
+;;;343    		Iap2Link_SendSyncPkt(pIap2Link);
+;;;344    	}
+;;;345    	else
+;;;346    	{
+;;;347    	
+;;;348    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 555\n");
+;;;349    		//indicate lack of backward compatibility
+;;;350    		static uint8 lack_of_backward_compatibility[] = {0xFF,0x55,0x0E,0x00,0x13,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xEB};
+;;;351    		Iap2Link_TxData(pIap2Link, lack_of_backward_compatibility, sizeof(lack_of_backward_compatibility), 0, 0);
+;;;352    	}
+;;;353    	SEGGER_RTT_printf(0,"Iap2Link_handShake. 666\n");
+;;;354    
+;;;355    	return IAP2RC_SUCCESS;
+;;;356    }
 00001c  bdf8              POP      {r3-r7,pc}
                   |L20.30|
 00001e  a137              ADR      r1,|L20.252|
-000020  2000              MOVS     r0,#0                 ;325
+000020  2000              MOVS     r0,#0                 ;327
 000022  f7fffffe          BL       SEGGER_RTT_printf
-000026  2027              MOVS     r0,#0x27              ;327
-000028  0140              LSLS     r0,r0,#5              ;327
-00002a  1820              ADDS     r0,r4,r0              ;327
-00002c  7e00              LDRB     r0,[r0,#0x18]         ;327
-00002e  2800              CMP      r0,#0                 ;327
+000026  2027              MOVS     r0,#0x27              ;329
+000028  0140              LSLS     r0,r0,#5              ;329
+00002a  1820              ADDS     r0,r4,r0              ;329
+00002c  7e00              LDRB     r0,[r0,#0x18]         ;329
+00002e  2800              CMP      r0,#0                 ;329
 000030  d014              BEQ      |L20.92|
 000032  a138              ADR      r1,|L20.276|
-000034  2000              MOVS     r0,#0                 ;330
+000034  2000              MOVS     r0,#0                 ;332
 000036  f7fffffe          BL       SEGGER_RTT_printf
 00003a  483d              LDR      r0,|L20.304|
-00003c  1820              ADDS     r0,r4,r0              ;331
+00003c  1820              ADDS     r0,r4,r0              ;333
 00003e  f7fffffe          BL       SwTimer_Stop
 000042  483b              LDR      r0,|L20.304|
-000044  1f00              SUBS     r0,r0,#4              ;332
-000046  1820              ADDS     r0,r4,r0              ;332
+000044  1f00              SUBS     r0,r0,#4              ;334
+000046  1820              ADDS     r0,r4,r0              ;334
 000048  f7fffffe          BL       __aeabi_uread4
-00004c  4606              MOV      r6,r0                 ;332
-00004e  2206              MOVS     r2,#6                 ;332
-000050  4631              MOV      r1,r6                 ;332
-000052  4620              MOV      r0,r4                 ;332
+00004c  4606              MOV      r6,r0                 ;334
+00004e  2206              MOVS     r2,#6                 ;334
+000050  4631              MOV      r1,r6                 ;334
+000052  4620              MOV      r0,r4                 ;334
 000054  f7fffffe          BL       Iap2Link_RcvData
-000058  2002              MOVS     r0,#2                 ;333
+000058  2002              MOVS     r0,#2                 ;335
 00005a  e7df              B        |L20.28|
                   |L20.92|
 00005c  a135              ADR      r1,|L20.308|
-00005e  2000              MOVS     r0,#0                 ;336
+00005e  2000              MOVS     r0,#0                 ;338
 000060  f7fffffe          BL       SEGGER_RTT_printf
-000064  209f              MOVS     r0,#0x9f              ;337
-000066  00c0              LSLS     r0,r0,#3              ;337
-000068  1820              ADDS     r0,r4,r0              ;337
-00006a  1c40              ADDS     r0,r0,#1              ;337
+000064  209f              MOVS     r0,#0x9f              ;339
+000066  00c0              LSLS     r0,r0,#3              ;339
+000068  1820              ADDS     r0,r4,r0              ;339
+00006a  1c40              ADDS     r0,r0,#1              ;339
 00006c  f7fffffe          BL       __aeabi_uread4
-000070  4606              MOV      r6,r0                 ;337
-000072  209f              MOVS     r0,#0x9f              ;337
-000074  00c0              LSLS     r0,r0,#3              ;337
-000076  1820              ADDS     r0,r4,r0              ;337
-000078  7a01              LDRB     r1,[r0,#8]            ;337
-00007a  79c3              LDRB     r3,[r0,#7]            ;337
-00007c  0208              LSLS     r0,r1,#8              ;337
-00007e  4318              ORRS     r0,r0,r3              ;337
-000080  4602              MOV      r2,r0                 ;337
-000082  4631              MOV      r1,r6                 ;337
+000070  4606              MOV      r6,r0                 ;339
+000072  209f              MOVS     r0,#0x9f              ;339
+000074  00c0              LSLS     r0,r0,#3              ;339
+000076  1820              ADDS     r0,r4,r0              ;339
+000078  7a01              LDRB     r1,[r0,#8]            ;339
+00007a  79c3              LDRB     r3,[r0,#7]            ;339
+00007c  0208              LSLS     r0,r1,#8              ;339
+00007e  4318              ORRS     r0,r0,r3              ;339
+000080  4602              MOV      r2,r0                 ;339
+000082  4631              MOV      r1,r6                 ;339
 000084  4832              LDR      r0,|L20.336|
 000086  f7fffffe          BL       memcmp
-00008a  2800              CMP      r0,#0                 ;337
+00008a  2800              CMP      r0,#0                 ;339
 00008c  d106              BNE      |L20.156|
 00008e  a131              ADR      r1,|L20.340|
 000090  f7fffffe          BL       SEGGER_RTT_printf
-000094  4620              MOV      r0,r4                 ;341
+000094  4620              MOV      r0,r4                 ;343
 000096  f7fffffe          BL       Iap2Link_SendSyncPkt
 00009a  e00b              B        |L20.180|
                   |L20.156|
 00009c  a134              ADR      r1,|L20.368|
-00009e  2000              MOVS     r0,#0                 ;346
+00009e  2000              MOVS     r0,#0                 ;348
 0000a0  f7fffffe          BL       SEGGER_RTT_printf
-0000a4  2000              MOVS     r0,#0                 ;349
-0000a6  4603              MOV      r3,r0                 ;349
-0000a8  2212              MOVS     r2,#0x12              ;349
+0000a4  2000              MOVS     r0,#0                 ;351
+0000a6  4603              MOV      r3,r0                 ;351
+0000a8  2212              MOVS     r2,#0x12              ;351
 0000aa  4938              LDR      r1,|L20.396|
-0000ac  9000              STR      r0,[sp,#0]            ;349
-0000ae  4620              MOV      r0,r4                 ;349
+0000ac  9000              STR      r0,[sp,#0]            ;351
+0000ae  4620              MOV      r0,r4                 ;351
 0000b0  f7fffffe          BL       Iap2Link_TxData
                   |L20.180|
 0000b4  a136              ADR      r1,|L20.400|
-0000b6  2000              MOVS     r0,#0                 ;351
+0000b6  2000              MOVS     r0,#0                 ;353
 0000b8  f7fffffe          BL       SEGGER_RTT_printf
-0000bc  2000              MOVS     r0,#0                 ;353
+0000bc  2000              MOVS     r0,#0                 ;355
 0000be  e7ad              B        |L20.28|
-;;;355    
+;;;357    
                           ENDP
 
                   |L20.192|

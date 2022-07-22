@@ -2,133 +2,174 @@
 ; commandline ArmCC [--c99 --list --split_sections --debug -c --asm --interleave --gnu -o.\objects\listusbdata.o --asm_dir=.\Listings\ --list_dir=.\Listings\ --depend=.\objects\listusbdata.d --cpu=Cortex-M0 --apcs=interwork -O0 --diag_suppress=9931 -I..\FTLib\CMSIS\inc -I..\FTLib\Inc -I..\FTLib\Lib -I..\usb\inc -I..\user -I..\RTT -I..\iap2 -IC:\Users\dell1\AppData\Local\Arm\Packs\FMD\FT32F0xx_DFP\1.0.6\Drivers\CMSIS\FT32F0xx\Include -D__UVISION_VERSION=534 -DFT32F072x8 -DFT32F072x8 --omf_browse=.\objects\listusbdata.crf ..\iap2\ListUsbData.c]
                           THUMB
 
-                          AREA ||i.ListUsbData_AddTail||, CODE, READONLY, ALIGN=1
+                          AREA ||i.ListUsbData_AddTail||, CODE, READONLY, ALIGN=2
 
                   ListUsbData_AddTail PROC
-;;;12     
-;;;13     ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
-000000  4603              MOV      r3,r0
-;;;14     {
-;;;15     	ListUsbData* pListNode = pHead;
-000002  461a              MOV      r2,r3
-;;;16          if(!(pNode))
-000004  2900              CMP      r1,#0
-000006  d101              BNE      |L1.12|
-;;;17     	 	return Null;
-000008  2000              MOVS     r0,#0
-                  |L1.10|
-;;;18     	//ASRT(pNode);
-;;;19     	
-;;;20     	pNode->m_pNext = Null;
-;;;21     	if(pHead == Null)
-;;;22     	{
-;;;23     		pNode->m_pPre = Null;
-;;;24     		pHead = pNode;
-;;;25     		goto END;
-;;;26     	}
-;;;27     
-;;;28     	//Get the tail node
-;;;29     	while(pListNode->m_pNext)
-;;;30     	{
-;;;31     		pListNode = pListNode->m_pNext;
-;;;32     		//ASRT(pListNode != pNode);
-;;;33     		 if(!(pListNode != pNode))
-;;;34     	 	return Null;
-;;;35     	}
-;;;36     
-;;;37     	pListNode->m_pNext = pNode;
-;;;38     	
-;;;39     	pNode->m_pPre = pListNode;
-;;;40     END:
-;;;41     //	PF(DL_LISTEX, ("List_AddTail(), count=%d\n", List_Count(pHead)));
-;;;42     	return pHead;
-;;;43     }
-00000a  4770              BX       lr
-                  |L1.12|
-00000c  2000              MOVS     r0,#0                 ;20
-00000e  6008              STR      r0,[r1,#0]            ;20
-000010  2b00              CMP      r3,#0                 ;21
-000012  d102              BNE      |L1.26|
-000014  6048              STR      r0,[r1,#4]            ;23
-000016  460b              MOV      r3,r1                 ;24
-000018  e00b              B        |L1.50|
-                  |L1.26|
-00001a  e004              B        |L1.38|
-                  |L1.28|
-00001c  6812              LDR      r2,[r2,#0]            ;31
-00001e  428a              CMP      r2,r1                 ;33
-000020  d101              BNE      |L1.38|
-000022  2000              MOVS     r0,#0                 ;34
-000024  e7f1              B        |L1.10|
-                  |L1.38|
-000026  6810              LDR      r0,[r2,#0]            ;29
-000028  2800              CMP      r0,#0                 ;29
-00002a  d1f7              BNE      |L1.28|
-00002c  6011              STR      r1,[r2,#0]            ;37
-00002e  604a              STR      r2,[r1,#4]            ;39
-000030  bf00              NOP                            ;40
-                  |L1.50|
-000032  4618              MOV      r0,r3                 ;42
-000034  e7e9              B        |L1.10|
-;;;44     
+;;;13     
+;;;14     ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
+000000  b570              PUSH     {r4-r6,lr}
+;;;15     {
+000002  4606              MOV      r6,r0
+000004  460c              MOV      r4,r1
+;;;16     	ListUsbData* pListNode = pHead;
+000006  4635              MOV      r5,r6
+;;;17          if(!(pNode))
+000008  2c00              CMP      r4,#0
+00000a  d101              BNE      |L1.16|
+;;;18     	 	return Null;
+00000c  2000              MOVS     r0,#0
+                  |L1.14|
+;;;19     	//ASRT(pNode);
+;;;20     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;21     	pNode->m_pNext = Null;
+;;;22     	if(pHead == Null)
+;;;23     	{
+;;;24     		pNode->m_pPre = Null;
+;;;25     		pHead = pNode;
+;;;26     		goto END;
+;;;27     	}
+;;;28     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;29     
+;;;30     	//Get the tail node
+;;;31     	while(pListNode->m_pNext)
+;;;32     	{
+;;;33     		pListNode = pListNode->m_pNext;
+;;;34     		//ASRT(pListNode != pNode);
+;;;35     		 if(!(pListNode != pNode))
+;;;36     	 	return Null;
+;;;37     	}
+;;;38     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;39     
+;;;40     	pListNode->m_pNext = pNode;
+;;;41     	
+;;;42     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;43     	pNode->m_pPre = pListNode;
+;;;44     END:
+;;;45     	
+;;;46     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;47     //	PF(DL_LISTEX, ("List_AddTail(), count=%d\n", List_Count(pHead)));
+;;;48     	return pHead;
+;;;49     }
+00000e  bd70              POP      {r4-r6,pc}
+                  |L1.16|
+000010  2314              MOVS     r3,#0x14              ;20
+000012  4a18              LDR      r2,|L1.116|
+000014  a118              ADR      r1,|L1.120|
+000016  2000              MOVS     r0,#0                 ;20
+000018  f7fffffe          BL       SEGGER_RTT_printf
+00001c  2000              MOVS     r0,#0                 ;21
+00001e  6020              STR      r0,[r4,#0]            ;21
+000020  2e00              CMP      r6,#0                 ;22
+000022  d102              BNE      |L1.42|
+000024  6060              STR      r0,[r4,#4]            ;24
+000026  4626              MOV      r6,r4                 ;25
+000028  e01c              B        |L1.100|
+                  |L1.42|
+00002a  231c              MOVS     r3,#0x1c              ;28
+00002c  4a11              LDR      r2,|L1.116|
+00002e  a112              ADR      r1,|L1.120|
+000030  2000              MOVS     r0,#0                 ;28
+000032  f7fffffe          BL       SEGGER_RTT_printf
+000036  e004              B        |L1.66|
+                  |L1.56|
+000038  682d              LDR      r5,[r5,#0]            ;33
+00003a  42a5              CMP      r5,r4                 ;35
+00003c  d101              BNE      |L1.66|
+00003e  2000              MOVS     r0,#0                 ;36
+000040  e7e5              B        |L1.14|
+                  |L1.66|
+000042  6828              LDR      r0,[r5,#0]            ;31
+000044  2800              CMP      r0,#0                 ;31
+000046  d1f7              BNE      |L1.56|
+000048  2326              MOVS     r3,#0x26              ;38
+00004a  4a0a              LDR      r2,|L1.116|
+00004c  a10a              ADR      r1,|L1.120|
+00004e  f7fffffe          BL       SEGGER_RTT_printf
+000052  602c              STR      r4,[r5,#0]            ;40
+000054  232a              MOVS     r3,#0x2a              ;42
+000056  4a07              LDR      r2,|L1.116|
+000058  a107              ADR      r1,|L1.120|
+00005a  2000              MOVS     r0,#0                 ;42
+00005c  f7fffffe          BL       SEGGER_RTT_printf
+000060  6065              STR      r5,[r4,#4]            ;43
+000062  bf00              NOP                            ;44
+                  |L1.100|
+000064  232e              MOVS     r3,#0x2e              ;46
+000066  4a03              LDR      r2,|L1.116|
+000068  a103              ADR      r1,|L1.120|
+00006a  2000              MOVS     r0,#0                 ;46
+00006c  f7fffffe          BL       SEGGER_RTT_printf
+000070  4630              MOV      r0,r6                 ;48
+000072  e7cc              B        |L1.14|
+;;;50     
                           ENDP
 
+                  |L1.116|
+                          DCD      __FUNCTION__
+                  |L1.120|
+000078  23232323          DCB      "##### function=%s line=%d \n",0
+00007c  23206675
+000080  6e637469
+000084  6f6e3d25
+000088  73206c69
+00008c  6e653d25
+000090  64200a00
 
                           AREA ||i.ListUsbData_Count||, CODE, READONLY, ALIGN=1
 
                   ListUsbData_Count PROC
-;;;123    
-;;;124    int ListUsbData_Count(ListUsbData* pNode)
+;;;157    
+;;;158    int ListUsbData_Count(ListUsbData* pNode)
 000000  4601              MOV      r1,r0
-;;;125    {
-;;;126    	ListUsbData* pHead = pNode;
+;;;159    {
+;;;160    	ListUsbData* pHead = pNode;
 000002  460a              MOV      r2,r1
-;;;127    	int nCount = 0;
+;;;161    	int nCount = 0;
 000004  2300              MOVS     r3,#0
-;;;128    
-;;;129    	if(pNode == Null)
+;;;162    
+;;;163    	if(pNode == Null)
 000006  2900              CMP      r1,#0
 000008  d100              BNE      |L2.12|
                   |L2.10|
-;;;130    	{
-;;;131    		return 0;
-;;;132    	}
-;;;133    
-;;;134    	while(pHead)
-;;;135    	{
-;;;136    		pHead = pHead->m_pPre;
-;;;137    		nCount++;
-;;;138    	}
-;;;139    
-;;;140    	pNode = pNode->m_pNext;
-;;;141    	while(pNode)
-;;;142    	{
-;;;143    		pNode = pNode->m_pNext;
-;;;144    		nCount++;
-;;;145    	}	
-;;;146    
-;;;147    	return nCount;
-;;;148    }
+;;;164    	{
+;;;165    		return 0;
+;;;166    	}
+;;;167    
+;;;168    	while(pHead)
+;;;169    	{
+;;;170    		pHead = pHead->m_pPre;
+;;;171    		nCount++;
+;;;172    	}
+;;;173    
+;;;174    	pNode = pNode->m_pNext;
+;;;175    	while(pNode)
+;;;176    	{
+;;;177    		pNode = pNode->m_pNext;
+;;;178    		nCount++;
+;;;179    	}	
+;;;180    
+;;;181    	return nCount;
+;;;182    }
 00000a  4770              BX       lr
                   |L2.12|
 00000c  e001              B        |L2.18|
                   |L2.14|
-00000e  6852              LDR      r2,[r2,#4]            ;136
-000010  1c5b              ADDS     r3,r3,#1              ;137
+00000e  6852              LDR      r2,[r2,#4]            ;170
+000010  1c5b              ADDS     r3,r3,#1              ;171
                   |L2.18|
-000012  2a00              CMP      r2,#0                 ;134
+000012  2a00              CMP      r2,#0                 ;168
 000014  d1fb              BNE      |L2.14|
-000016  6809              LDR      r1,[r1,#0]            ;140
+000016  6809              LDR      r1,[r1,#0]            ;174
 000018  e001              B        |L2.30|
                   |L2.26|
-00001a  6809              LDR      r1,[r1,#0]            ;143
-00001c  1c5b              ADDS     r3,r3,#1              ;144
+00001a  6809              LDR      r1,[r1,#0]            ;177
+00001c  1c5b              ADDS     r3,r3,#1              ;178
                   |L2.30|
-00001e  2900              CMP      r1,#0                 ;141
+00001e  2900              CMP      r1,#0                 ;175
 000020  d1fb              BNE      |L2.26|
-000022  4618              MOV      r0,r3                 ;147
+000022  4618              MOV      r0,r3                 ;181
 000024  e7f1              B        |L2.10|
-;;;149    
+;;;183    
                           ENDP
 
 
@@ -137,195 +178,336 @@
                   ListUsbData_Init PROC
 ;;;7      
 ;;;8      void ListUsbData_Init(ListUsbData* pList)
-000000  b510              PUSH     {r4,lr}
+000000  4770              BX       lr
 ;;;9      {
-000002  4604              MOV      r4,r0
-;;;10     	memset(pList, 0, sizeof(ListUsbData));
-000004  2114              MOVS     r1,#0x14
-000006  4620              MOV      r0,r4
-000008  f7fffffe          BL       __aeabi_memclr4
-;;;11     }
-00000c  bd10              POP      {r4,pc}
-;;;12     
+;;;10     
+;;;11     	//memset(pList, 0, sizeof(ListUsbData));
+;;;12     }
+;;;13     
                           ENDP
 
 
-                          AREA ||i.ListUsbData_Remove||, CODE, READONLY, ALIGN=1
+                          AREA ||i.ListUsbData_Remove||, CODE, READONLY, ALIGN=2
 
                   ListUsbData_Remove PROC
-;;;56     //Return: head node
-;;;57     ListUsbData* ListUsbData_Remove(ListUsbData* pNode)
-000000  4601              MOV      r1,r0
-;;;58     {
-;;;59     	ListUsbData* pHead = pNode;
-000002  460a              MOV      r2,r1
-;;;60     	
-;;;61     	//ASRT(pNode);
-;;;62     	if(!(pNode))
-000004  2900              CMP      r1,#0
-000006  d100              BNE      |L4.10|
-                  |L4.8|
-;;;63     		   return Null;
-;;;64     
-;;;65     	//Head of list
-;;;66     	if(pNode->m_pPre == Null)
-;;;67     	{
-;;;68     		pHead = pNode->m_pNext;
-;;;69     		if(pHead)
+;;;62     //Return: head node
+;;;63     ListUsbData* ListUsbData_Remove(ListUsbData* pNode)
+000000  b570              PUSH     {r4-r6,lr}
+;;;64     {
+000002  4604              MOV      r4,r0
+;;;65     	ListUsbData* pHead = pNode;
+000004  4625              MOV      r5,r4
+;;;66     	
+;;;67     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+000006  2343              MOVS     r3,#0x43
+000008  4a3e              LDR      r2,|L4.260|
+00000a  a13f              ADR      r1,|L4.264|
+00000c  2000              MOVS     r0,#0
+00000e  f7fffffe          BL       SEGGER_RTT_printf
+;;;68     	//ASRT(pNode);
+;;;69     	if(!(pNode))
+000012  2c00              CMP      r4,#0
+000014  d107              BNE      |L4.38|
 ;;;70     		{
-;;;71     			pHead->m_pPre = Null;
-;;;72     		}
-;;;73     		goto END;
-;;;74     	}
-;;;75     	else
-;;;76     	{
-;;;77     		pNode->m_pPre->m_pNext = pNode->m_pNext;
-;;;78     		
-;;;79     		if(pNode->m_pNext)
-;;;80     		{
-;;;81     			pNode->m_pNext->m_pPre = pNode->m_pPre;
-;;;82     		}
-;;;83     	}
-;;;84     
-;;;85     	while(pHead->m_pPre)
-;;;86     	{
-;;;87     		pHead = pHead->m_pPre;
-;;;88     	}
-;;;89     
-;;;90     END:	
-;;;91     	pNode->m_pPre = Null;
-;;;92     	pNode->m_pNext = Null;
-;;;93     	
-;;;94     //	PF(DL_LISTEX, ("List_Remove(), count=%d\n", List_Count(pHead)));
-;;;95     	return pHead;
-;;;96     }
-000008  4770              BX       lr
-                  |L4.10|
-00000a  6848              LDR      r0,[r1,#4]            ;66
-00000c  2800              CMP      r0,#0                 ;66
-00000e  d104              BNE      |L4.26|
-000010  680a              LDR      r2,[r1,#0]            ;68
-000012  2a00              CMP      r2,#0                 ;69
-000014  d000              BEQ      |L4.24|
-000016  6050              STR      r0,[r2,#4]            ;71
-                  |L4.24|
-000018  e00e              B        |L4.56|
-                  |L4.26|
-00001a  684b              LDR      r3,[r1,#4]            ;77
-00001c  6808              LDR      r0,[r1,#0]            ;77
-00001e  6018              STR      r0,[r3,#0]            ;77
-000020  6808              LDR      r0,[r1,#0]            ;79
-000022  2800              CMP      r0,#0                 ;79
-000024  d002              BEQ      |L4.44|
-000026  680b              LDR      r3,[r1,#0]            ;81
-000028  6848              LDR      r0,[r1,#4]            ;81
-00002a  6058              STR      r0,[r3,#4]            ;81
-                  |L4.44|
-00002c  e000              B        |L4.48|
-                  |L4.46|
-00002e  6852              LDR      r2,[r2,#4]            ;87
-                  |L4.48|
-000030  6850              LDR      r0,[r2,#4]            ;85
-000032  2800              CMP      r0,#0                 ;85
-000034  d1fb              BNE      |L4.46|
-000036  bf00              NOP                            ;90
-                  |L4.56|
-000038  2000              MOVS     r0,#0                 ;91
-00003a  6048              STR      r0,[r1,#4]            ;91
-00003c  6008              STR      r0,[r1,#0]            ;92
-00003e  4610              MOV      r0,r2                 ;95
-000040  e7e2              B        |L4.8|
-;;;97     
+;;;71     				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+000016  2347              MOVS     r3,#0x47
+000018  4a3a              LDR      r2,|L4.260|
+00001a  a142              ADR      r1,|L4.292|
+00001c  2000              MOVS     r0,#0
+00001e  f7fffffe          BL       SEGGER_RTT_printf
+;;;72     		   return Null;
+000022  2000              MOVS     r0,#0
+                  |L4.36|
+;;;73     		}
+;;;74     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;75     
+;;;76     	//Head of list
+;;;77     	if(pNode->m_pPre == Null)
+;;;78     	{
+;;;79     	
+;;;80     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;81     		pHead = pNode->m_pNext;
+;;;82     		if(pHead)
+;;;83     		{
+;;;84     			pHead->m_pPre = Null;
+;;;85     		}
+;;;86     		
+;;;87     		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;88     		goto END;
+;;;89     	}
+;;;90     	else
+;;;91     	{
+;;;92     	
+;;;93     	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;94     		pNode->m_pPre->m_pNext = pNode->m_pNext;
+;;;95     		
+;;;96     		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;97     		if(pNode->m_pNext)
+;;;98     		{
+;;;99     		
+;;;100    		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;101    			pNode->m_pNext->m_pPre = pNode->m_pPre;
+;;;102    		}
+;;;103    		
+;;;104    		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;105    	}
+;;;106    	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;107    
+;;;108    	while(pHead->m_pPre)
+;;;109    	{
+;;;110    		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;111    		pHead = pHead->m_pPre;
+;;;112    		
+;;;113    		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;114    	}
+;;;115    	
+;;;116    	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;117    
+;;;118    END:
+;;;119    	
+;;;120    	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;121    	pNode->m_pPre = Null;
+;;;122    	
+;;;123    	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;124    	pNode->m_pNext = Null;
+;;;125    	
+;;;126    	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;127    	
+;;;128    //	PF(DL_LISTEX, ("List_Remove(), count=%d\n", List_Count(pHead)));
+;;;129    	return pHead;
+;;;130    }
+000024  bd70              POP      {r4-r6,pc}
+                  |L4.38|
+000026  234a              MOVS     r3,#0x4a              ;74
+000028  4a36              LDR      r2,|L4.260|
+00002a  a137              ADR      r1,|L4.264|
+00002c  2000              MOVS     r0,#0                 ;74
+00002e  f7fffffe          BL       SEGGER_RTT_printf
+000032  6860              LDR      r0,[r4,#4]            ;77
+000034  2800              CMP      r0,#0                 ;77
+000036  d110              BNE      |L4.90|
+000038  2350              MOVS     r3,#0x50              ;80
+00003a  4a32              LDR      r2,|L4.260|
+00003c  a132              ADR      r1,|L4.264|
+00003e  f7fffffe          BL       SEGGER_RTT_printf
+000042  6825              LDR      r5,[r4,#0]            ;81
+000044  2d00              CMP      r5,#0                 ;82
+000046  d001              BEQ      |L4.76|
+000048  2000              MOVS     r0,#0                 ;84
+00004a  6068              STR      r0,[r5,#4]            ;84
+                  |L4.76|
+00004c  2357              MOVS     r3,#0x57              ;87
+00004e  4a2d              LDR      r2,|L4.260|
+000050  a12d              ADR      r1,|L4.264|
+000052  2000              MOVS     r0,#0                 ;87
+000054  f7fffffe          BL       SEGGER_RTT_printf
+000058  e03d              B        |L4.214|
+                  |L4.90|
+00005a  235d              MOVS     r3,#0x5d              ;93
+00005c  4a29              LDR      r2,|L4.260|
+00005e  a12a              ADR      r1,|L4.264|
+000060  2000              MOVS     r0,#0                 ;93
+000062  f7fffffe          BL       SEGGER_RTT_printf
+000066  6861              LDR      r1,[r4,#4]            ;94
+000068  6820              LDR      r0,[r4,#0]            ;94
+00006a  6008              STR      r0,[r1,#0]            ;94
+00006c  2360              MOVS     r3,#0x60              ;96
+00006e  4a25              LDR      r2,|L4.260|
+000070  a125              ADR      r1,|L4.264|
+000072  2000              MOVS     r0,#0                 ;96
+000074  f7fffffe          BL       SEGGER_RTT_printf
+000078  6820              LDR      r0,[r4,#0]            ;97
+00007a  2800              CMP      r0,#0                 ;97
+00007c  d008              BEQ      |L4.144|
+00007e  2364              MOVS     r3,#0x64              ;100
+000080  4a20              LDR      r2,|L4.260|
+000082  a121              ADR      r1,|L4.264|
+000084  2000              MOVS     r0,#0                 ;100
+000086  f7fffffe          BL       SEGGER_RTT_printf
+00008a  6821              LDR      r1,[r4,#0]            ;101
+00008c  6860              LDR      r0,[r4,#4]            ;101
+00008e  6048              STR      r0,[r1,#4]            ;101
+                  |L4.144|
+000090  2368              MOVS     r3,#0x68              ;104
+000092  4a1c              LDR      r2,|L4.260|
+000094  a11c              ADR      r1,|L4.264|
+000096  2000              MOVS     r0,#0                 ;104
+000098  f7fffffe          BL       SEGGER_RTT_printf
+00009c  236a              MOVS     r3,#0x6a              ;106
+00009e  4a19              LDR      r2,|L4.260|
+0000a0  a119              ADR      r1,|L4.264|
+0000a2  2000              MOVS     r0,#0                 ;106
+0000a4  f7fffffe          BL       SEGGER_RTT_printf
+0000a8  e00c              B        |L4.196|
+                  |L4.170|
+0000aa  236e              MOVS     r3,#0x6e              ;110
+0000ac  4a15              LDR      r2,|L4.260|
+0000ae  a116              ADR      r1,|L4.264|
+0000b0  2000              MOVS     r0,#0                 ;110
+0000b2  f7fffffe          BL       SEGGER_RTT_printf
+0000b6  686d              LDR      r5,[r5,#4]            ;111
+0000b8  2371              MOVS     r3,#0x71              ;113
+0000ba  4a12              LDR      r2,|L4.260|
+0000bc  a112              ADR      r1,|L4.264|
+0000be  2000              MOVS     r0,#0                 ;113
+0000c0  f7fffffe          BL       SEGGER_RTT_printf
+                  |L4.196|
+0000c4  6868              LDR      r0,[r5,#4]            ;108
+0000c6  2800              CMP      r0,#0                 ;108
+0000c8  d1ef              BNE      |L4.170|
+0000ca  2374              MOVS     r3,#0x74              ;116
+0000cc  4a0d              LDR      r2,|L4.260|
+0000ce  a10e              ADR      r1,|L4.264|
+0000d0  f7fffffe          BL       SEGGER_RTT_printf
+0000d4  bf00              NOP                            ;118
+                  |L4.214|
+0000d6  2378              MOVS     r3,#0x78              ;120
+0000d8  4a0a              LDR      r2,|L4.260|
+0000da  a10b              ADR      r1,|L4.264|
+0000dc  2000              MOVS     r0,#0                 ;120
+0000de  f7fffffe          BL       SEGGER_RTT_printf
+0000e2  2000              MOVS     r0,#0                 ;121
+0000e4  6060              STR      r0,[r4,#4]            ;121
+0000e6  237b              MOVS     r3,#0x7b              ;123
+0000e8  4a06              LDR      r2,|L4.260|
+0000ea  a107              ADR      r1,|L4.264|
+0000ec  f7fffffe          BL       SEGGER_RTT_printf
+0000f0  2000              MOVS     r0,#0                 ;124
+0000f2  6020              STR      r0,[r4,#0]            ;124
+0000f4  237e              MOVS     r3,#0x7e              ;126
+0000f6  4a03              LDR      r2,|L4.260|
+0000f8  a103              ADR      r1,|L4.264|
+0000fa  f7fffffe          BL       SEGGER_RTT_printf
+0000fe  4628              MOV      r0,r5                 ;129
+000100  e790              B        |L4.36|
+;;;131    
                           ENDP
 
+000102  0000              DCW      0x0000
+                  |L4.260|
+                          DCD      |symbol_number.19|
+                  |L4.264|
+000108  23232323          DCB      "##### function=%s line=%d \n",0
+00010c  23206675
+000110  6e637469
+000114  6f6e3d25
+000118  73206c69
+00011c  6e653d25
+000120  64200a00
+                  |L4.292|
+000124  23232320          DCB      "### function=%s line=%d\n",0
+000128  66756e63
+00012c  74696f6e
+000130  3d257320
+000134  6c696e65
+000138  3d25640a
+00013c  00      
+00013d  00                DCB      0
+00013e  00                DCB      0
+00013f  00                DCB      0
 
                           AREA ||i.ListUsbData_RemoveAll||, CODE, READONLY, ALIGN=1
 
                   ListUsbData_RemoveAll PROC
-;;;44     
-;;;45     void ListUsbData_RemoveAll(ListUsbData* pNode)
-000000  b530              PUSH     {r4,r5,lr}
-;;;46     {
+;;;50     
+;;;51     void ListUsbData_RemoveAll(ListUsbData* pNode)
+000000  b570              PUSH     {r4-r6,lr}
+;;;52     {
 000002  4604              MOV      r4,r0
-;;;47     	ListUsbData* pTemp = pNode;
+;;;53     	ListUsbData* pTemp = pNode;
 000004  4625              MOV      r5,r4
-;;;48     
-;;;49     	while(pTemp)
+;;;54     
+;;;55     	while(pTemp)
 000006  e003              B        |L5.16|
                   |L5.8|
-;;;50     	{
-;;;51     		pTemp = ListUsbData_Remove(pNode);
+;;;56     	{
+;;;57     		pTemp = ListUsbData_Remove(pNode);
 000008  4620              MOV      r0,r4
 00000a  f7fffffe          BL       ListUsbData_Remove
 00000e  4605              MOV      r5,r0
                   |L5.16|
-000010  2d00              CMP      r5,#0                 ;49
+000010  2d00              CMP      r5,#0                 ;55
 000012  d1f9              BNE      |L5.8|
-;;;52     	}
-;;;53     }
-000014  bd30              POP      {r4,r5,pc}
-;;;54     
+;;;58     	}
+;;;59     }
+000014  bd70              POP      {r4-r6,pc}
+;;;60     
                           ENDP
 
 
                           AREA ||i.ListUsbData_isIn||, CODE, READONLY, ALIGN=1
 
                   ListUsbData_isIn PROC
-;;;97     
-;;;98     Bool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode)
+;;;131    
+;;;132    Bool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode)
 000000  4602              MOV      r2,r0
-;;;99     {
-;;;100    	if(Null == pHead || Null == pNode)
+;;;133    {
+;;;134    	if(Null == pHead || Null == pNode)
 000002  2a00              CMP      r2,#0
 000004  d001              BEQ      |L6.10|
 000006  2900              CMP      r1,#0
 000008  d101              BNE      |L6.14|
                   |L6.10|
-;;;101    	{
-;;;102    		return False;
+;;;135    	{
+;;;136    		return False;
 00000a  2000              MOVS     r0,#0
                   |L6.12|
-;;;103    	}
-;;;104    
-;;;105    	if(pHead == pNode)
-;;;106    	{
-;;;107    		return True;
-;;;108    	}
-;;;109    	
-;;;110    	pHead = pHead->m_pNext;
-;;;111    	while(pHead)
-;;;112    	{
-;;;113    		if(pHead == pNode)
-;;;114    		{
-;;;115    			return True;
-;;;116    		}
-;;;117    
-;;;118    		pHead = pHead->m_pNext;
-;;;119    	}
-;;;120    
-;;;121    	return False;
-;;;122    }
+;;;137    	}
+;;;138    
+;;;139    	if(pHead == pNode)
+;;;140    	{
+;;;141    		return True;
+;;;142    	}
+;;;143    	
+;;;144    	pHead = pHead->m_pNext;
+;;;145    	while(pHead)
+;;;146    	{
+;;;147    		if(pHead == pNode)
+;;;148    		{
+;;;149    			return True;
+;;;150    		}
+;;;151    
+;;;152    		pHead = pHead->m_pNext;
+;;;153    	}
+;;;154    
+;;;155    	return False;
+;;;156    }
 00000c  4770              BX       lr
                   |L6.14|
-00000e  428a              CMP      r2,r1                 ;105
+00000e  428a              CMP      r2,r1                 ;139
 000010  d101              BNE      |L6.22|
-000012  2001              MOVS     r0,#1                 ;107
+000012  2001              MOVS     r0,#1                 ;141
 000014  e7fa              B        |L6.12|
                   |L6.22|
-000016  6812              LDR      r2,[r2,#0]            ;110
+000016  6812              LDR      r2,[r2,#0]            ;144
 000018  e004              B        |L6.36|
                   |L6.26|
-00001a  428a              CMP      r2,r1                 ;113
+00001a  428a              CMP      r2,r1                 ;147
 00001c  d101              BNE      |L6.34|
-00001e  2001              MOVS     r0,#1                 ;115
+00001e  2001              MOVS     r0,#1                 ;149
 000020  e7f4              B        |L6.12|
                   |L6.34|
-000022  6812              LDR      r2,[r2,#0]            ;118
+000022  6812              LDR      r2,[r2,#0]            ;152
                   |L6.36|
-000024  2a00              CMP      r2,#0                 ;111
+000024  2a00              CMP      r2,#0                 ;145
 000026  d1f8              BNE      |L6.26|
-000028  2000              MOVS     r0,#0                 ;121
+000028  2000              MOVS     r0,#0                 ;155
 00002a  e7ef              B        |L6.12|
-;;;123    
+;;;157    
                           ENDP
 
+
+                          AREA ||.constdata||, DATA, READONLY, ALIGN=0
+
+                  __FUNCTION__
+000000  4c697374          DCB      0x4c,0x69,0x73,0x74
+000004  55736244          DCB      0x55,0x73,0x62,0x44
+000008  6174615f          DCB      0x61,0x74,0x61,0x5f
+00000c  41646454          DCB      0x41,0x64,0x64,0x54
+000010  61696c00          DCB      0x61,0x69,0x6c,0x00
+                  |symbol_number.19|
+000014  4c697374          DCB      0x4c,0x69,0x73,0x74
+000018  55736244          DCB      0x55,0x73,0x62,0x44
+00001c  6174615f          DCB      0x61,0x74,0x61,0x5f
+000020  52656d6f          DCB      0x52,0x65,0x6d,0x6f
+000024  766500            DCB      0x76,0x65,0x00

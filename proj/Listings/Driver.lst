@@ -18900,7 +18900,7 @@ Nvoid USB_FS_IRQHandler(void);
 Nvoid USB_Suspend(void);
 Nvoid USB_Reset(void);
 Nvoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Nint EndpointBulkOut(M_EPBOUT_STATUS, int);
 N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
@@ -20026,7 +20026,6 @@ N#define MS_STICKS 			1	//Hot many ticks per ms, it is for timer
 N#define TIMER_TASK_INTERVAL 1
 N#define MAX_TEMP_BUF_SIZE 	SECTOR_SIZE
 Nstruct _tagSwTimer;
-N
 Ntypedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 Nstruct _tagTimerManager;
 Ntypedef struct _tagSwTimer
@@ -20324,9 +20323,7 @@ N
 NBool Driver_TransferStart(Irb* pIrb);
 Xuint8 Driver_TransferStart(Irb* pIrb);
 Nvoid Driver_RxDone(const void* pData, int len);
-W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
 Nvoid Driver_Check();
-W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
 Nvoid Driver_TxDone();
 N
 N

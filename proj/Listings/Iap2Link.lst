@@ -18891,7 +18891,7 @@ Nvoid USB_FS_IRQHandler(void);
 Nvoid USB_Suspend(void);
 Nvoid USB_Reset(void);
 Nvoid EndpointBulkIn(M_EPBIN_STATUS, int);
-Nvoid EndpointBulkOut(M_EPBOUT_STATUS, int);
+Nint EndpointBulkOut(M_EPBOUT_STATUS, int);
 N
 Nvoid USB_Endpoint0(int);
 Nvoid USB_Remote_Wakeup(void);
@@ -20017,7 +20017,6 @@ N#define MS_STICKS 			1	//Hot many ticks per ms, it is for timer
 N#define TIMER_TASK_INTERVAL 1
 N#define MAX_TEMP_BUF_SIZE 	SECTOR_SIZE
 Nstruct _tagSwTimer;
-N
 Ntypedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 Nstruct _tagTimerManager;
 Ntypedef struct _tagSwTimer
@@ -20646,8 +20645,6 @@ N	}
 N
 N	return True;
 X	return 1;
-W "..\iap2\Iap2Link.c" 129 12 variable "pCtrlByte"  was declared but never referenced
-W "..\iap2\Iap2Link.c" 130 15 variable "pTxPkt"  was declared but never referenced
 N}
 N
 NBool Iap2Link_TxData(Iap2Link* pIap2Link, const void* pData, int len, uint32 reSendTimeMs, uint8 maxTxCount)
@@ -20673,6 +20670,8 @@ N	pIap2Link->m_ReSendTimeMs = reSendTimeMs;
 N	
 N	if(!pIap2Link->TransferStart(pIrb))
 N	{
+N	
+N	SEGGER_RTT_printf(0,"Iap2Link_TxData	return Falsee \n");
 N		return False;
 X		return 0;
 N	}
@@ -20691,7 +20690,7 @@ NBool Iap2Link_ReTx(Iap2Link* pIap2Link)
 Xuint8 Iap2Link_ReTx(Iap2Link* pIap2Link)
 N{
 N	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,187);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,189);
 N
 N	if(!pIap2Link->TransferStart(&pIap2Link->m_Irb))
 N	{
@@ -20699,7 +20698,7 @@ N		return False;
 X		return 0;
 N	}
 N	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,193);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,195);
 N
 N	SwTimer_Start(&pIap2Link->m_ReTxTimer, IAP2_LINK_INIT_TIMERID, pIap2Link->m_ReSendTimeMs);
 X	SwTimer_Start(&pIap2Link->m_ReTxTimer, 1, pIap2Link->m_ReSendTimeMs);
@@ -20884,7 +20883,7 @@ X	Iap2LinkPkt* pPkt = 0;
 N	Iap2Event eventId = isSuccess? IAP2_EVENT_TRANSFER_SUCCESS : IAP2_EVENT_TRANSFER_FAILED;
 N
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,362);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,364);
 N
 N	if(!isSuccess && pIap2Link->m_ReTxTimer.m_isStart)
 N	{
@@ -20894,19 +20893,19 @@ N		return;
 N	}
 N	
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,371);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,373);
 N	//Check if it is a handshake packet
-N	if(IAP2_STATE_INIT == pIap2Link->m_State)
-N	{
-N	
+N	#if 0
+S	if(IAP2_STATE_INIT == pIap2Link->m_State)
+S	{
+S	
+S	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+S		Iap2Link_handShake(pIap2Link, eventId);
+S		return ;
+S	}
+N#endif
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,376);
-N		Iap2Link_handShake(pIap2Link, eventId);
-N		return ;
-N	}
-N
-N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,381);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,384);
 N
 N	pPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
 N	if(pIrb->m_ActLen && !pIrb->m_isTx)	//Receive a packet
@@ -20918,7 +20917,7 @@ N			return;
 N		}
 N		
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,392);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,395);
 N		//Check if it is a link packet
 N		if(pPkt->m_CtrlByte.m_SlpBit)
 N		{
@@ -20936,18 +20935,18 @@ N		else if(pPkt->m_CtrlByte.m_AckBit && pPkt->m_CtrlByte.m_EakBit)
 N		{
 N		
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,409);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,412);
 N			//Extended Acknowledgement Payload
 N			Iap2Link_Payload_Eak(pIap2Link, eventId, pPkt);
 N			return ;
 N		}
 N		
 N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,415);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,418);
 N	}
 N
 N	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,__LINE__,pIap2Link->m_State);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,418,pIap2Link->m_State);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d pIap2Link->m_State=%d\n",__FUNCTION__,421,pIap2Link->m_State);
 N
 N	switch(pIap2Link->m_State)
 N	{
@@ -20969,21 +20968,21 @@ N{
 N
 N//if( )
 N
-N	//SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
+N	SEGGER_RTT_printf(0,"### function=%s pIap2Link->m_ReTxTimer.m_isStart=%d\n",__FUNCTION__,pIap2Link->m_ReTxTimer.m_isStart);
 N
 N	if(pIap2Link->m_ReTxTimer.m_isStart
 N		&& SwTimer_isTimerOutEx(&pIap2Link->m_ReTxTimer))
 N	{
 N	
 N	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,446);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,449);
 N		if(pIap2Link->m_ReTxCount <= pIap2Link->m_MaxReTxCount
 N			|| IAP2_LINK_RETX_COUNT_UNLIMITIED == pIap2Link->m_MaxReTxCount)
 X			|| 0xFF == pIap2Link->m_MaxReTxCount)
 N		{
 N		
 N		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,451);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,454);
 N			Iap2Link_ReTx(pIap2Link);
 N		}
 N	}

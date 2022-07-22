@@ -12616,7 +12616,7 @@ void USB_FS_IRQHandler(void);
 void USB_Suspend(void);
 void USB_Reset(void);
 void EndpointBulkIn(M_EPBIN_STATUS, int);
-void EndpointBulkOut(M_EPBOUT_STATUS, int);
+int EndpointBulkOut(M_EPBOUT_STATUS, int);
 
 void USB_Endpoint0(int);
 void USB_Remote_Wakeup(void);
@@ -13896,7 +13896,6 @@ typedef signed long             LONG;
 
 
 struct _tagSwTimer;
-
 typedef void (*TimeoutFun)(struct _tagSwTimer*, void* context);
 struct _tagTimerManager;
 typedef struct _tagSwTimer
@@ -15086,25 +15085,37 @@ int main(void)
 	
 	while (1)
 	{
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,770);
 
-	  Iap2Link_Start(g_pIap2Link);
+	
+	
 
 		Driver_Check();
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,776);
 		data_offset =0;
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,778);
 		memset(g_hid_report,0,6);
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,780);
 		Iap2Link_Run(g_pIap2Link);
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 
 				
 				usbdata = ListUsbData_Remove(g_usbdata_list);
+						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,786);
 		if(usbdata!=0 )
 			{
 			
-			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,783);
+			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,790);
 			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,792);
 			free(usbdata->pdata);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,794);
 			free(usbdata);
+					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,796);
 			}
-		SysTick_Delay_Ms(1000);
+
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
+		
 		if(!g_start_key)
 				continue;
 

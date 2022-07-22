@@ -194,7 +194,24 @@ void USB_IRQHandler(void)
 	
 	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,__LINE__);
 	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, M_EP_MAXP);
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+	for(int i=0;i<recv_data_len;i++)
+		SEGGER_RTT_printf(0,"22 0x%02x ",Vendor_data_Buffer[i]);
+		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
+		
+		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+		pUsbData->pdata = malloc(recv_data_len);
+		
+		SEGGER_RTT_printf(0,"\n ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+		pUsbData->m_isUsed = 0;
+		pUsbData->m_pNext = NULL;
+		pUsbData->m_pPre = NULL;
+		pUsbData->data_size = recv_data_len;
+		
+		SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 111 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
+
+			ListUsbData_AddTail(g_usbdata_list,pUsbData);
+	SEGGER_RTT_printf(0,"\n USB_IT_OUT_EP2_FLAG 222 ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,__LINE__,recv_data_len);
 
 		#ifdef _debug_
 		//Vendor_data_Buffer[0]++;
@@ -422,7 +439,7 @@ void EndpointBulkIn(M_EPBIN_STATUS pbistate, int nCallState)
   * @retval None
   *****************************************************************************
 */
-void EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
+int EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
 {
 	int     nBytes;
 	BYTE    byOutCSR;
@@ -459,7 +476,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
 			{
 				/* Call to function to handle buffer over run */
 				MWRITE_BYTE(M_REG_OUTCSR1, 0);
-				return;
+				return nBytes;
 			}
 
 			/* Unload FIFO */
@@ -482,6 +499,7 @@ void EndpointBulkOut(M_EPBOUT_STATUS pbostate, int nCallState)
 			byOutCSR = MREAD_BYTE(M_REG_OUTCSR1);
 		}
 	}
+	return nBytes;
 }
 
 /******************************************************************************
@@ -1937,8 +1955,8 @@ int USB_EP_Rx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 	tEp1out.pData = ptr;
 	tEp1out.nBytesRecv = 0;
 
-	EndpointBulkOut(tEp1out, M_EP_NORMAL);
-	return tEp1out.nBytesRecv;
+	return EndpointBulkOut(tEp1out, M_EP_NORMAL);
+	//return tEp1out.nBytesRecv;
 }
 
 

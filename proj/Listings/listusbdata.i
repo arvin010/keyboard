@@ -1432,7 +1432,8 @@ extern __declspec(__nothrow) void _membitmovewb(void *  , const void *  , int  ,
 
 void ListUsbData_Init(ListUsbData* pList)
 {
-	memset(pList, 0, sizeof(ListUsbData));
+
+	
 }
 
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
@@ -1441,7 +1442,7 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
      if(!(pNode))
 	 	return 0;
 	
-	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,20);
 	pNode->m_pNext = 0;
 	if(pHead == 0)
 	{
@@ -1449,6 +1450,7 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
 		pHead = pNode;
 		goto END;
 	}
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,28);
 
 	
 	while(pListNode->m_pNext)
@@ -1458,11 +1460,15 @@ ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode)
 		 if(!(pListNode != pNode))
 	 	return 0;
 	}
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,38);
 
 	pListNode->m_pNext = pNode;
 	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,42);
 	pNode->m_pPre = pListNode;
 END:
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,46);
 
 	return pHead;
 }
@@ -1483,38 +1489,66 @@ ListUsbData* ListUsbData_Remove(ListUsbData* pNode)
 {
 	ListUsbData* pHead = pNode;
 	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,67);
 	
 	if(!(pNode))
+		{
+				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,71);
 		   return 0;
+		}
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,74);
 
 	
 	if(pNode->m_pPre == 0)
 	{
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,80);
 		pHead = pNode->m_pNext;
 		if(pHead)
 		{
 			pHead->m_pPre = 0;
 		}
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,87);
 		goto END;
 	}
 	else
 	{
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,93);
 		pNode->m_pPre->m_pNext = pNode->m_pNext;
 		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,96);
 		if(pNode->m_pNext)
 		{
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,100);
 			pNode->m_pNext->m_pPre = pNode->m_pPre;
 		}
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,104);
 	}
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,106);
 
 	while(pHead->m_pPre)
 	{
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,110);
 		pHead = pHead->m_pPre;
+		
+		SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,113);
 	}
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,116);
 
-END:	
+END:
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,120);
 	pNode->m_pPre = 0;
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,123);
 	pNode->m_pNext = 0;
+	
+	SEGGER_RTT_printf(0,"##### function=%s line=%d \n",__FUNCTION__,126);
 	
 
 	return pHead;
