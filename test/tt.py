@@ -1,6 +1,7 @@
 #coding: utf-8
 import multiprocessing
 from cProfile import run
+from urllib.error import URLError
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 import threading
@@ -9,9 +10,9 @@ import random
 
 
 def run(browser, url,interval):
-    if browser == "firefox":
+    if "firefox" in browser :
         driver = webdriver.Firefox()
-    elif browser == "chrome":
+    elif "chrome" in browser :
         # driver = webdriver.Chrome()
         # option = webdriver.ChromeOptions()
         # option.add_argument('headless')
@@ -19,6 +20,7 @@ def run(browser, url,interval):
         #  webdriver.Chrome(executable_path= driver_path)
         s = Service("chromedriver.exe")
         driver = webdriver.Chrome(service=s)
+        driver.implicitly_wait(1)
         driver.get(url=url)
         time.sleep(interval)
         driver.quit() 
@@ -40,28 +42,43 @@ def run_pool():
 
 data = {
     # "firefox": "http://www.xqtesting.com",
-    "chrome": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
-    "chrome": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
-    "chrome": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
-    "chrome": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
+    "chrome1": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
+    "chrome2": "https://www.bilibili.com/video/BV1FK4y1Y7TC/?spm_id_from=333.788.recommend_more_video.-1",
+    "chrome3": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
+    "chrome4": "https://www.bilibili.com/video/BV1Nr4y1J7bY?spm_id_from=333.999.0.0",
 }
 
 def run_pool2():
     threads = []
     for browser, url in data.items():
-        #多线程
         interval = random.randint(80,130)
         t1 = threading.Thread(target=run, args=(browser, url,interval,))
+        t1.start()
         threads.append(t1)
     # 启动
     for t2 in threads:
-        t2.start()
+        
         t2.join()
 
+def run_pool3():
+    process_list = []
+    for browser, url in data.items():
+        interval = random.randint(80,130)
+        t1 = multiprocessing.Process(target=run, args=(browser, url,interval,))
+        t1.start()
+        process_list.append(t1)
+    # 
+    for t2 in process_list:
+        
+        t2.join()
 
-while True:
-    # run_pool()
+if __name__ == '__main__':
+    s = time.time()
 
-    run_pool2()
+    # while True:
+        # run_pool()
 
+    run_pool3()
+    e = time.time()
+    print('总用时：',e-s)
 
