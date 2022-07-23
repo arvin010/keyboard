@@ -14,12 +14,12 @@ def run(browser, url,interval):
         driver = webdriver.Firefox()
     elif "chrome" in browser :
         # driver = webdriver.Chrome()
-        # option = webdriver.ChromeOptions()
-        # option.add_argument('headless')
-        # option.add_argument('--disable-gpu')
-        #  webdriver.Chrome(executable_path= driver_path)
-        s = Service("chromedriver.exe")
-        driver = webdriver.Chrome(service=s)
+        options = webdriver.ChromeOptions()
+        options.add_argument('headless')
+        options.add_argument('--disable-gpu')
+        # webdriver.Chrome(executable_path= driver_path)
+        driver_path = Service("chromedriver.exe")
+        driver = webdriver.Chrome(chrome_options=options,service=driver_path)
         driver.implicitly_wait(1)
         driver.get(url=url)
         time.sleep(interval)
@@ -75,10 +75,10 @@ def run_pool3():
 if __name__ == '__main__':
     s = time.time()
 
-    # while True:
+    while True:
         # run_pool()
 
-    run_pool3()
+        run_pool3()
     e = time.time()
-    print('总用时：',e-s)
+
 
