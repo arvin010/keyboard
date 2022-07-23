@@ -111,7 +111,7 @@ int SessionMgr_FsmRxReq(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2L
 
 int SessionMgr_FsmTxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)
 {
-	int nLen = SWAP16(pPkt->m_Len);
+//	int nLen = SWAP16(pPkt->m_Len);
 	
 	//PF_FUN_LINE(DL_MAIN);
 	

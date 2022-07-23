@@ -507,27 +507,20 @@
 000010  4628              MOV      r0,r5
 000012  f7fffffe          BL       __aeabi_uread4
 000016  2800              CMP      r0,#0
-000018  d104              BNE      |L14.36|
+000018  d103              BNE      |L14.34|
 ;;;144    	{
 ;;;145    		pTm->m_timerList = pTimer;
 00001a  4629              MOV      r1,r5
 00001c  4620              MOV      r0,r4
 00001e  f7fffffe          BL       __aeabi_uwrite4
-000022  e006              B        |L14.50|
-                  |L14.36|
+                  |L14.34|
 ;;;146    	}
 ;;;147    	else
 ;;;148    	{
-;;;149    		List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
-000024  4628              MOV      r0,r5
-000026  f7fffffe          BL       __aeabi_uread4
-00002a  4606              MOV      r6,r0
-00002c  4621              MOV      r1,r4
-00002e  f7fffffe          BL       List_AddTail
-                  |L14.50|
+;;;149    		//List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
 ;;;150    	}
 ;;;151    }	
-000032  bd70              POP      {r4-r6,pc}
+000022  bd70              POP      {r4-r6,pc}
 ;;;152    
                           ENDP
 
@@ -560,44 +553,31 @@
 ;;;153    void TimerManager_RemoveTimer(SwTimer* pTimer)
 000000  b570              PUSH     {r4-r6,lr}
 ;;;154    {
-000002  4604              MOV      r4,r0
+000002  4605              MOV      r5,r0
 ;;;155    	TimerManager* pTm = pTimer->m_pTimerManager;
-000004  4620              MOV      r0,r4
+000004  4628              MOV      r0,r5
 000006  301e              ADDS     r0,r0,#0x1e
 000008  f7fffffe          BL       __aeabi_uread4
-00000c  4605              MOV      r5,r0
+00000c  4604              MOV      r4,r0
 ;;;156    	
 ;;;157    	if(Null == pTm || Null == pTm->m_timerList) return;
-00000e  2d00              CMP      r5,#0
+00000e  2c00              CMP      r4,#0
 000010  d004              BEQ      |L16.28|
-000012  4628              MOV      r0,r5
+000012  4620              MOV      r0,r4
 000014  f7fffffe          BL       __aeabi_uread4
 000018  2800              CMP      r0,#0
 00001a  d100              BNE      |L16.30|
                   |L16.28|
 ;;;158    	
-;;;159    	if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
-;;;160    	{
-;;;161    		pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
-;;;162    	}
+;;;159    	//if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
+;;;160    	//{
+;;;161    	//	pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
+;;;162    	//}
 ;;;163    }
 00001c  bd70              POP      {r4-r6,pc}
                   |L16.30|
-00001e  4628              MOV      r0,r5                 ;159
-000020  f7fffffe          BL       __aeabi_uread4
-000024  4606              MOV      r6,r0                 ;159
-000026  4621              MOV      r1,r4                 ;159
-000028  f7fffffe          BL       List_isIn
-00002c  2800              CMP      r0,#0                 ;159
-00002e  d006              BEQ      |L16.62|
-000030  4620              MOV      r0,r4                 ;161
-000032  f7fffffe          BL       List_Remove
-000036  4606              MOV      r6,r0                 ;161
-000038  4629              MOV      r1,r5                 ;161
-00003a  f7fffffe          BL       __aeabi_uwrite4
-                  |L16.62|
-00003e  bf00              NOP      
-000040  e7ec              B        |L16.28|
+00001e  bf00              NOP      
+000020  e7fc              B        |L16.28|
 ;;;164    
                           ENDP
 

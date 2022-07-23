@@ -18917,8 +18917,7 @@ NITStatus USB_GetITStatus(uint32_t USB_IT);
 Nvoid localIrqEnable(void);
 Nvoid localIrqDisable(void);
 Nvoid startCriticalSection(void);
-W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
-Nvoid endCriticalSection();
+Nvoid endCriticalSection(void);
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20599,8 +20598,7 @@ N}
 N
 Nint SessionMgr_FsmTxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)
 N{
-N	int nLen = SWAP16(pPkt->m_Len);
-X	int nLen = (uint16)(pPkt->m_Len);
+N//	int nLen = SWAP16(pPkt->m_Len);
 N	
 N	//PF_FUN_LINE(DL_MAIN);
 N	
@@ -20614,7 +20612,6 @@ N		pSessionMgr->m_State = IAP2_STATE_RX_ACK;
 N		return IAP2RC_SUCCESS;
 N	}
 N	return IAP2RC_FAILED;
-W "..\iap2\iAp2Session.c" 114 6 variable "nLen"  was declared but never referenced
 N}
 N
 Nint SessionMgr_FsmRxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)

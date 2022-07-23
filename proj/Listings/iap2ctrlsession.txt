@@ -199,34 +199,33 @@
 ;;;81     
 ;;;82     
 ;;;83     
-;;;84     	 int			 fd = -1;
+;;;84     ///	 int			 fd = -1;
+;;;85     	 int			 err = -1;
 000004  2000              MOVS     r0,#0
 000006  43c0              MVNS     r0,r0
 000008  9006              STR      r0,[sp,#0x18]
-;;;85     	 int			 err = -1;
-00000a  9005              STR      r0,[sp,#0x14]
 ;;;86     	 uint8_t		 buf[ 2 ];
 ;;;87     	 uint8_t		 *certificateBuf;
 ;;;88     	 int certificateLen;
 ;;;89     	 
 ;;;90     
 ;;;91     	 err = i2c_readdata(I2C1,0x20,kMFiAuthReg_DeviceCertificateSize,buf,2);
-00000c  2002              MOVS     r0,#2
-00000e  ab04              ADD      r3,sp,#0x10
-000010  2230              MOVS     r2,#0x30
-000012  2120              MOVS     r1,#0x20
-000014  9000              STR      r0,[sp,#0]
-000016  4843              LDR      r0,|L4.292|
-000018  f7fffffe          BL       i2c_readdata
-00001c  9005              STR      r0,[sp,#0x14]
+00000a  2002              MOVS     r0,#2
+00000c  ab05              ADD      r3,sp,#0x14
+00000e  2230              MOVS     r2,#0x30
+000010  2120              MOVS     r1,#0x20
+000012  9000              STR      r0,[sp,#0]
+000014  4842              LDR      r0,|L4.288|
+000016  f7fffffe          BL       i2c_readdata
+00001a  9006              STR      r0,[sp,#0x18]
 ;;;92     	 if(err < 0)
-00001e  9805              LDR      r0,[sp,#0x14]
-000020  2800              CMP      r0,#0
-000022  da02              BGE      |L4.42|
+00001c  9806              LDR      r0,[sp,#0x18]
+00001e  2800              CMP      r0,#0
+000020  da02              BGE      |L4.40|
 ;;;93     	 {
 ;;;94     		 return err;
-000024  9805              LDR      r0,[sp,#0x14]
-                  |L4.38|
+000022  9806              LDR      r0,[sp,#0x18]
+                  |L4.36|
 ;;;95     	 }
 ;;;96     	certificateLen = ( buf[ 0 ] << 8 ) | buf[ 1 ];
 ;;;97     
@@ -246,7 +245,7 @@
 ;;;111    	   unsigned short parameterLen = ( unsigned short)certificateLen+4;
 ;;;112    		unsigned short messageLen = ( unsigned short)certificateLen+10;
 ;;;113    
-;;;114    		 uint32_t payloadLen = messageLen;
+;;;114    //		 uint32_t payloadLen = messageLen;
 ;;;115    		 uint8_t payload[messageLen];
 ;;;116    		payload[0]= 0x40;//start of message MSB
 ;;;117    		 payload[1]= 0x40;// start of message LSB
@@ -328,129 +327,128 @@
 ;;;193    #endif
 ;;;194    	
 ;;;195    }
-000026  b00b              ADD      sp,sp,#0x2c
-000028  bdf0              POP      {r4-r7,pc}
-                  |L4.42|
-00002a  4669              MOV      r1,sp                 ;96
-00002c  7c08              LDRB     r0,[r1,#0x10]         ;96
-00002e  0200              LSLS     r0,r0,#8              ;96
-000030  7c49              LDRB     r1,[r1,#0x11]         ;96
-000032  4308              ORRS     r0,r0,r1              ;96
-000034  9002              STR      r0,[sp,#8]            ;96
-000036  9802              LDR      r0,[sp,#8]            ;99
-000038  f7fffffe          BL       malloc
-00003c  9003              STR      r0,[sp,#0xc]          ;99
-00003e  9902              LDR      r1,[sp,#8]            ;100
-000040  9803              LDR      r0,[sp,#0xc]          ;100
-000042  f7fffffe          BL       __aeabi_memclr
-000046  9802              LDR      r0,[sp,#8]            ;102
-000048  9000              STR      r0,[sp,#0]            ;102
-00004a  2231              MOVS     r2,#0x31              ;102
-00004c  2120              MOVS     r1,#0x20              ;102
-00004e  4835              LDR      r0,|L4.292|
-000050  9b03              LDR      r3,[sp,#0xc]          ;102
-000052  f7fffffe          BL       i2c_readdata
-000056  9005              STR      r0,[sp,#0x14]         ;102
-000058  9805              LDR      r0,[sp,#0x14]         ;103
-00005a  2800              CMP      r0,#0                 ;103
-00005c  da04              BGE      |L4.104|
-00005e  9803              LDR      r0,[sp,#0xc]          ;106
-000060  f7fffffe          BL       free
-000064  9805              LDR      r0,[sp,#0x14]         ;107
-000066  e7de              B        |L4.38|
-                  |L4.104|
-000068  9802              LDR      r0,[sp,#8]            ;111
-00006a  1d00              ADDS     r0,r0,#4              ;111
-00006c  b280              UXTH     r0,r0                 ;111
-00006e  9001              STR      r0,[sp,#4]            ;111
-000070  9802              LDR      r0,[sp,#8]            ;112
-000072  300a              ADDS     r0,r0,#0xa            ;112
-000074  b286              UXTH     r6,r0                 ;112
-000076  bf00              NOP                            ;114
-000078  4635              MOV      r5,r6                 ;115
-00007a  4628              MOV      r0,r5                 ;115
-00007c  f7fffffe          BL       malloc
-000080  4604              MOV      r4,r0                 ;115
-000082  2040              MOVS     r0,#0x40              ;116
-000084  7020              STRB     r0,[r4,#0]            ;116
-000086  7060              STRB     r0,[r4,#1]            ;117
-000088  20ff              MOVS     r0,#0xff              ;118
-00008a  0200              LSLS     r0,r0,#8              ;118
-00008c  4030              ANDS     r0,r0,r6              ;118
-00008e  1200              ASRS     r0,r0,#8              ;118
-000090  70a0              STRB     r0,[r4,#2]            ;118
-000092  70e6              STRB     r6,[r4,#3]            ;119
-000094  20aa              MOVS     r0,#0xaa              ;121
-000096  7120              STRB     r0,[r4,#4]            ;121
-000098  2001              MOVS     r0,#1                 ;122
-00009a  7160              STRB     r0,[r4,#5]            ;122
-00009c  21ff              MOVS     r1,#0xff              ;123
-00009e  0209              LSLS     r1,r1,#8              ;123
-0000a0  9801              LDR      r0,[sp,#4]            ;123
-0000a2  4008              ANDS     r0,r0,r1              ;123
-0000a4  1200              ASRS     r0,r0,#8              ;123
-0000a6  71a0              STRB     r0,[r4,#6]            ;123
-0000a8  9801              LDR      r0,[sp,#4]            ;124
-0000aa  71e0              STRB     r0,[r4,#7]            ;124
-0000ac  2000              MOVS     r0,#0                 ;125
-0000ae  7220              STRB     r0,[r4,#8]            ;125
-0000b0  7260              STRB     r0,[r4,#9]            ;126
-0000b2  4632              MOV      r2,r6                 ;127
-0000b4  3a0a              SUBS     r2,r2,#0xa            ;127
-0000b6  4620              MOV      r0,r4                 ;127
-0000b8  300a              ADDS     r0,r0,#0xa            ;127
-0000ba  9903              LDR      r1,[sp,#0xc]          ;127
-0000bc  f7fffffe          BL       __aeabi_memcpy
-0000c0  980a              LDR      r0,[sp,#0x28]         ;130
-0000c2  8005              STRH     r5,[r0,#0]            ;130
-0000c4  9f09              LDR      r7,[sp,#0x24]         ;132
-0000c6  4818              LDR      r0,|L4.296|
-0000c8  70b8              STRB     r0,[r7,#2]            ;133
-0000ca  0a00              LSRS     r0,r0,#8              ;133
-0000cc  70f8              STRB     r0,[r7,#3]            ;133
-0000ce  703d              STRB     r5,[r7,#0]            ;134
-0000d0  0a28              LSRS     r0,r5,#8              ;134
-0000d2  7078              STRB     r0,[r7,#1]            ;134
-0000d4  1d38              ADDS     r0,r7,#4              ;135
-0000d6  f7fffffe          BL       __aeabi_uread4
-0000da  2800              CMP      r0,#0                 ;135
-0000dc  d10a              BNE      |L4.244|
-0000de  7879              LDRB     r1,[r7,#1]            ;136
-0000e0  783a              LDRB     r2,[r7,#0]            ;136
-0000e2  0209              LSLS     r1,r1,#8              ;136
-0000e4  4311              ORRS     r1,r1,r2              ;136
-0000e6  4608              MOV      r0,r1                 ;136
-0000e8  f7fffffe          BL       malloc
-0000ec  1d39              ADDS     r1,r7,#4              ;136
-0000ee  9000              STR      r0,[sp,#0]            ;136
-0000f0  f7fffffe          BL       __aeabi_uwrite4
-                  |L4.244|
-0000f4  1d38              ADDS     r0,r7,#4              ;137
-0000f6  f7fffffe          BL       __aeabi_uread4
-0000fa  9000              STR      r0,[sp,#0]            ;137
-0000fc  7878              LDRB     r0,[r7,#1]            ;137
-0000fe  7839              LDRB     r1,[r7,#0]            ;137
-000100  0200              LSLS     r0,r0,#8              ;137
-000102  4308              ORRS     r0,r0,r1              ;137
-000104  4602              MOV      r2,r0                 ;137
-000106  4621              MOV      r1,r4                 ;137
-000108  9800              LDR      r0,[sp,#0]            ;137
-00010a  f7fffffe          BL       __aeabi_memcpy
-00010e  9803              LDR      r0,[sp,#0xc]          ;147
-000110  f7fffffe          BL       free
-000114  9805              LDR      r0,[sp,#0x14]         ;148
-000116  9007              STR      r0,[sp,#0x1c]         ;148
-000118  4620              MOV      r0,r4                 ;148
-00011a  f7fffffe          BL       free
-00011e  9807              LDR      r0,[sp,#0x1c]         ;148
-000120  e781              B        |L4.38|
+000024  b00b              ADD      sp,sp,#0x2c
+000026  bdf0              POP      {r4-r7,pc}
+                  |L4.40|
+000028  4669              MOV      r1,sp                 ;96
+00002a  7d08              LDRB     r0,[r1,#0x14]         ;96
+00002c  0200              LSLS     r0,r0,#8              ;96
+00002e  7d49              LDRB     r1,[r1,#0x15]         ;96
+000030  4308              ORRS     r0,r0,r1              ;96
+000032  9003              STR      r0,[sp,#0xc]          ;96
+000034  9803              LDR      r0,[sp,#0xc]          ;99
+000036  f7fffffe          BL       malloc
+00003a  9004              STR      r0,[sp,#0x10]         ;99
+00003c  9903              LDR      r1,[sp,#0xc]          ;100
+00003e  9804              LDR      r0,[sp,#0x10]         ;100
+000040  f7fffffe          BL       __aeabi_memclr
+000044  9803              LDR      r0,[sp,#0xc]          ;102
+000046  9000              STR      r0,[sp,#0]            ;102
+000048  2231              MOVS     r2,#0x31              ;102
+00004a  2120              MOVS     r1,#0x20              ;102
+00004c  4834              LDR      r0,|L4.288|
+00004e  9b04              LDR      r3,[sp,#0x10]         ;102
+000050  f7fffffe          BL       i2c_readdata
+000054  9006              STR      r0,[sp,#0x18]         ;102
+000056  9806              LDR      r0,[sp,#0x18]         ;103
+000058  2800              CMP      r0,#0                 ;103
+00005a  da04              BGE      |L4.102|
+00005c  9804              LDR      r0,[sp,#0x10]         ;106
+00005e  f7fffffe          BL       free
+000062  9806              LDR      r0,[sp,#0x18]         ;107
+000064  e7de              B        |L4.36|
+                  |L4.102|
+000066  9803              LDR      r0,[sp,#0xc]          ;111
+000068  1d00              ADDS     r0,r0,#4              ;111
+00006a  b280              UXTH     r0,r0                 ;111
+00006c  9002              STR      r0,[sp,#8]            ;111
+00006e  9803              LDR      r0,[sp,#0xc]          ;112
+000070  300a              ADDS     r0,r0,#0xa            ;112
+000072  b286              UXTH     r6,r0                 ;112
+000074  4635              MOV      r5,r6                 ;115
+000076  4628              MOV      r0,r5                 ;115
+000078  f7fffffe          BL       malloc
+00007c  4604              MOV      r4,r0                 ;115
+00007e  2040              MOVS     r0,#0x40              ;116
+000080  7020              STRB     r0,[r4,#0]            ;116
+000082  7060              STRB     r0,[r4,#1]            ;117
+000084  20ff              MOVS     r0,#0xff              ;118
+000086  0200              LSLS     r0,r0,#8              ;118
+000088  4030              ANDS     r0,r0,r6              ;118
+00008a  1200              ASRS     r0,r0,#8              ;118
+00008c  70a0              STRB     r0,[r4,#2]            ;118
+00008e  70e6              STRB     r6,[r4,#3]            ;119
+000090  20aa              MOVS     r0,#0xaa              ;121
+000092  7120              STRB     r0,[r4,#4]            ;121
+000094  2001              MOVS     r0,#1                 ;122
+000096  7160              STRB     r0,[r4,#5]            ;122
+000098  21ff              MOVS     r1,#0xff              ;123
+00009a  0209              LSLS     r1,r1,#8              ;123
+00009c  9802              LDR      r0,[sp,#8]            ;123
+00009e  4008              ANDS     r0,r0,r1              ;123
+0000a0  1200              ASRS     r0,r0,#8              ;123
+0000a2  71a0              STRB     r0,[r4,#6]            ;123
+0000a4  9802              LDR      r0,[sp,#8]            ;124
+0000a6  71e0              STRB     r0,[r4,#7]            ;124
+0000a8  2000              MOVS     r0,#0                 ;125
+0000aa  7220              STRB     r0,[r4,#8]            ;125
+0000ac  7260              STRB     r0,[r4,#9]            ;126
+0000ae  4632              MOV      r2,r6                 ;127
+0000b0  3a0a              SUBS     r2,r2,#0xa            ;127
+0000b2  4620              MOV      r0,r4                 ;127
+0000b4  300a              ADDS     r0,r0,#0xa            ;127
+0000b6  9904              LDR      r1,[sp,#0x10]         ;127
+0000b8  f7fffffe          BL       __aeabi_memcpy
+0000bc  980a              LDR      r0,[sp,#0x28]         ;130
+0000be  8005              STRH     r5,[r0,#0]            ;130
+0000c0  9f09              LDR      r7,[sp,#0x24]         ;132
+0000c2  4818              LDR      r0,|L4.292|
+0000c4  70b8              STRB     r0,[r7,#2]            ;133
+0000c6  0a00              LSRS     r0,r0,#8              ;133
+0000c8  70f8              STRB     r0,[r7,#3]            ;133
+0000ca  703d              STRB     r5,[r7,#0]            ;134
+0000cc  0a28              LSRS     r0,r5,#8              ;134
+0000ce  7078              STRB     r0,[r7,#1]            ;134
+0000d0  1d38              ADDS     r0,r7,#4              ;135
+0000d2  f7fffffe          BL       __aeabi_uread4
+0000d6  2800              CMP      r0,#0                 ;135
+0000d8  d10a              BNE      |L4.240|
+0000da  7879              LDRB     r1,[r7,#1]            ;136
+0000dc  783a              LDRB     r2,[r7,#0]            ;136
+0000de  0209              LSLS     r1,r1,#8              ;136
+0000e0  4311              ORRS     r1,r1,r2              ;136
+0000e2  4608              MOV      r0,r1                 ;136
+0000e4  f7fffffe          BL       malloc
+0000e8  1d39              ADDS     r1,r7,#4              ;136
+0000ea  9001              STR      r0,[sp,#4]            ;136
+0000ec  f7fffffe          BL       __aeabi_uwrite4
+                  |L4.240|
+0000f0  1d38              ADDS     r0,r7,#4              ;137
+0000f2  f7fffffe          BL       __aeabi_uread4
+0000f6  9001              STR      r0,[sp,#4]            ;137
+0000f8  7878              LDRB     r0,[r7,#1]            ;137
+0000fa  7839              LDRB     r1,[r7,#0]            ;137
+0000fc  0200              LSLS     r0,r0,#8              ;137
+0000fe  4308              ORRS     r0,r0,r1              ;137
+000100  4602              MOV      r2,r0                 ;137
+000102  4621              MOV      r1,r4                 ;137
+000104  9801              LDR      r0,[sp,#4]            ;137
+000106  f7fffffe          BL       __aeabi_memcpy
+00010a  9804              LDR      r0,[sp,#0x10]         ;147
+00010c  f7fffffe          BL       free
+000110  9806              LDR      r0,[sp,#0x18]         ;148
+000112  9007              STR      r0,[sp,#0x1c]         ;148
+000114  4620              MOV      r0,r4                 ;148
+000116  f7fffffe          BL       free
+00011a  9807              LDR      r0,[sp,#0x1c]         ;148
+00011c  e782              B        |L4.36|
 ;;;196    
                           ENDP
 
-000122  0000              DCW      0x0000
-                  |L4.292|
+00011e  0000              DCW      0x0000
+                  |L4.288|
                           DCD      0x40005400
-                  |L4.296|
+                  |L4.292|
                           DCD      0x0000aa01
 
                           AREA ||i.Iap2CtrlSession_ChallengeRsp||, CODE, READONLY, ALIGN=2
@@ -460,55 +458,53 @@
 ;;;197    static int Iap2CtrlSession_ChallengeRsp(const Iap2CtrlSessionMsg* pReq, uint8* pData, uint16* pLen)
 000000  b5f7              PUSH     {r0-r2,r4-r7,lr}
 ;;;198    {
-000002  b08c              SUB      sp,sp,#0x30
+000002  b08a              SUB      sp,sp,#0x28
 ;;;199    
-;;;200     int			 fd = -1;
-000004  2000              MOVS     r0,#0
-000006  43c0              MVNS     r0,r0
-000008  900a              STR      r0,[sp,#0x28]
+;;;200    // int			 fd = -1;
 ;;;201     int			 err = -1;
-00000a  4605              MOV      r5,r0
+000004  2500              MOVS     r5,#0
+000006  43ed              MVNS     r5,r5
 ;;;202     uint8_t		 buf[ 2 ];
 ;;;203     uint8_t *   data = pReq->m_Param->m_Data;
-00000c  980c              LDR      r0,[sp,#0x30]
-00000e  300a              ADDS     r0,r0,#0xa
-000010  f7fffffe          BL       __aeabi_uread4
-000014  9008              STR      r0,[sp,#0x20]
+000008  980a              LDR      r0,[sp,#0x28]
+00000a  300a              ADDS     r0,r0,#0xa
+00000c  f7fffffe          BL       __aeabi_uread4
+000010  9007              STR      r0,[sp,#0x1c]
 ;;;204    
 ;;;205     uint8_t * challengReciveBuf ;
 ;;;206     int challengLen = ((data[11]&0x00ff) <<8)|((data[12]&0x00ff));
-000016  9808              LDR      r0,[sp,#0x20]
-000018  7ac0              LDRB     r0,[r0,#0xb]
-00001a  0200              LSLS     r0,r0,#8
-00001c  9908              LDR      r1,[sp,#0x20]
-00001e  7b09              LDRB     r1,[r1,#0xc]
-000020  4308              ORRS     r0,r0,r1
-000022  9006              STR      r0,[sp,#0x18]
+000012  9807              LDR      r0,[sp,#0x1c]
+000014  7ac0              LDRB     r0,[r0,#0xb]
+000016  0200              LSLS     r0,r0,#8
+000018  9907              LDR      r1,[sp,#0x1c]
+00001a  7b09              LDRB     r1,[r1,#0xc]
+00001c  4308              ORRS     r0,r0,r1
+00001e  9005              STR      r0,[sp,#0x14]
 ;;;207    	if(challengLen > 6)
-000024  9806              LDR      r0,[sp,#0x18]
-000026  2806              CMP      r0,#6
-000028  dd0c              BLE      |L5.68|
+000020  9805              LDR      r0,[sp,#0x14]
+000022  2806              CMP      r0,#6
+000024  dd0c              BLE      |L5.64|
 ;;;208    		{
 ;;;209    		challengReciveBuf = (uint8_t *)malloc(challengLen-6);
-00002a  9906              LDR      r1,[sp,#0x18]
-00002c  1f88              SUBS     r0,r1,#6
-00002e  f7fffffe          BL       malloc
-000032  9007              STR      r0,[sp,#0x1c]
+000026  9905              LDR      r1,[sp,#0x14]
+000028  1f88              SUBS     r0,r1,#6
+00002a  f7fffffe          BL       malloc
+00002e  9006              STR      r0,[sp,#0x18]
 ;;;210    		memcpy(challengReciveBuf,&data[15],challengLen-6);
-000034  9806              LDR      r0,[sp,#0x18]
-000036  1f82              SUBS     r2,r0,#6
-000038  9908              LDR      r1,[sp,#0x20]
-00003a  310f              ADDS     r1,r1,#0xf
-00003c  9807              LDR      r0,[sp,#0x1c]
-00003e  f7fffffe          BL       __aeabi_memcpy
-000042  e003              B        |L5.76|
-                  |L5.68|
+000030  9805              LDR      r0,[sp,#0x14]
+000032  1f82              SUBS     r2,r0,#6
+000034  9907              LDR      r1,[sp,#0x1c]
+000036  310f              ADDS     r1,r1,#0xf
+000038  9806              LDR      r0,[sp,#0x18]
+00003a  f7fffffe          BL       __aeabi_memcpy
+00003e  e003              B        |L5.72|
+                  |L5.64|
 ;;;211    		}
 ;;;212    		else
 ;;;213    			return -1;
-000044  2000              MOVS     r0,#0
-000046  43c0              MVNS     r0,r0
-                  |L5.72|
+000040  2000              MOVS     r0,#0
+000042  43c0              MVNS     r0,r0
+                  |L5.68|
 ;;;214    
 ;;;215       
 ;;;216    			
@@ -603,7 +599,7 @@
 ;;;305       int parameterLen = signatureLen+4;
 ;;;306    	int messageLen = signatureLen+10;
 ;;;307    
-;;;308    	 uint32_t payloadLen = messageLen;
+;;;308    //	 uint32_t payloadLen = messageLen;
 ;;;309    	 uint8_t payload[messageLen];
 ;;;310    	
 ;;;311    	payload[0]= 0x40;//start of message MSB
@@ -644,271 +640,271 @@
 ;;;346     
 ;;;347     
 ;;;348    }
-000048  b00f              ADD      sp,sp,#0x3c
-00004a  bdf0              POP      {r4-r7,pc}
-                  |L5.76|
-00004c  9806              LDR      r0,[sp,#0x18]         ;218
-00004e  1f80              SUBS     r0,r0,#6              ;218
-000050  0400              LSLS     r0,r0,#16             ;218
-000052  0e01              LSRS     r1,r0,#24             ;218
-000054  a808              ADD      r0,sp,#0x20           ;218
-000056  7101              STRB     r1,[r0,#4]            ;218
-000058  9806              LDR      r0,[sp,#0x18]         ;219
-00005a  1f80              SUBS     r0,r0,#6              ;219
-00005c  b2c1              UXTB     r1,r0                 ;219
-00005e  a808              ADD      r0,sp,#0x20           ;219
-000060  7141              STRB     r1,[r0,#5]            ;219
-000062  2002              MOVS     r0,#2                 ;220
-000064  ab09              ADD      r3,sp,#0x24           ;220
-000066  2220              MOVS     r2,#0x20              ;220
-000068  4611              MOV      r1,r2                 ;220
-00006a  9000              STR      r0,[sp,#0]            ;220
-00006c  487f              LDR      r0,|L5.620|
-00006e  f7fffffe          BL       i2c_senddata
-000072  4605              MOV      r5,r0                 ;220
-000074  2d00              CMP      r5,#0                 ;221
-000076  da04              BGE      |L5.130|
-000078  9807              LDR      r0,[sp,#0x1c]         ;224
-00007a  f7fffffe          BL       free
-00007e  4628              MOV      r0,r5                 ;225
-000080  e7e2              B        |L5.72|
-                  |L5.130|
-000082  9806              LDR      r0,[sp,#0x18]         ;227
-000084  1f80              SUBS     r0,r0,#6              ;227
-000086  9000              STR      r0,[sp,#0]            ;227
-000088  2221              MOVS     r2,#0x21              ;227
-00008a  2120              MOVS     r1,#0x20              ;227
-00008c  4877              LDR      r0,|L5.620|
-00008e  9b07              LDR      r3,[sp,#0x1c]         ;227
-000090  f7fffffe          BL       i2c_senddata
-000094  4605              MOV      r5,r0                 ;227
-000096  2d00              CMP      r5,#0                 ;228
-000098  da04              BGE      |L5.164|
-00009a  9807              LDR      r0,[sp,#0x1c]         ;231
-00009c  f7fffffe          BL       free
-0000a0  4628              MOV      r0,r5                 ;232
-0000a2  e7d1              B        |L5.72|
-                  |L5.164|
-0000a4  2001              MOVS     r0,#1                 ;235
-0000a6  a908              ADD      r1,sp,#0x20           ;235
-0000a8  7108              STRB     r0,[r1,#4]            ;235
-0000aa  ab09              ADD      r3,sp,#0x24           ;237
-0000ac  2210              MOVS     r2,#0x10              ;237
-0000ae  2120              MOVS     r1,#0x20              ;237
-0000b0  9000              STR      r0,[sp,#0]            ;237
-0000b2  486e              LDR      r0,|L5.620|
-0000b4  f7fffffe          BL       i2c_senddata
-0000b8  4605              MOV      r5,r0                 ;237
-0000ba  2d00              CMP      r5,#0                 ;238
-0000bc  da04              BGE      |L5.200|
-0000be  9807              LDR      r0,[sp,#0x1c]         ;241
-0000c0  f7fffffe          BL       free
-0000c4  4628              MOV      r0,r5                 ;242
-0000c6  e7bf              B        |L5.72|
-                  |L5.200|
-0000c8  2000              MOVS     r0,#0                 ;246
-0000ca  a908              ADD      r1,sp,#0x20           ;246
-0000cc  7108              STRB     r0,[r1,#4]            ;246
-0000ce  2001              MOVS     r0,#1                 ;248
-0000d0  ab09              ADD      r3,sp,#0x24           ;248
-0000d2  2210              MOVS     r2,#0x10              ;248
-0000d4  2120              MOVS     r1,#0x20              ;248
-0000d6  9000              STR      r0,[sp,#0]            ;248
-0000d8  4864              LDR      r0,|L5.620|
-0000da  f7fffffe          BL       i2c_readdata
-0000de  4605              MOV      r5,r0                 ;248
-0000e0  2d00              CMP      r5,#0                 ;249
-0000e2  da04              BGE      |L5.238|
-0000e4  9807              LDR      r0,[sp,#0x1c]         ;252
-0000e6  f7fffffe          BL       free
-0000ea  4628              MOV      r0,r5                 ;253
-0000ec  e7ac              B        |L5.72|
-                  |L5.238|
-0000ee  a808              ADD      r0,sp,#0x20           ;255
-0000f0  7900              LDRB     r0,[r0,#4]            ;255
-0000f2  1100              ASRS     r0,r0,#4              ;255
-0000f4  9005              STR      r0,[sp,#0x14]         ;255
-0000f6  9805              LDR      r0,[sp,#0x14]         ;256
-0000f8  2801              CMP      r0,#1                 ;256
-0000fa  d005              BEQ      |L5.264|
-0000fc  9807              LDR      r0,[sp,#0x1c]         ;259
-0000fe  f7fffffe          BL       free
-000102  2000              MOVS     r0,#0                 ;260
-000104  43c0              MVNS     r0,r0                 ;260
-000106  e79f              B        |L5.72|
-                  |L5.264|
-000108  2100              MOVS     r1,#0                 ;263
-00010a  a808              ADD      r0,sp,#0x20           ;263
-00010c  7101              STRB     r1,[r0,#4]            ;263
-00010e  7141              STRB     r1,[r0,#5]            ;264
-000110  2002              MOVS     r0,#2                 ;265
-000112  ab09              ADD      r3,sp,#0x24           ;265
-000114  2211              MOVS     r2,#0x11              ;265
-000116  2120              MOVS     r1,#0x20              ;265
-000118  9000              STR      r0,[sp,#0]            ;265
-00011a  4854              LDR      r0,|L5.620|
-00011c  f7fffffe          BL       i2c_readdata
-000120  4605              MOV      r5,r0                 ;265
-000122  2d00              CMP      r5,#0                 ;266
-000124  da04              BGE      |L5.304|
-000126  9807              LDR      r0,[sp,#0x1c]         ;269
-000128  f7fffffe          BL       free
-00012c  4628              MOV      r0,r5                 ;270
-00012e  e78b              B        |L5.72|
-                  |L5.304|
-000130  a808              ADD      r0,sp,#0x20           ;273
-000132  7900              LDRB     r0,[r0,#4]            ;273
-000134  0201              LSLS     r1,r0,#8              ;273
-000136  a808              ADD      r0,sp,#0x20           ;273
-000138  7940              LDRB     r0,[r0,#5]            ;273
-00013a  4308              ORRS     r0,r0,r1              ;273
-00013c  9004              STR      r0,[sp,#0x10]         ;273
-00013e  2100              MOVS     r1,#0                 ;275
-000140  a808              ADD      r0,sp,#0x20           ;275
-000142  7101              STRB     r1,[r0,#4]            ;275
-000144  7141              STRB     r1,[r0,#5]            ;276
-000146  2002              MOVS     r0,#2                 ;277
-000148  ab09              ADD      r3,sp,#0x24           ;277
-00014a  2220              MOVS     r2,#0x20              ;277
-00014c  4611              MOV      r1,r2                 ;277
-00014e  9000              STR      r0,[sp,#0]            ;277
-000150  4846              LDR      r0,|L5.620|
-000152  f7fffffe          BL       i2c_readdata
-000156  4605              MOV      r5,r0                 ;277
-000158  2d00              CMP      r5,#0                 ;278
-00015a  da04              BGE      |L5.358|
-00015c  9807              LDR      r0,[sp,#0x1c]         ;281
-00015e  f7fffffe          BL       free
-000162  4628              MOV      r0,r5                 ;282
-000164  e770              B        |L5.72|
-                  |L5.358|
-000166  a808              ADD      r0,sp,#0x20           ;284
-000168  7940              LDRB     r0,[r0,#5]            ;284
-00016a  2800              CMP      r0,#0                 ;284
-00016c  d109              BNE      |L5.386|
-00016e  a808              ADD      r0,sp,#0x20           ;284
-000170  7900              LDRB     r0,[r0,#4]            ;284
-000172  2800              CMP      r0,#0                 ;284
-000174  d105              BNE      |L5.386|
-000176  9807              LDR      r0,[sp,#0x1c]         ;287
-000178  f7fffffe          BL       free
-00017c  2000              MOVS     r0,#0                 ;288
-00017e  43c0              MVNS     r0,r0                 ;288
-000180  e762              B        |L5.72|
-                  |L5.386|
-000182  a908              ADD      r1,sp,#0x20           ;290
-000184  7908              LDRB     r0,[r1,#4]            ;290
-000186  0200              LSLS     r0,r0,#8              ;290
-000188  7949              LDRB     r1,[r1,#5]            ;290
-00018a  4308              ORRS     r0,r0,r1              ;290
-00018c  9006              STR      r0,[sp,#0x18]         ;290
-00018e  9807              LDR      r0,[sp,#0x1c]         ;292
-000190  f7fffffe          BL       free
-000194  9804              LDR      r0,[sp,#0x10]         ;293
-000196  f7fffffe          BL       malloc
-00019a  9007              STR      r0,[sp,#0x1c]         ;293
-00019c  9804              LDR      r0,[sp,#0x10]         ;294
-00019e  9000              STR      r0,[sp,#0]            ;294
-0001a0  2212              MOVS     r2,#0x12              ;294
-0001a2  2120              MOVS     r1,#0x20              ;294
-0001a4  4831              LDR      r0,|L5.620|
-0001a6  9b07              LDR      r3,[sp,#0x1c]         ;294
-0001a8  f7fffffe          BL       i2c_readdata
-0001ac  4605              MOV      r5,r0                 ;294
-0001ae  2d00              CMP      r5,#0                 ;295
-0001b0  da04              BGE      |L5.444|
-0001b2  9807              LDR      r0,[sp,#0x1c]         ;298
-0001b4  f7fffffe          BL       free
-0001b8  4628              MOV      r0,r5                 ;299
-0001ba  e745              B        |L5.72|
-                  |L5.444|
-0001bc  9804              LDR      r0,[sp,#0x10]         ;305
-0001be  1d00              ADDS     r0,r0,#4              ;305
-0001c0  9003              STR      r0,[sp,#0xc]          ;305
-0001c2  9804              LDR      r0,[sp,#0x10]         ;306
-0001c4  4607              MOV      r7,r0                 ;306
-0001c6  370a              ADDS     r7,r7,#0xa            ;306
-0001c8  9702              STR      r7,[sp,#8]            ;306
-0001ca  bf00              NOP                            ;308
-0001cc  9f02              LDR      r7,[sp,#8]            ;309
-0001ce  4638              MOV      r0,r7                 ;309
-0001d0  f7fffffe          BL       malloc
-0001d4  4604              MOV      r4,r0                 ;309
-0001d6  2040              MOVS     r0,#0x40              ;311
-0001d8  7020              STRB     r0,[r4,#0]            ;311
-0001da  7060              STRB     r0,[r4,#1]            ;312
-0001dc  20ff              MOVS     r0,#0xff              ;313
-0001de  0200              LSLS     r0,r0,#8              ;313
-0001e0  9f02              LDR      r7,[sp,#8]            ;313
-0001e2  4038              ANDS     r0,r0,r7              ;313
-0001e4  1200              ASRS     r0,r0,#8              ;313
-0001e6  70a0              STRB     r0,[r4,#2]            ;313
-0001e8  9f02              LDR      r7,[sp,#8]            ;314
-0001ea  70e7              STRB     r7,[r4,#3]            ;314
-0001ec  20aa              MOVS     r0,#0xaa              ;315
-0001ee  7120              STRB     r0,[r4,#4]            ;315
-0001f0  2003              MOVS     r0,#3                 ;316
-0001f2  7160              STRB     r0,[r4,#5]            ;316
-0001f4  21ff              MOVS     r1,#0xff              ;317
-0001f6  0209              LSLS     r1,r1,#8              ;317
-0001f8  9803              LDR      r0,[sp,#0xc]          ;317
-0001fa  4008              ANDS     r0,r0,r1              ;317
-0001fc  1200              ASRS     r0,r0,#8              ;317
-0001fe  71a0              STRB     r0,[r4,#6]            ;317
-000200  9803              LDR      r0,[sp,#0xc]          ;318
-000202  71e0              STRB     r0,[r4,#7]            ;318
-000204  2000              MOVS     r0,#0                 ;319
-000206  7220              STRB     r0,[r4,#8]            ;319
-000208  7260              STRB     r0,[r4,#9]            ;320
-00020a  980e              LDR      r0,[sp,#0x38]         ;332
-00020c  8007              STRH     r7,[r0,#0]            ;332
-00020e  9e0d              LDR      r6,[sp,#0x34]         ;334
-000210  4817              LDR      r0,|L5.624|
-000212  70b0              STRB     r0,[r6,#2]            ;335
-000214  0a00              LSRS     r0,r0,#8              ;335
-000216  70f0              STRB     r0,[r6,#3]            ;335
-000218  b2b8              UXTH     r0,r7                 ;336
-00021a  7030              STRB     r0,[r6,#0]            ;336
-00021c  0a00              LSRS     r0,r0,#8              ;336
-00021e  7070              STRB     r0,[r6,#1]            ;336
-000220  1d30              ADDS     r0,r6,#4              ;337
-000222  f7fffffe          BL       __aeabi_uread4
-000226  2800              CMP      r0,#0                 ;337
-000228  d10a              BNE      |L5.576|
-00022a  7871              LDRB     r1,[r6,#1]            ;338
-00022c  7832              LDRB     r2,[r6,#0]            ;338
-00022e  0209              LSLS     r1,r1,#8              ;338
-000230  4311              ORRS     r1,r1,r2              ;338
-000232  4608              MOV      r0,r1                 ;338
-000234  f7fffffe          BL       malloc
-000238  1d31              ADDS     r1,r6,#4              ;338
-00023a  9001              STR      r0,[sp,#4]            ;338
-00023c  f7fffffe          BL       __aeabi_uwrite4
-                  |L5.576|
-000240  1d30              ADDS     r0,r6,#4              ;339
-000242  f7fffffe          BL       __aeabi_uread4
-000246  9001              STR      r0,[sp,#4]            ;339
-000248  7870              LDRB     r0,[r6,#1]            ;339
-00024a  7831              LDRB     r1,[r6,#0]            ;339
-00024c  0200              LSLS     r0,r0,#8              ;339
-00024e  4308              ORRS     r0,r0,r1              ;339
-000250  4602              MOV      r2,r0                 ;339
-000252  4621              MOV      r1,r4                 ;339
-000254  9801              LDR      r0,[sp,#4]            ;339
-000256  f7fffffe          BL       __aeabi_memcpy
-00025a  9807              LDR      r0,[sp,#0x1c]         ;343
-00025c  f7fffffe          BL       free
-000260  4620              MOV      r0,r4                 ;344
-000262  950b              STR      r5,[sp,#0x2c]         ;344
-000264  f7fffffe          BL       free
-000268  980b              LDR      r0,[sp,#0x2c]         ;344
-00026a  e6ed              B        |L5.72|
+000044  b00d              ADD      sp,sp,#0x34
+000046  bdf0              POP      {r4-r7,pc}
+                  |L5.72|
+000048  9805              LDR      r0,[sp,#0x14]         ;218
+00004a  1f80              SUBS     r0,r0,#6              ;218
+00004c  0400              LSLS     r0,r0,#16             ;218
+00004e  0e01              LSRS     r1,r0,#24             ;218
+000050  a808              ADD      r0,sp,#0x20           ;218
+000052  7001              STRB     r1,[r0,#0]            ;218
+000054  9805              LDR      r0,[sp,#0x14]         ;219
+000056  1f80              SUBS     r0,r0,#6              ;219
+000058  b2c1              UXTB     r1,r0                 ;219
+00005a  a808              ADD      r0,sp,#0x20           ;219
+00005c  7041              STRB     r1,[r0,#1]            ;219
+00005e  2002              MOVS     r0,#2                 ;220
+000060  ab08              ADD      r3,sp,#0x20           ;220
+000062  2220              MOVS     r2,#0x20              ;220
+000064  4611              MOV      r1,r2                 ;220
+000066  9000              STR      r0,[sp,#0]            ;220
+000068  487f              LDR      r0,|L5.616|
+00006a  f7fffffe          BL       i2c_senddata
+00006e  4605              MOV      r5,r0                 ;220
+000070  2d00              CMP      r5,#0                 ;221
+000072  da04              BGE      |L5.126|
+000074  9806              LDR      r0,[sp,#0x18]         ;224
+000076  f7fffffe          BL       free
+00007a  4628              MOV      r0,r5                 ;225
+00007c  e7e2              B        |L5.68|
+                  |L5.126|
+00007e  9805              LDR      r0,[sp,#0x14]         ;227
+000080  1f80              SUBS     r0,r0,#6              ;227
+000082  9000              STR      r0,[sp,#0]            ;227
+000084  2221              MOVS     r2,#0x21              ;227
+000086  2120              MOVS     r1,#0x20              ;227
+000088  4877              LDR      r0,|L5.616|
+00008a  9b06              LDR      r3,[sp,#0x18]         ;227
+00008c  f7fffffe          BL       i2c_senddata
+000090  4605              MOV      r5,r0                 ;227
+000092  2d00              CMP      r5,#0                 ;228
+000094  da04              BGE      |L5.160|
+000096  9806              LDR      r0,[sp,#0x18]         ;231
+000098  f7fffffe          BL       free
+00009c  4628              MOV      r0,r5                 ;232
+00009e  e7d1              B        |L5.68|
+                  |L5.160|
+0000a0  2001              MOVS     r0,#1                 ;235
+0000a2  a908              ADD      r1,sp,#0x20           ;235
+0000a4  7008              STRB     r0,[r1,#0]            ;235
+0000a6  ab08              ADD      r3,sp,#0x20           ;237
+0000a8  2210              MOVS     r2,#0x10              ;237
+0000aa  2120              MOVS     r1,#0x20              ;237
+0000ac  9000              STR      r0,[sp,#0]            ;237
+0000ae  486e              LDR      r0,|L5.616|
+0000b0  f7fffffe          BL       i2c_senddata
+0000b4  4605              MOV      r5,r0                 ;237
+0000b6  2d00              CMP      r5,#0                 ;238
+0000b8  da04              BGE      |L5.196|
+0000ba  9806              LDR      r0,[sp,#0x18]         ;241
+0000bc  f7fffffe          BL       free
+0000c0  4628              MOV      r0,r5                 ;242
+0000c2  e7bf              B        |L5.68|
+                  |L5.196|
+0000c4  2000              MOVS     r0,#0                 ;246
+0000c6  a908              ADD      r1,sp,#0x20           ;246
+0000c8  7008              STRB     r0,[r1,#0]            ;246
+0000ca  2001              MOVS     r0,#1                 ;248
+0000cc  ab08              ADD      r3,sp,#0x20           ;248
+0000ce  2210              MOVS     r2,#0x10              ;248
+0000d0  2120              MOVS     r1,#0x20              ;248
+0000d2  9000              STR      r0,[sp,#0]            ;248
+0000d4  4864              LDR      r0,|L5.616|
+0000d6  f7fffffe          BL       i2c_readdata
+0000da  4605              MOV      r5,r0                 ;248
+0000dc  2d00              CMP      r5,#0                 ;249
+0000de  da04              BGE      |L5.234|
+0000e0  9806              LDR      r0,[sp,#0x18]         ;252
+0000e2  f7fffffe          BL       free
+0000e6  4628              MOV      r0,r5                 ;253
+0000e8  e7ac              B        |L5.68|
+                  |L5.234|
+0000ea  a808              ADD      r0,sp,#0x20           ;255
+0000ec  7800              LDRB     r0,[r0,#0]            ;255
+0000ee  1100              ASRS     r0,r0,#4              ;255
+0000f0  9004              STR      r0,[sp,#0x10]         ;255
+0000f2  9804              LDR      r0,[sp,#0x10]         ;256
+0000f4  2801              CMP      r0,#1                 ;256
+0000f6  d005              BEQ      |L5.260|
+0000f8  9806              LDR      r0,[sp,#0x18]         ;259
+0000fa  f7fffffe          BL       free
+0000fe  2000              MOVS     r0,#0                 ;260
+000100  43c0              MVNS     r0,r0                 ;260
+000102  e79f              B        |L5.68|
+                  |L5.260|
+000104  2100              MOVS     r1,#0                 ;263
+000106  a808              ADD      r0,sp,#0x20           ;263
+000108  7001              STRB     r1,[r0,#0]            ;263
+00010a  7041              STRB     r1,[r0,#1]            ;264
+00010c  2002              MOVS     r0,#2                 ;265
+00010e  ab08              ADD      r3,sp,#0x20           ;265
+000110  2211              MOVS     r2,#0x11              ;265
+000112  2120              MOVS     r1,#0x20              ;265
+000114  9000              STR      r0,[sp,#0]            ;265
+000116  4854              LDR      r0,|L5.616|
+000118  f7fffffe          BL       i2c_readdata
+00011c  4605              MOV      r5,r0                 ;265
+00011e  2d00              CMP      r5,#0                 ;266
+000120  da04              BGE      |L5.300|
+000122  9806              LDR      r0,[sp,#0x18]         ;269
+000124  f7fffffe          BL       free
+000128  4628              MOV      r0,r5                 ;270
+00012a  e78b              B        |L5.68|
+                  |L5.300|
+00012c  a808              ADD      r0,sp,#0x20           ;273
+00012e  7800              LDRB     r0,[r0,#0]            ;273
+000130  0201              LSLS     r1,r0,#8              ;273
+000132  a808              ADD      r0,sp,#0x20           ;273
+000134  7840              LDRB     r0,[r0,#1]            ;273
+000136  4308              ORRS     r0,r0,r1              ;273
+000138  9003              STR      r0,[sp,#0xc]          ;273
+00013a  2100              MOVS     r1,#0                 ;275
+00013c  a808              ADD      r0,sp,#0x20           ;275
+00013e  7001              STRB     r1,[r0,#0]            ;275
+000140  7041              STRB     r1,[r0,#1]            ;276
+000142  2002              MOVS     r0,#2                 ;277
+000144  ab08              ADD      r3,sp,#0x20           ;277
+000146  2220              MOVS     r2,#0x20              ;277
+000148  4611              MOV      r1,r2                 ;277
+00014a  9000              STR      r0,[sp,#0]            ;277
+00014c  4846              LDR      r0,|L5.616|
+00014e  f7fffffe          BL       i2c_readdata
+000152  4605              MOV      r5,r0                 ;277
+000154  2d00              CMP      r5,#0                 ;278
+000156  da04              BGE      |L5.354|
+000158  9806              LDR      r0,[sp,#0x18]         ;281
+00015a  f7fffffe          BL       free
+00015e  4628              MOV      r0,r5                 ;282
+000160  e770              B        |L5.68|
+                  |L5.354|
+000162  a808              ADD      r0,sp,#0x20           ;284
+000164  7840              LDRB     r0,[r0,#1]            ;284
+000166  2800              CMP      r0,#0                 ;284
+000168  d109              BNE      |L5.382|
+00016a  a808              ADD      r0,sp,#0x20           ;284
+00016c  7800              LDRB     r0,[r0,#0]            ;284
+00016e  2800              CMP      r0,#0                 ;284
+000170  d105              BNE      |L5.382|
+000172  9806              LDR      r0,[sp,#0x18]         ;287
+000174  f7fffffe          BL       free
+000178  2000              MOVS     r0,#0                 ;288
+00017a  43c0              MVNS     r0,r0                 ;288
+00017c  e762              B        |L5.68|
+                  |L5.382|
+00017e  a908              ADD      r1,sp,#0x20           ;290
+000180  7808              LDRB     r0,[r1,#0]            ;290
+000182  0200              LSLS     r0,r0,#8              ;290
+000184  7849              LDRB     r1,[r1,#1]            ;290
+000186  4308              ORRS     r0,r0,r1              ;290
+000188  9005              STR      r0,[sp,#0x14]         ;290
+00018a  9806              LDR      r0,[sp,#0x18]         ;292
+00018c  f7fffffe          BL       free
+000190  9803              LDR      r0,[sp,#0xc]          ;293
+000192  f7fffffe          BL       malloc
+000196  9006              STR      r0,[sp,#0x18]         ;293
+000198  9803              LDR      r0,[sp,#0xc]          ;294
+00019a  9000              STR      r0,[sp,#0]            ;294
+00019c  2212              MOVS     r2,#0x12              ;294
+00019e  2120              MOVS     r1,#0x20              ;294
+0001a0  4831              LDR      r0,|L5.616|
+0001a2  9b06              LDR      r3,[sp,#0x18]         ;294
+0001a4  f7fffffe          BL       i2c_readdata
+0001a8  4605              MOV      r5,r0                 ;294
+0001aa  2d00              CMP      r5,#0                 ;295
+0001ac  da04              BGE      |L5.440|
+0001ae  9806              LDR      r0,[sp,#0x18]         ;298
+0001b0  f7fffffe          BL       free
+0001b4  4628              MOV      r0,r5                 ;299
+0001b6  e745              B        |L5.68|
+                  |L5.440|
+0001b8  9803              LDR      r0,[sp,#0xc]          ;305
+0001ba  1d00              ADDS     r0,r0,#4              ;305
+0001bc  9002              STR      r0,[sp,#8]            ;305
+0001be  9803              LDR      r0,[sp,#0xc]          ;306
+0001c0  4607              MOV      r7,r0                 ;306
+0001c2  370a              ADDS     r7,r7,#0xa            ;306
+0001c4  9701              STR      r7,[sp,#4]            ;306
+0001c6  9f01              LDR      r7,[sp,#4]            ;309
+0001c8  4638              MOV      r0,r7                 ;309
+0001ca  f7fffffe          BL       malloc
+0001ce  4604              MOV      r4,r0                 ;309
+0001d0  2040              MOVS     r0,#0x40              ;311
+0001d2  7020              STRB     r0,[r4,#0]            ;311
+0001d4  7060              STRB     r0,[r4,#1]            ;312
+0001d6  20ff              MOVS     r0,#0xff              ;313
+0001d8  0200              LSLS     r0,r0,#8              ;313
+0001da  9f01              LDR      r7,[sp,#4]            ;313
+0001dc  4038              ANDS     r0,r0,r7              ;313
+0001de  1200              ASRS     r0,r0,#8              ;313
+0001e0  70a0              STRB     r0,[r4,#2]            ;313
+0001e2  9f01              LDR      r7,[sp,#4]            ;314
+0001e4  70e7              STRB     r7,[r4,#3]            ;314
+0001e6  20aa              MOVS     r0,#0xaa              ;315
+0001e8  7120              STRB     r0,[r4,#4]            ;315
+0001ea  2003              MOVS     r0,#3                 ;316
+0001ec  7160              STRB     r0,[r4,#5]            ;316
+0001ee  21ff              MOVS     r1,#0xff              ;317
+0001f0  0209              LSLS     r1,r1,#8              ;317
+0001f2  9802              LDR      r0,[sp,#8]            ;317
+0001f4  4008              ANDS     r0,r0,r1              ;317
+0001f6  1200              ASRS     r0,r0,#8              ;317
+0001f8  71a0              STRB     r0,[r4,#6]            ;317
+0001fa  9802              LDR      r0,[sp,#8]            ;318
+0001fc  71e0              STRB     r0,[r4,#7]            ;318
+0001fe  2000              MOVS     r0,#0                 ;319
+000200  7220              STRB     r0,[r4,#8]            ;319
+000202  7260              STRB     r0,[r4,#9]            ;320
+000204  980c              LDR      r0,[sp,#0x30]         ;332
+000206  8007              STRH     r7,[r0,#0]            ;332
+000208  9e0b              LDR      r6,[sp,#0x2c]         ;334
+00020a  4818              LDR      r0,|L5.620|
+00020c  70b0              STRB     r0,[r6,#2]            ;335
+00020e  0a00              LSRS     r0,r0,#8              ;335
+000210  70f0              STRB     r0,[r6,#3]            ;335
+000212  b2b8              UXTH     r0,r7                 ;336
+000214  7030              STRB     r0,[r6,#0]            ;336
+000216  0a00              LSRS     r0,r0,#8              ;336
+000218  7070              STRB     r0,[r6,#1]            ;336
+00021a  1d30              ADDS     r0,r6,#4              ;337
+00021c  f7fffffe          BL       __aeabi_uread4
+000220  2800              CMP      r0,#0                 ;337
+000222  d10a              BNE      |L5.570|
+000224  7871              LDRB     r1,[r6,#1]            ;338
+000226  7832              LDRB     r2,[r6,#0]            ;338
+000228  0209              LSLS     r1,r1,#8              ;338
+00022a  4311              ORRS     r1,r1,r2              ;338
+00022c  4608              MOV      r0,r1                 ;338
+00022e  f7fffffe          BL       malloc
+000232  1d31              ADDS     r1,r6,#4              ;338
+000234  9000              STR      r0,[sp,#0]            ;338
+000236  f7fffffe          BL       __aeabi_uwrite4
+                  |L5.570|
+00023a  1d30              ADDS     r0,r6,#4              ;339
+00023c  f7fffffe          BL       __aeabi_uread4
+000240  9000              STR      r0,[sp,#0]            ;339
+000242  7870              LDRB     r0,[r6,#1]            ;339
+000244  7831              LDRB     r1,[r6,#0]            ;339
+000246  0200              LSLS     r0,r0,#8              ;339
+000248  4308              ORRS     r0,r0,r1              ;339
+00024a  4602              MOV      r2,r0                 ;339
+00024c  4621              MOV      r1,r4                 ;339
+00024e  9800              LDR      r0,[sp,#0]            ;339
+000250  f7fffffe          BL       __aeabi_memcpy
+000254  9806              LDR      r0,[sp,#0x18]         ;343
+000256  f7fffffe          BL       free
+00025a  4620              MOV      r0,r4                 ;344
+00025c  9509              STR      r5,[sp,#0x24]         ;344
+00025e  f7fffffe          BL       free
+000262  9809              LDR      r0,[sp,#0x24]         ;344
+000264  e6ee              B        |L5.68|
 ;;;349    
                           ENDP
 
-                  |L5.620|
+000266  0000              DCW      0x0000
+                  |L5.616|
                           DCD      0x40005400
-                  |L5.624|
+                  |L5.620|
                           DCD      0x0000aa01
 
                           AREA ||i.Iap2CtrlSession_EventProc||, CODE, READONLY, ALIGN=2

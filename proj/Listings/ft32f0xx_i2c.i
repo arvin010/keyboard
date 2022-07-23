@@ -6049,7 +6049,7 @@ int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBu
 {
 	  I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
   
-    
+ 
 	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
 	I2C_SlaveAddressConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),slave_addr); 
  

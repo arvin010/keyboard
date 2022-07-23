@@ -262,7 +262,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count( );
+int ListUsbData_Count(void );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 
@@ -1429,7 +1429,7 @@ extern __declspec(__nothrow) void _membitmovewb(void *  , const void *  , int  ,
  
 
 # 7 "..\\iap2\\ListUsbData.c"
-int g_count = 0;
+extern int g_count ;
 void ListUsbData_Init(ListUsbData* pList)
 {
 

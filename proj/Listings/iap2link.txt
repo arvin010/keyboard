@@ -1474,37 +1474,35 @@
 000006  4615              MOV      r5,r2
 ;;;128    	uint8 checkSum = 0;
 000008  2700              MOVS     r7,#0
-;;;129    	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
-00000a  1d20              ADDS     r0,r4,#4
-00000c  9002              STR      r0,[sp,#8]
+;;;129    //	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
 ;;;130    	Iap2LinkPkt* pTxPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
-00000e  209f              MOVS     r0,#0x9f
-000010  00c0              LSLS     r0,r0,#3
-000012  1830              ADDS     r0,r6,r0
-000014  1c40              ADDS     r0,r0,#1
-000016  f7fffffe          BL       __aeabi_uread4
-00001a  9001              STR      r0,[sp,#4]
+00000a  209f              MOVS     r0,#0x9f
+00000c  00c0              LSLS     r0,r0,#3
+00000e  1830              ADDS     r0,r6,r0
+000010  1c40              ADDS     r0,r0,#1
+000012  f7fffffe          BL       __aeabi_uread4
+000016  9001              STR      r0,[sp,#4]
 ;;;131    	uint16 pktLen = SWAP16(pPkt->m_Len);
-00001c  78e0              LDRB     r0,[r4,#3]
-00001e  78a1              LDRB     r1,[r4,#2]
-000020  0200              LSLS     r0,r0,#8
-000022  4308              ORRS     r0,r0,r1
-000024  9000              STR      r0,[sp,#0]
+000018  78e0              LDRB     r0,[r4,#3]
+00001a  78a1              LDRB     r1,[r4,#2]
+00001c  0200              LSLS     r0,r0,#8
+00001e  4308              ORRS     r0,r0,r1
+000020  9000              STR      r0,[sp,#0]
 ;;;132    
 ;;;133    	if(len < IAP2_PKT_HEAD_SIZE || pktLen != len || len > IAP2_MAX_PACKET_SIZE)
-000026  2d09              CMP      r5,#9
-000028  db05              BLT      |L19.54|
-00002a  9800              LDR      r0,[sp,#0]
-00002c  42a8              CMP      r0,r5
-00002e  d102              BNE      |L19.54|
-000030  480c              LDR      r0,|L19.100|
-000032  4285              CMP      r5,r0
-000034  dd01              BLE      |L19.58|
-                  |L19.54|
+000022  2d09              CMP      r5,#9
+000024  db05              BLT      |L19.50|
+000026  9800              LDR      r0,[sp,#0]
+000028  42a8              CMP      r0,r5
+00002a  d102              BNE      |L19.50|
+00002c  480c              LDR      r0,|L19.96|
+00002e  4285              CMP      r5,r0
+000030  dd01              BLE      |L19.54|
+                  |L19.50|
 ;;;134    	{
 ;;;135    		return False;
-000036  2000              MOVS     r0,#0
-                  |L19.56|
+000032  2000              MOVS     r0,#0
+                  |L19.52|
 ;;;136    	}
 ;;;137    
 ;;;138    	if(pPkt->m_Sof != SOP)
@@ -1521,36 +1519,36 @@
 ;;;149    
 ;;;150    	return True;
 ;;;151    }
-000038  bdfe              POP      {r1-r7,pc}
-                  |L19.58|
-00003a  7860              LDRB     r0,[r4,#1]            ;138
-00003c  7821              LDRB     r1,[r4,#0]            ;138
-00003e  0200              LSLS     r0,r0,#8              ;138
-000040  4308              ORRS     r0,r0,r1              ;138
-000042  4909              LDR      r1,|L19.104|
-000044  4288              CMP      r0,r1                 ;138
-000046  d001              BEQ      |L19.76|
-000048  2000              MOVS     r0,#0                 ;140
-00004a  e7f5              B        |L19.56|
-                  |L19.76|
-00004c  2108              MOVS     r1,#8                 ;143
-00004e  4620              MOV      r0,r4                 ;143
-000050  f7fffffe          BL       Iap2LinkPkt_GetCheckSum
-000054  4607              MOV      r7,r0                 ;143
-000056  7a20              LDRB     r0,[r4,#8]            ;145
-000058  42b8              CMP      r0,r7                 ;145
-00005a  d001              BEQ      |L19.96|
-00005c  2000              MOVS     r0,#0                 ;147
-00005e  e7eb              B        |L19.56|
-                  |L19.96|
-000060  2001              MOVS     r0,#1                 ;150
-000062  e7e9              B        |L19.56|
+000034  bdfe              POP      {r1-r7,pc}
+                  |L19.54|
+000036  7860              LDRB     r0,[r4,#1]            ;138
+000038  7821              LDRB     r1,[r4,#0]            ;138
+00003a  0200              LSLS     r0,r0,#8              ;138
+00003c  4308              ORRS     r0,r0,r1              ;138
+00003e  4909              LDR      r1,|L19.100|
+000040  4288              CMP      r0,r1                 ;138
+000042  d001              BEQ      |L19.72|
+000044  2000              MOVS     r0,#0                 ;140
+000046  e7f5              B        |L19.52|
+                  |L19.72|
+000048  2108              MOVS     r1,#8                 ;143
+00004a  4620              MOV      r0,r4                 ;143
+00004c  f7fffffe          BL       Iap2LinkPkt_GetCheckSum
+000050  4607              MOV      r7,r0                 ;143
+000052  7a20              LDRB     r0,[r4,#8]            ;145
+000054  42b8              CMP      r0,r7                 ;145
+000056  d001              BEQ      |L19.92|
+000058  2000              MOVS     r0,#0                 ;147
+00005a  e7eb              B        |L19.52|
+                  |L19.92|
+00005c  2001              MOVS     r0,#1                 ;150
+00005e  e7e9              B        |L19.52|
 ;;;152    
                           ENDP
 
-                  |L19.100|
+                  |L19.96|
                           DCD      0x0000801e
-                  |L19.104|
+                  |L19.100|
                           DCD      0x0000ff5a
 
                           AREA ||i.Iap2Link_handShake||, CODE, READONLY, ALIGN=2

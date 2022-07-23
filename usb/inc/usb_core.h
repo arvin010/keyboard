@@ -352,7 +352,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 #endif /* _USB_CORE_H_ */
 

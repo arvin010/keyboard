@@ -18926,8 +18926,7 @@ NITStatus USB_GetITStatus(uint32_t USB_IT);
 Nvoid localIrqEnable(void);
 Nvoid localIrqDisable(void);
 Nvoid startCriticalSection(void);
-W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
-Nvoid endCriticalSection();
+Nvoid endCriticalSection(void);
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20673,7 +20672,7 @@ N
 N
 N
 N
-N	 int			 fd = -1;
+N///	 int			 fd = -1;
 N	 int			 err = -1;
 N	 uint8_t		 buf[ 2 ];
 N	 uint8_t		 *certificateBuf;
@@ -20705,7 +20704,7 @@ N	//  iAP2Packet_t* packet = iAP2PacketCreateEmptySendPacket();
 N	   unsigned short parameterLen = ( unsigned short)certificateLen+4;
 N		unsigned short messageLen = ( unsigned short)certificateLen+10;
 N
-N		 uint32_t payloadLen = messageLen;
+N//		 uint32_t payloadLen = messageLen;
 N		 uint8_t payload[messageLen];
 N		payload[0]= 0x40;//start of message MSB
 N		 payload[1]= 0x40;// start of message LSB
@@ -20787,14 +20786,12 @@ SEnd:
 S	return RC_FAILED;
 N#endif
 N	
-W "..\iap2\Iap2CtrlSession.c" 84 10 variable "fd"  was declared but never referenced
-W "..\iap2\Iap2CtrlSession.c" 114 13 variable "payloadLen"  was declared but never referenced
 N}
 N
 Nstatic int Iap2CtrlSession_ChallengeRsp(const Iap2CtrlSessionMsg* pReq, uint8* pData, uint16* pLen)
 N{
 N
-N int			 fd = -1;
+N// int			 fd = -1;
 N int			 err = -1;
 N uint8_t		 buf[ 2 ];
 N uint8_t *   data = pReq->m_Param->m_Data;
@@ -20911,7 +20908,7 @@ N//	iAP2Packet_t* packet = iAP2PacketCreateEmptySendPacket();
 N   int parameterLen = signatureLen+4;
 N	int messageLen = signatureLen+10;
 N
-N	 uint32_t payloadLen = messageLen;
+N//	 uint32_t payloadLen = messageLen;
 N	 uint8_t payload[messageLen];
 N	
 N	payload[0]= 0x40;//start of message MSB
@@ -20952,8 +20949,6 @@ N return err;
 N
 N 
 N 
-W "..\iap2\Iap2CtrlSession.c" 200 9 variable "fd"  was declared but never referenced
-W "..\iap2\Iap2CtrlSession.c" 308 12 variable "payloadLen"  was declared but never referenced
 N}
 N
 N

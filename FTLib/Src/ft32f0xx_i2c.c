@@ -1242,7 +1242,7 @@ int i2c_readdata(I2C_TypeDef * i2c,uint8_t slave_addr,uint8_t addr, uint8_t *pBu
 {
 	  I2C_GenerateSTART(I2C1,ENABLE);
   //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
-    //??????-?
+ 
 	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
 	I2C_SlaveAddressConfig(I2C1,slave_addr); 
  

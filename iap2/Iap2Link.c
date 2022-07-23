@@ -126,7 +126,7 @@ void Iap2Link_TimeOut(Iap2Link* pIap2Link, uint8 timeId)
 Bool Iap2Link_Verify(Iap2Link* pIap2Link, Iap2LinkPkt* pPkt, int len)
 {
 	uint8 checkSum = 0;
-	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
+//	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
 	Iap2LinkPkt* pTxPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
 	uint16 pktLen = SWAP16(pPkt->m_Len);
 

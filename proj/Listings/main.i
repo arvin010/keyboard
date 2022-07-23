@@ -12632,7 +12632,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -14174,8 +14174,10 @@ void Iap2Link_TimerReset(Iap2Link* pIap2Link);
 
 uint8 Driver_TransferStart(Irb* pIrb);
 void Driver_RxDone(const void* pData, int len);
-void Driver_Check();
-void Driver_TxDone();
+void Driver_Check(void);
+void Driver_TxDone(void);
+
+
 
 
 
@@ -14350,7 +14352,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count( );
+int ListUsbData_Count(void );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 
@@ -14374,6 +14376,7 @@ void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 uint8 g_start_key = 0;
 
+int g_count = 0;
 
 extern Iap2Link* g_pIap2Link;
 
@@ -14534,16 +14537,24 @@ int iAP2PacketParseBuffer ( uint8_t*  buffer,
 	  uint8_t* pbuffer = buffer;
 	  int pbuffer_len =0;
 	  
-	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,215);
+	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,216);
 	  if(pbuffer ==0)
+	  	{
+	  	
+		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer ==NULL\n",__FUNCTION__,220);
 		return -1;
+	  	}
 	  
-	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,219,pbuffer_len,bufferLen);
+	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen%d\n",__FUNCTION__,224,pbuffer_len,bufferLen);
+	 for(int i=0;i< bufferLen;i++)
+	 	 SEGGER_RTT_printf(0,"0x%02x ",buffer[i]);
+
+	  	 SEGGER_RTT_printf(0,"\n iAP2PacketParseBuffer\n");
 		while(pbuffer_len < bufferLen)
 		{
 		
-		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,223,pbuffer_len,bufferLen);
-		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,224,g_ParseState_t);
+		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen=%d\n",__FUNCTION__,232,pbuffer_len,bufferLen);
+		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,233,g_ParseState_t);
 	   switch(g_ParseState_t)
 		{ 
 		  case kiAP2PacketParseStateSOP1:
@@ -15036,9 +15047,10 @@ int b_config = 0;
 int main(void)
 {
 	I2C_InitTypeDef* g_I2C_1_InitStruct;
-    int usb_receive_len;
+
 	 uint8 data_offset=0;
-	 ListUsbData * usbdata;
+	int list_data_count = 0;
+	 ListUsbData * usbdata = 0;
 
 
 	
@@ -15089,44 +15101,31 @@ int main(void)
 	
 	while (1)
 	{
-		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,770);
+		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,780);
+		usbdata = 0;
 
 	
 	
 
 		Driver_Check();
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,776);
-		data_offset =0;
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,778);
-		memset(g_hid_report,0,6);
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,780);
-		Iap2Link_Run(g_pIap2Link);
-		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
 
-if(ListUsbData_Count()> 0)
-{
 				
-				startCriticalSection();
-				usbdata = ListUsbData_Remove(g_usbdata_list);
-				endCriticalSection();
-				}
-						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,791);
-		if(usbdata!=0 )
-			{
+		data_offset =0;
 			
-			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,795);
-			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,797);
-			free(usbdata->pdata);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
-			free(usbdata);
-					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
-			}
+		memset(g_hid_report,0,6);
+				
 
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,804);
 		
+		list_data_count = ListUsbData_Count();
+		SEGGER_RTT_printf(0,"### function=%s line=%d list_data_count=%d\n",__FUNCTION__,796,list_data_count);
+		
+# 823 "..\\user\\main.c"
 		if(!g_start_key)
+			{
+			SEGGER_RTT_printf(0,"continue \n");
+			SysTick_Delay_Ms(1000);
 				continue;
+			}
 
 		matrix_scan_key(&matrix);
 		matrix_scan_again(&matrix);

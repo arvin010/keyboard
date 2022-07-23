@@ -1743,7 +1743,7 @@
 00000c  481a              LDR      r0,|L42.120|
 00000e  f7fffffe          BL       I2C_GenerateSTART
 ;;;1244     //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
-;;;1245       //??????-?
+;;;1245    
 ;;;1246   	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
 000012  2100              MOVS     r1,#0
 000014  4818              LDR      r0,|L42.120|

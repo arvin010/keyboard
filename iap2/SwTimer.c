@@ -146,7 +146,7 @@ void TimerManager_AddTimer(TimerManager* pTm, SwTimer* pTimer)
 	}
 	else
 	{
-		List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
+		//List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
 	}
 }	
 
@@ -156,10 +156,10 @@ void TimerManager_RemoveTimer(SwTimer* pTimer)
 	
 	if(Null == pTm || Null == pTm->m_timerList) return;
 	
-	if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
-	{
-		pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
-	}
+	//if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
+	//{
+	//	pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
+	//}
 }
 
 void TimerManager_ResetTimer(TimerManager* pTm, uint32 ticks)

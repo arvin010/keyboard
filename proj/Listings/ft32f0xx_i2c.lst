@@ -9388,8 +9388,7 @@ N{
 N	  I2C_GenerateSTART(I2C1,ENABLE);
 X	  I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
 N  //  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
-W "..\FTLib\Src\ft32f0xx_i2c.c" 1245 11 support for trigraphs is disabled
-N    //??????-?
+N 
 N	I2C_MasterRequestConfig(I2C1,I2C_Direction_Transmitter);
 X	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0000));
 N	I2C_SlaveAddressConfig(I2C1,slave_addr); 
@@ -9402,6 +9401,7 @@ N
 N    //????????
 N    I2C_GenerateSTART(I2C1,ENABLE);
 X    I2C_GenerateSTART(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),ENABLE);
+W "..\FTLib\Src\ft32f0xx_i2c.c" 1254 12 support for trigraphs is disabled
 N	    //??????-?
 N	I2C_MasterRequestConfig(I2C1,I2C_Direction_Receiver);
 X	I2C_MasterRequestConfig(((I2C_TypeDef *) (((uint32_t)0x40000000) + 0x00005400)),((uint16_t)0x0400));

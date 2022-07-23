@@ -4,7 +4,7 @@
 #include "ListUsbData.h"
 #include <stdlib.h>
 #include <string.h>
-int g_count = 0;
+extern int g_count ;
 void ListUsbData_Init(ListUsbData* pList)
 {
 

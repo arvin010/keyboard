@@ -12884,7 +12884,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -13941,8 +13941,10 @@ void Iap2Link_TimerReset(Iap2Link* pIap2Link);
 
 uint8 Driver_TransferStart(Irb* pIrb);
 void Driver_RxDone(const void* pData, int len);
-void Driver_Check();
-void Driver_TxDone();
+void Driver_Check(void);
+void Driver_TxDone(void);
+
+
 
 
 
@@ -13978,9 +13980,9 @@ SEGGER_RTT_printf(0,"Driver_TransferStart pIrb->m_isTx=%d\n",pIrb->m_isTx);
 	return 1;
 }
 
-void Driver_Check()
+void Driver_Check(void)
 {
-	
+	SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
 
 	if(g_isTxDone)
 	{
@@ -13989,7 +13991,7 @@ void Driver_Check()
 		return;
 	}
 
-	
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,46);
 
 	if(g_isRxDone)
 	{
@@ -14000,10 +14002,10 @@ void Driver_Check()
 		g_isRxDone = 0;
 	}
 	
-	
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,57);
 }
 
-void Driver_TxDone()
+void Driver_TxDone(void)
 {
 	g_isTxDone = 1;
 }

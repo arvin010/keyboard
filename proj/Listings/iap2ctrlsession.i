@@ -12893,7 +12893,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -14205,7 +14205,7 @@ static int Iap2CtrlSession_AuthenticationCerticate(const Iap2CtrlSessionMsg* pRe
 
 
 
-	 int			 fd = -1;
+
 	 int			 err = -1;
 	 uint8_t		 buf[ 2 ];
 	 uint8_t		 *certificateBuf;
@@ -14235,7 +14235,7 @@ static int Iap2CtrlSession_AuthenticationCerticate(const Iap2CtrlSessionMsg* pRe
 	   unsigned short parameterLen = ( unsigned short)certificateLen+4;
 		unsigned short messageLen = ( unsigned short)certificateLen+10;
 
-		 uint32_t payloadLen = messageLen;
+
 		 uint8_t payload[messageLen];
 		payload[0]= 0x40;
 		 payload[1]= 0x40;
@@ -14280,7 +14280,7 @@ static int Iap2CtrlSession_AuthenticationCerticate(const Iap2CtrlSessionMsg* pRe
 static int Iap2CtrlSession_ChallengeRsp(const Iap2CtrlSessionMsg* pReq, uint8* pData, uint16* pLen)
 {
 
- int			 fd = -1;
+
  int			 err = -1;
  uint8_t		 buf[ 2 ];
  uint8_t *   data = pReq->m_Param->m_Data;
@@ -14388,7 +14388,7 @@ static int Iap2CtrlSession_ChallengeRsp(const Iap2CtrlSessionMsg* pReq, uint8* p
    int parameterLen = signatureLen+4;
 	int messageLen = signatureLen+10;
 
-	 uint32_t payloadLen = messageLen;
+
 	 uint8_t payload[messageLen];
 	
 	payload[0]= 0x40;

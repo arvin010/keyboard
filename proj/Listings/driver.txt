@@ -6,31 +6,38 @@
 
                   Driver_Check PROC
 ;;;34     
-;;;35     void Driver_Check()
+;;;35     void Driver_Check(void)
 000000  b510              PUSH     {r4,lr}
 ;;;36     {
-;;;37     	//SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
+;;;37     	SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
+000002  4817              LDR      r0,|L1.96|
+000004  7803              LDRB     r3,[r0,#0]  ; g_isRxDone
+000006  4817              LDR      r0,|L1.100|
+000008  7802              LDRB     r2,[r0,#0]  ; g_isTxDone
+00000a  a117              ADR      r1,|L1.104|
+00000c  2000              MOVS     r0,#0
+00000e  f7fffffe          BL       SEGGER_RTT_printf
 ;;;38     
 ;;;39     	if(g_isTxDone)
-000002  480d              LDR      r0,|L1.56|
-000004  7800              LDRB     r0,[r0,#0]  ; g_isTxDone
-000006  2800              CMP      r0,#0
-000008  d008              BEQ      |L1.28|
+000012  4814              LDR      r0,|L1.100|
+000014  7800              LDRB     r0,[r0,#0]  ; g_isTxDone
+000016  2800              CMP      r0,#0
+000018  d008              BEQ      |L1.44|
 ;;;40     	{
 ;;;41     		Iap2Link_TransferDone(g_pIap2Link, True);
-00000a  2101              MOVS     r1,#1
-00000c  480b              LDR      r0,|L1.60|
-00000e  6800              LDR      r0,[r0,#0]  ; g_pIap2Link
-000010  f7fffffe          BL       Iap2Link_TransferDone
+00001a  2101              MOVS     r1,#1
+00001c  481d              LDR      r0,|L1.148|
+00001e  6800              LDR      r0,[r0,#0]  ; g_pIap2Link
+000020  f7fffffe          BL       Iap2Link_TransferDone
 ;;;42     		g_isTxDone = FALSE;
-000014  2000              MOVS     r0,#0
-000016  4908              LDR      r1,|L1.56|
-000018  7008              STRB     r0,[r1,#0]
-                  |L1.26|
+000024  2000              MOVS     r0,#0
+000026  490f              LDR      r1,|L1.100|
+000028  7008              STRB     r0,[r1,#0]
+                  |L1.42|
 ;;;43     		return;
 ;;;44     	}
 ;;;45     
-;;;46     	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;46     	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 ;;;47     
 ;;;48     	if(g_isRxDone)
 ;;;49     	{
@@ -41,33 +48,69 @@
 ;;;54     		g_isRxDone = FALSE;
 ;;;55     	}
 ;;;56     	
-;;;57     	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+;;;57     	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 ;;;58     }
-00001a  bd10              POP      {r4,pc}
-                  |L1.28|
-00001c  4808              LDR      r0,|L1.64|
-00001e  7800              LDRB     r0,[r0,#0]            ;48  ; g_isRxDone
-000020  2800              CMP      r0,#0                 ;48
-000022  d007              BEQ      |L1.52|
-000024  2101              MOVS     r1,#1                 ;53
-000026  4805              LDR      r0,|L1.60|
-000028  6800              LDR      r0,[r0,#0]            ;53  ; g_pIap2Link
-00002a  f7fffffe          BL       Iap2Link_TransferDone
-00002e  2000              MOVS     r0,#0                 ;54
-000030  4903              LDR      r1,|L1.64|
-000032  7008              STRB     r0,[r1,#0]            ;54
-                  |L1.52|
-000034  bf00              NOP      
-000036  e7f0              B        |L1.26|
+00002a  bd10              POP      {r4,pc}
+                  |L1.44|
+00002c  232e              MOVS     r3,#0x2e              ;46
+00002e  4a1a              LDR      r2,|L1.152|
+000030  a11a              ADR      r1,|L1.156|
+000032  2000              MOVS     r0,#0                 ;46
+000034  f7fffffe          BL       SEGGER_RTT_printf
+000038  4809              LDR      r0,|L1.96|
+00003a  7800              LDRB     r0,[r0,#0]            ;48  ; g_isRxDone
+00003c  2800              CMP      r0,#0                 ;48
+00003e  d007              BEQ      |L1.80|
+000040  2101              MOVS     r1,#1                 ;53
+000042  4814              LDR      r0,|L1.148|
+000044  6800              LDR      r0,[r0,#0]            ;53  ; g_pIap2Link
+000046  f7fffffe          BL       Iap2Link_TransferDone
+00004a  2000              MOVS     r0,#0                 ;54
+00004c  4904              LDR      r1,|L1.96|
+00004e  7008              STRB     r0,[r1,#0]            ;54
+                  |L1.80|
+000050  2339              MOVS     r3,#0x39              ;57
+000052  4a11              LDR      r2,|L1.152|
+000054  a111              ADR      r1,|L1.156|
+000056  2000              MOVS     r0,#0                 ;57
+000058  f7fffffe          BL       SEGGER_RTT_printf
+00005c  bf00              NOP      
+00005e  e7e4              B        |L1.42|
 ;;;59     
                           ENDP
 
-                  |L1.56|
-                          DCD      g_isTxDone
-                  |L1.60|
-                          DCD      g_pIap2Link
-                  |L1.64|
+                  |L1.96|
                           DCD      g_isRxDone
+                  |L1.100|
+                          DCD      g_isTxDone
+                  |L1.104|
+000068  44726976          DCB      "Driver_Check g_isTxDone=%d g_isRxDone=%d\n",0
+00006c  65725f43
+000070  6865636b
+000074  20675f69
+000078  73547844
+00007c  6f6e653d
+000080  25642067
+000084  5f697352
+000088  78446f6e
+00008c  653d2564
+000090  0a00    
+000092  00                DCB      0
+000093  00                DCB      0
+                  |L1.148|
+                          DCD      g_pIap2Link
+                  |L1.152|
+                          DCD      __FUNCTION__
+                  |L1.156|
+00009c  23232320          DCB      "### function=%s line=%d \n",0
+0000a0  66756e63
+0000a4  74696f6e
+0000a8  3d257320
+0000ac  6c696e65
+0000b0  3d256420
+0000b4  0a00    
+0000b6  00                DCB      0
+0000b7  00                DCB      0
 
                           AREA ||i.Driver_RxDone||, CODE, READONLY, ALIGN=2
 
@@ -129,7 +172,7 @@
 
 000052  0000              DCW      0x0000
                   |L2.84|
-                          DCD      __FUNCTION__
+                          DCD      |symbol_number.18|
                   |L2.88|
 000058  23232320          DCB      "### function=%s line=%d \n",0
 00005c  66756e63
@@ -224,7 +267,7 @@
 
                   Driver_TxDone PROC
 ;;;59     
-;;;60     void Driver_TxDone()
+;;;60     void Driver_TxDone(void)
 000000  2001              MOVS     r0,#1
 ;;;61     {
 ;;;62     	g_isTxDone = True;
@@ -242,9 +285,14 @@
 
                   __FUNCTION__
 000000  44726976          DCB      0x44,0x72,0x69,0x76
-000004  65725f52          DCB      0x65,0x72,0x5f,0x52
-000008  78446f6e          DCB      0x78,0x44,0x6f,0x6e
-00000c  6500              DCB      0x65,0x00
+000004  65725f43          DCB      0x65,0x72,0x5f,0x43
+000008  6865636b          DCB      0x68,0x65,0x63,0x6b
+00000c  00                DCB      0x00
+                  |symbol_number.18|
+00000d  447269            DCB      0x44,0x72,0x69
+000010  7665725f          DCB      0x76,0x65,0x72,0x5f
+000014  5278446f          DCB      0x52,0x78,0x44,0x6f
+000018  6e6500            DCB      0x6e,0x65,0x00
 
                           AREA ||.data||, DATA, ALIGN=2
 

@@ -52,6 +52,7 @@
 
 Bool g_start_key = FALSE;
 
+int g_count = 0;
 
 extern Iap2Link* g_pIap2Link;
 
@@ -214,13 +215,21 @@ int iAP2PacketParseBuffer ( uint8_t*  buffer,
 	  
 	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 	  if(pbuffer ==NULL)
+	  	{
+	  	
+		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer ==NULL\n",__FUNCTION__,__LINE__);
 		return -1;
+	  	}
 	  
-	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen%d\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+	 for(int i=0;i< bufferLen;i++)
+	 	 SEGGER_RTT_printf(0,"0x%02x ",buffer[i]);
+
+	  	 SEGGER_RTT_printf(0,"\n iAP2PacketParseBuffer\n");
 		while(pbuffer_len < bufferLen)
 		{
 		
-		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen=%d\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
 		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,__LINE__,g_ParseState_t);
 	   switch(g_ParseState_t)
 		{ 
@@ -714,9 +723,10 @@ int b_config = 0;
 int main(void)
 {
 	I2C_InitTypeDef* g_I2C_1_InitStruct;
-    int usb_receive_len;
+//    int usb_receive_len;
 	 uint8 data_offset=0;
-	 ListUsbData * usbdata;
+	int list_data_count = 0;
+	 ListUsbData * usbdata = NULL;
 
 
 	
@@ -768,21 +778,27 @@ int main(void)
 	while (1)
 	{
 		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+		usbdata = NULL;
 
 	//  Iap2Link_Start(g_pIap2Link);
 	
-
+#if 1
 		Driver_Check();
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-		data_offset =0;
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-		memset(g_hid_report,0,6);
-				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-		Iap2Link_Run(g_pIap2Link);
-		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 
-if(ListUsbData_Count()> 0)
-{
+				//SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+		data_offset =0;
+			//	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+		memset(g_hid_report,0,6);
+				//SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+
+		//Iap2Link_Run(g_pIap2Link);
+		list_data_count = ListUsbData_Count();
+		SEGGER_RTT_printf(0,"### function=%s line=%d list_data_count=%d\n",__FUNCTION__,__LINE__,list_data_count);
+		//	SEGGER_RTT_printf(0,"### function=%s line=%d ListUsbData_Count=%d\n",__FUNCTION__,__LINE__,ListUsbData_Count());
+#else
+
+         if(ListUsbData_Count()> 0)
+         {
 				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
 				startCriticalSection();
 				usbdata = ListUsbData_Remove(g_usbdata_list);
@@ -802,9 +818,14 @@ if(ListUsbData_Count()> 0)
 			}
 
 				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-		//SysTick_Delay_Ms(1000);
+		//
+		#endif
 		if(!g_start_key)
+			{
+			SEGGER_RTT_printf(0,"continue \n");
+			SysTick_Delay_Ms(1000);
 				continue;
+			}
 
 		matrix_scan_key(&matrix);
 		matrix_scan_again(&matrix);

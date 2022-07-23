@@ -18907,8 +18907,7 @@ NITStatus USB_GetITStatus(uint32_t USB_IT);
 Nvoid localIrqEnable(void);
 Nvoid localIrqDisable(void);
 Nvoid startCriticalSection(void);
-W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
-Nvoid endCriticalSection();
+Nvoid endCriticalSection(void);
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20620,7 +20619,7 @@ NBool Iap2Link_Verify(Iap2Link* pIap2Link, Iap2LinkPkt* pPkt, int len)
 Xuint8 Iap2Link_Verify(Iap2Link* pIap2Link, Iap2LinkPkt* pPkt, int len)
 N{
 N	uint8 checkSum = 0;
-N	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
+N//	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
 N	Iap2LinkPkt* pTxPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
 N	uint16 pktLen = SWAP16(pPkt->m_Len);
 X	uint16 pktLen = (uint16)(pPkt->m_Len);
@@ -20650,7 +20649,6 @@ N	}
 N
 N	return True;
 X	return 1;
-W "..\iap2\Iap2Link.c" 129 12 variable "pCtrlByte"  was declared but never referenced
 W "..\iap2\Iap2Link.c" 130 15 variable "pTxPkt"  was declared but never referenced
 N}
 N

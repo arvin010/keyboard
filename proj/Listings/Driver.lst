@@ -18916,8 +18916,7 @@ NITStatus USB_GetITStatus(uint32_t USB_IT);
 Nvoid localIrqEnable(void);
 Nvoid localIrqDisable(void);
 Nvoid startCriticalSection(void);
-W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
-Nvoid endCriticalSection();
+Nvoid endCriticalSection(void);
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20328,15 +20327,13 @@ N
 NBool Driver_TransferStart(Irb* pIrb);
 Xuint8 Driver_TransferStart(Irb* pIrb);
 Nvoid Driver_RxDone(const void* pData, int len);
-W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
-Nvoid Driver_Check();
-W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
-Nvoid Driver_TxDone();
+Nvoid Driver_Check(void);
+Nvoid Driver_TxDone(void);
 N
 N
 N
-W "..\iap2\Driver.h" 17 7 last line of file ends without a newline
 N#endif
+N
 L 4 "..\iap2\Driver.c" 2
 N#include "stdlib.h"
 N#include "string.h"
@@ -20375,9 +20372,9 @@ N	return True;
 X	return 1;
 N}
 N
-Nvoid Driver_Check()
+Nvoid Driver_Check(void)
 N{
-N	//SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
+N	SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
 N
 N	if(g_isTxDone)
 N	{
@@ -20388,7 +20385,8 @@ X		g_isTxDone = 0;
 N		return;
 N	}
 N
-N	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,46);
 N
 N	if(g_isRxDone)
 N	{
@@ -20401,10 +20399,11 @@ N		g_isRxDone = FALSE;
 X		g_isRxDone = 0;
 N	}
 N	
-N	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+N	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+X	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,57);
 N}
 N
-Nvoid Driver_TxDone()
+Nvoid Driver_TxDone(void)
 N{
 N	g_isTxDone = True;
 X	g_isTxDone = 1;

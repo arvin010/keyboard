@@ -350,8 +350,7 @@ NListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 NListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 NBool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
 Xuint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-W "..\iap2\ListUsbData.h" 19 5 Deprecated declaration ListUsbData_Count - give arg types
-Nint ListUsbData_Count(/*ListUsbData* pNode*/);
+Nint ListUsbData_Count(void/*ListUsbData* pNode*/);
 Nvoid ListUsbData_RemoveAll(ListUsbData* pNode);
 N
 N#endif
@@ -1884,7 +1883,7 @@ N
 N/* end of string.h */
 N
 L 7 "..\iap2\ListUsbData.c" 2
-Nint g_count = 0;
+Nextern int g_count ;
 Nvoid ListUsbData_Init(ListUsbData* pList)
 N{
 N

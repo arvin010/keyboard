@@ -12864,7 +12864,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -13843,7 +13843,7 @@ void TimerManager_AddTimer(TimerManager* pTm, SwTimer* pTimer)
 	}
 	else
 	{
-		List_AddTail((List*)pTm->m_timerList, (List*)pTimer);
+		
 	}
 }	
 
@@ -13853,10 +13853,10 @@ void TimerManager_RemoveTimer(SwTimer* pTimer)
 	
 	if(0 == pTm || 0 == pTm->m_timerList) return;
 	
-	if(List_isIn((List*)pTm->m_timerList, (List*)pTimer))
-	{
-		pTm->m_timerList = (SwTimer*)List_Remove((List*)pTimer);
-	}
+	
+	
+	
+	
 }
 
 void TimerManager_ResetTimer(TimerManager* pTm, uint32 ticks)

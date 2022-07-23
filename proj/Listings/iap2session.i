@@ -12885,7 +12885,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -14189,7 +14189,7 @@ int SessionMgr_FsmRxReq(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2L
 
 int SessionMgr_FsmTxRsp(SessionMgr* pSessionMgr, Iap2Event nEventId, const Iap2LinkPkt* pPkt)
 {
-	int nLen = (uint16)(pPkt->m_Len);
+
 	
 	
 	

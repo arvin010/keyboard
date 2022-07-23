@@ -13417,7 +13417,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -13685,7 +13685,7 @@ void ListUsbData_Init(ListUsbData* pList);
 ListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 ListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 uint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-int ListUsbData_Count( );
+int ListUsbData_Count(void );
 void ListUsbData_RemoveAll(ListUsbData* pNode);
 
 
@@ -13743,7 +13743,7 @@ void startCriticalSection(void) {
     }
 }
 
-void endCriticalSection() {
+void endCriticalSection(void) {
     localIrqEnable();
 }
 
@@ -13865,7 +13865,7 @@ void USB_IRQHandler(void)
 	 
 	if((usb_intrin & ((uint32_t) 0x00000101)) != RESET)
 	{
-	SEGGER_RTT_printf(0,"USB_Endpoint0(M_EP_NORMAL); 111");
+
 		USB_Endpoint0(0);
 	}
 
@@ -13877,7 +13877,7 @@ void USB_IRQHandler(void)
 	if((usb_introut & ((uint32_t) 0x00000202)) != RESET) 
 	{
 		
-				SEGGER_RTT_printf(0,"US B_IT_OUT_EP1_FLAG ##   # function=%s line=%d\n",__FUNCTION__,210);
+				
 			recv_data_len = 	USB_EP_Rx(0x00, Vendor_data_Buffer, 64);
 		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
 		pUsbData->pdata = malloc(recv_data_len);
@@ -13897,14 +13897,14 @@ void USB_IRQHandler(void)
 	if((usb_introut & ((uint32_t) 0x00000204)) != RESET) 
 	{
 	startCriticalSection();
-
+	
 	recv_data_len = 	USB_EP_Rx(2, Vendor_data_Buffer, 64);
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG rr ### function=%s line=%d recv_data_len=%d\n",__FUNCTION__,232,recv_data_len);
-	for(int i=0;i<recv_data_len;i++)
-		SEGGER_RTT_printf(0,"22 0x%02x ",Vendor_data_Buffer[i]);
+	
+	
+		
 		pUsbData = (ListUsbData *)malloc(sizeof(ListUsbData));
 		
-	
+		
 		pUsbData->pdata = malloc(recv_data_len);
 		memcpy(pUsbData->pdata,Vendor_data_Buffer,recv_data_len);
 	
@@ -13930,7 +13930,7 @@ void USB_IRQHandler(void)
 	if((usb_introut & ((uint32_t) 0x00000220)) != RESET)
 	{
 	
-	SEGGER_RTT_printf(0,"USB_IT_OUT_EP2_FLAG ### function=%s line=%d\n",__FUNCTION__,263);
+	
 		USB_EP_Rx(0x05, Vendor_data_Buffer, 64);
 		
 
@@ -14101,7 +14101,7 @@ void EndpointBulkIn(M_EPBIN_STATUS pbistate, int nCallState)
 	else
 	{
 	
-	SEGGER_RTT_printf(0,"EndpointBulkIn pbistate.nBytesLeft=%d\n",pbistate.nBytesLeft);
+	
 		  
 		if(pbistate.nBytesLeft != -1)
 		{
@@ -14116,12 +14116,12 @@ void EndpointBulkIn(M_EPBIN_STATUS pbistate, int nCallState)
 				nBytes = 64;
 				pbistate.nBytesLeft -= 64;
 			}
-			SEGGER_RTT_printf(0,"222 EndpointBulkIn pbistate.nBytesLeft=%d\n",pbistate.nBytesLeft);
+		
 
 			 
 			FIFOWrite((int)pbistate.byEP, nBytes, pbistate.pData);
 			
-			SEGGER_RTT_printf(0,"333 EndpointBulkIn nBytes=%d\n",nBytes);
+			
 			pbistate.pData = (BYTE *)pbistate.pData + nBytes;
 
 			*((BYTE *)(0x40005c00+14)) = pbistate . byEP;
@@ -14259,8 +14259,8 @@ void FIFORead(int nEP, int nBytes, void * pDst)
 	int     nCount;
 	BYTE *  pby;
 	int     nAddr;
-	int i;
-	SEGGER_RTT_printf(0,"start FIFORead nBytes = %d nEP=%d\n",nBytes,nEP);
+
+	
 
 	if(nBytes) 
 	{
@@ -14270,10 +14270,10 @@ void FIFORead(int nEP, int nBytes, void * pDst)
 		while(nCount) 
 		{
 
-		 SEGGER_RTT_printf(0," 0x%02x ",*pby);
-		 i++;
-		if(i==10)
-			SEGGER_RTT_printf(0,"\n");
+		
+		
+		
+		
 			*pby++ = *((BYTE *)nAddr);
 			
 			nCount--;
@@ -14281,7 +14281,7 @@ void FIFORead(int nEP, int nBytes, void * pDst)
 		}
 	}
 	
-	SEGGER_RTT_printf(0,"\n  end FIFORead nBytes = %d nEP=%d\n",nBytes,nEP);
+	
 }
 
 
@@ -14421,7 +14421,7 @@ void USB_Endpoint0(int nCallState)
 	BYTE	byCSR0;
 
 	
-	SEGGER_RTT_printf(0,"USB_Endpoint0  xxx nCallState =%d\n",nCallState);
+	
 	 
 	if (nCallState == 1)
 	{
@@ -14447,13 +14447,13 @@ void USB_Endpoint0(int nCallState)
 			if((gnDevState == 0) && ep0state.byFAddr)
 			{
 			
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 xxx 111\n");
+			
 				gnDevState = 1;				
 			}
 			else if((gnDevState == 1) && !ep0state.byFAddr)
 			{
 			
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 222\n");
+			
 				gnDevState = 0;				
 			}
 		}
@@ -14489,7 +14489,7 @@ void USB_Endpoint0(int nCallState)
 			 
 			 
 			FIFORead(0, 8, &cmd);	
-			SEGGER_RTT_printf(0,"USB_Endpoint0  aaa\n");
+		
 			
 			USB_Endpoint0_Command(&ep0state, &cmd);			
 		}
@@ -14498,13 +14498,13 @@ void USB_Endpoint0(int nCallState)
 	if(ep0state.nState == 2)
 	{
 	
-	SEGGER_RTT_printf(0,"USB_Endpoint0_Tx 1111\n");
+	
 		USB_Endpoint0_Tx(&ep0state);
 	}
 	else if(ep0state.nState == 1)
 	{
 	
-	SEGGER_RTT_printf(0,"USB_Endpoint0_Tx 2222\n");
+	
 		USB_Endpoint0_Rx(&ep0state);
 	}
 }
@@ -14747,7 +14747,7 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 	uint8_t srbuff;
 	uint8_t txdat[2] = {0};
 	
-	SEGGER_RTT_printf(0,"USB_StdDev_Req;  333 pcmd->bRequest=%d\n",pcmd->bRequest);
+	
 	switch(pcmd->bRequest) 
 	{
 		 
@@ -14892,7 +14892,7 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 						break;
 					case	(0x03<<8):	
 
-						SEGGER_RTT_printf(0,"USB_StdDev_Req;  333 pcmd->USBwValue=%d\n",pcmd->wValue . w);
+						
 						switch(pcmd->wValue . w & 0xff)
 						{
 							case	0:	
@@ -14940,9 +14940,9 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 								pep0state->nBytesLeft = iapStringDescriptorSize;		
 								 
 								
-								SEGGER_RTT_printf(0,"USB_StdDev_Req;  444 pcmd->USBwLength=%d\n",pcmd->wLength . w);
-								
-								SEGGER_RTT_printf(0,"USB_StdDev_Req;  444 pcmd->nBytesLeft=%d\n",pep0state->nBytesLeft);
+							
+							
+							
 								if (pcmd->wLength . w < pep0state->nBytesLeft)
 								{
 									pep0state->nBytesLeft = pcmd->wLength . w;
@@ -14966,25 +14966,25 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 			byConfig = (BYTE)(pcmd->wValue . w & 0x00FF);
 			if(gnDevState == 0)
 			{
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 777 byConfig=%d\n",byConfig);
+		
 				bError = 1;
 			}
 			 
 			else if(byConfig >USB_FSDeviceDescriptor[USB_FSDeviceDescriptorSize-1])
 			{
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 666 byConfig=%d\n",byConfig);
+			
 				bError = 1;
 			}
 			else if(!byConfig)
 			{
 			
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 333\n");
+			
 				gnDevState = 1;
 			}
 			else
 			{
 			
-			SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;	 555 byConfig=%d\n",byConfig);
+			
 				 
 				gpCurCfg = (void *)USB_FSConfigDescriptor;
 				 
@@ -14993,13 +14993,13 @@ static void USB_StdDev_Req(PM_EP0_STATUS pep0state, PCOMMAND pcmd)
 				 
 				ConfigureIfs();
 				
-				SEGGER_RTT_printf(0,"gnDevState = DEVSTATE_ADDRESS;  444\n");
+				
 				gnDevState = 2;
 				*((BYTE *)(0x40005c00+14)) = 0;
 				bNoData = 1;
 			}
 			
-			SEGGER_RTT_printf(0,"b_config == 1\n");
+			
 			b_config = 1;
 			break;
 
@@ -15609,36 +15609,36 @@ ErrorStatus USB_EP_Tx(uint8_t Ep,uint8_t *ptr,uint8_t data_len)
 	M_EPBIN_STATUS tEp0in;
 	uint32_t timeout = 0;
 	
-	SEGGER_RTT_printf(0,"USB_EP_Tx gnDevState=%d\n",gnDevState);
+	
 	if(gnDevState > 1)
 	{
 	
-	SEGGER_RTT_printf(0,"2 USB_EP_Tx gnDevState=%d\n",gnDevState);
+	
 		tEp0in.byEP = Ep;
 		tEp0in.nBytesLeft = data_len;
 		tEp0in.pData = ptr;
 		EndpointBulkIn(tEp0in, 0);
 
 		
-		SEGGER_RTT_printf(0,"3 USB_EP_Tx MREAD_BYTE(M_REG_INCSR1)=0x%02x\n",*((BYTE *)(0x40005c00+17)));
+		
 		while(*((BYTE *)(0x40005c00+17)) & 0x01)
 		{
 		
-		SEGGER_RTT_printf(0,"4 USB_EP_Tx timeout=%d\n",timeout);
+		
 			timeout++;
 			if(timeout>=0xffffffff)
 			{
 			
-			SEGGER_RTT_printf(0,"5 USB_EP_Tx timeout=%d\n",timeout);
+			
 				return ERROR;
 			}
 		}
 		
-		SEGGER_RTT_printf(0,"6 USB_EP_Tx gnDevState=%d\n",gnDevState);
+		
 		return SUCCESS;
 	}
 	
-	SEGGER_RTT_printf(0,"7 USB_EP_Tx gnDevState=%d\n",gnDevState);
+	
 	return ERROR;
 }
 

@@ -12876,7 +12876,7 @@ ITStatus USB_GetITStatus(uint32_t USB_IT);
 void localIrqEnable(void);
 void localIrqDisable(void);
 void startCriticalSection(void);
-void endCriticalSection();
+void endCriticalSection(void);
 
 
 
@@ -14204,7 +14204,7 @@ void Iap2Link_TimeOut(Iap2Link* pIap2Link, uint8 timeId)
 uint8 Iap2Link_Verify(Iap2Link* pIap2Link, Iap2LinkPkt* pPkt, int len)
 {
 	uint8 checkSum = 0;
-	CtrlByte* pCtrlByte = (CtrlByte*)&pPkt->m_CtrlByte;
+
 	Iap2LinkPkt* pTxPkt = (Iap2LinkPkt*)pIap2Link->m_Irb.m_pBuff;
 	uint16 pktLen = (uint16)(pPkt->m_Len);
 

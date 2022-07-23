@@ -32,9 +32,9 @@ SEGGER_RTT_printf(0,"Driver_TransferStart pIrb->m_isTx=%d\n",pIrb->m_isTx);
 	return True;
 }
 
-void Driver_Check()
+void Driver_Check(void)
 {
-	//SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
+	SEGGER_RTT_printf(0,"Driver_Check g_isTxDone=%d g_isRxDone=%d\n",g_isTxDone,g_isRxDone);
 
 	if(g_isTxDone)
 	{
@@ -43,7 +43,7 @@ void Driver_Check()
 		return;
 	}
 
-	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 
 	if(g_isRxDone)
 	{
@@ -54,10 +54,10 @@ void Driver_Check()
 		g_isRxDone = FALSE;
 	}
 	
-	//SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
+	SEGGER_RTT_printf(0,"### function=%s line=%d \n",__FUNCTION__,__LINE__);
 }
 
-void Driver_TxDone()
+void Driver_TxDone(void)
 {
 	g_isTxDone = True;
 }

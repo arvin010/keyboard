@@ -18571,8 +18571,7 @@ NITStatus USB_GetITStatus(uint32_t USB_IT);
 Nvoid localIrqEnable(void);
 Nvoid localIrqDisable(void);
 Nvoid startCriticalSection(void);
-W "..\usb\inc\usb_core.h" 355 6 Deprecated declaration endCriticalSection - give arg types
-Nvoid endCriticalSection();
+Nvoid endCriticalSection(void);
 N
 N#endif /* _USB_CORE_H_ */
 N
@@ -20693,15 +20692,13 @@ N
 NBool Driver_TransferStart(Irb* pIrb);
 Xuint8 Driver_TransferStart(Irb* pIrb);
 Nvoid Driver_RxDone(const void* pData, int len);
-W "..\iap2\Driver.h" 12 6 Deprecated declaration Driver_Check - give arg types
-Nvoid Driver_Check();
-W "..\iap2\Driver.h" 13 6 Deprecated declaration Driver_TxDone - give arg types
-Nvoid Driver_TxDone();
+Nvoid Driver_Check(void);
+Nvoid Driver_TxDone(void);
 N
 N
 N
-W "..\iap2\Driver.h" 17 7 last line of file ends without a newline
 N#endif
+N
 L 29 "..\user\main.c" 2
 N#include "Iap2CtrlSession.h"
 L 1 "..\iap2\Iap2CtrlSession.h" 1
@@ -20886,8 +20883,7 @@ NListUsbData* ListUsbData_AddTail(ListUsbData* pHead, ListUsbData* pNode);
 NListUsbData* ListUsbData_Remove(ListUsbData* pNode);
 NBool ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
 Xuint8 ListUsbData_isIn(ListUsbData* pHead, ListUsbData* pNode);
-W "..\iap2\ListUsbData.h" 19 5 Deprecated declaration ListUsbData_Count - give arg types
-Nint ListUsbData_Count(/*ListUsbData* pNode*/);
+Nint ListUsbData_Count(void/*ListUsbData* pNode*/);
 Nvoid ListUsbData_RemoveAll(ListUsbData* pNode);
 N
 N#endif
@@ -20917,6 +20913,7 @@ N
 NBool g_start_key = FALSE;
 Xuint8 g_start_key = 0;
 N
+Nint g_count = 0;
 N
 Nextern Iap2Link* g_pIap2Link;
 N
@@ -21120,20 +21117,29 @@ N	  uint8_t* pbuffer = buffer;
 N	  int pbuffer_len =0;
 N	  
 N	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,215);
+X	  SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,216);
 N	  if(pbuffer ==NULL)
 X	  if(pbuffer ==0)
+N	  	{
+N	  	
+N		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer ==NULL\n",__FUNCTION__,__LINE__);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer ==NULL\n",__FUNCTION__,220);
 N		return -1;
+N	  	}
 N	  
-N	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
-X	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,219,pbuffer_len,bufferLen);
+N	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen%d\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+X	 SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen%d\n",__FUNCTION__,224,pbuffer_len,bufferLen);
+N	 for(int i=0;i< bufferLen;i++)
+N	 	 SEGGER_RTT_printf(0,"0x%02x ",buffer[i]);
+N
+N	  	 SEGGER_RTT_printf(0,"\n iAP2PacketParseBuffer\n");
 N		while(pbuffer_len < bufferLen)
 N		{
 N		
-N		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len%d,bufferLen\n",__FUNCTION__,223,pbuffer_len,bufferLen);
+N		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen=%d\n",__FUNCTION__,__LINE__,pbuffer_len,bufferLen);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d pbuffer_len=%d,bufferLen=%d\n",__FUNCTION__,232,pbuffer_len,bufferLen);
 N		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,__LINE__,g_ParseState_t);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,224,g_ParseState_t);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d g_ParseState_t=%d\n",__FUNCTION__,233,g_ParseState_t);
 N	   switch(g_ParseState_t)
 N		{ 
 N		  case kiAP2PacketParseStateSOP1:
@@ -21658,9 +21664,11 @@ Nint b_config = 0;
 Nint main(void)
 N{
 N	I2C_InitTypeDef* g_I2C_1_InitStruct;
-N    int usb_receive_len;
+N//    int usb_receive_len;
 N	 uint8 data_offset=0;
-N	 ListUsbData * usbdata;
+N	int list_data_count = 0;
+N	 ListUsbData * usbdata = NULL;
+X	 ListUsbData * usbdata = 0;
 N
 N
 N	
@@ -21719,55 +21727,57 @@ N
 N	while (1)
 N	{
 N		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,770);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,780);
+N		usbdata = NULL;
+X		usbdata = 0;
 N
 N	//  Iap2Link_Start(g_pIap2Link);
 N	
-N
+N#if 1
 N		Driver_Check();
-N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,776);
+N
+N				//SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 N		data_offset =0;
-N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,778);
+N			//	SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 N		memset(g_hid_report,0,6);
-N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,780);
-N		Iap2Link_Run(g_pIap2Link);
-N		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X		SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,782);
+N				//SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
 N
-Nif(ListUsbData_Count()> 0)
-N{
-N				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
-N				startCriticalSection();
-N				usbdata = ListUsbData_Remove(g_usbdata_list);
-N				endCriticalSection();
-N				}
-N						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,791);
-N		if(usbdata!=NULL )
-X		if(usbdata!=0 )
-N			{
-N			
-N			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,795);
-N			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
-N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,797);
-N			free(usbdata->pdata);
-N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,799);
-N			free(usbdata);
-N					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,801);
-N			}
-N
-N				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
-X				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,804);
-N		//SysTick_Delay_Ms(1000);
+N		//Iap2Link_Run(g_pIap2Link);
+N		list_data_count = ListUsbData_Count();
+N		SEGGER_RTT_printf(0,"### function=%s line=%d list_data_count=%d\n",__FUNCTION__,__LINE__,list_data_count);
+X		SEGGER_RTT_printf(0,"### function=%s line=%d list_data_count=%d\n",__FUNCTION__,796,list_data_count);
+N		//	SEGGER_RTT_printf(0,"### function=%s line=%d ListUsbData_Count=%d\n",__FUNCTION__,__LINE__,ListUsbData_Count());
+N#else
+S
+S         if(ListUsbData_Count()> 0)
+S         {
+S				//usb_receive_len = USB_EP_Rx(1,receive_data_buf,512);
+S				startCriticalSection();
+S				usbdata = ListUsbData_Remove(g_usbdata_list);
+S				endCriticalSection();
+S				}
+S						SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S		if(usbdata!=NULL )
+S			{
+S			
+S			SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S			iAP2PacketParseBuffer(usbdata->pdata,usbdata->data_size);
+S					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S			free(usbdata->pdata);
+S					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S			free(usbdata);
+S					SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S			}
+S
+S				SEGGER_RTT_printf(0,"### function=%s line=%d\n",__FUNCTION__,__LINE__);
+S		//
+N		#endif
 N		if(!g_start_key)
+N			{
+N			SEGGER_RTT_printf(0,"continue \n");
+N			SysTick_Delay_Ms(1000);
 N				continue;
+N			}
 N
 N		matrix_scan_key(&matrix);
 N		matrix_scan_again(&matrix);
@@ -21786,8 +21796,8 @@ N		/*·¢ËÍ¶àÃ½Ìå¼ü*/
 N		send_acpi_media_keycode(&matrix);
 N		
 N	}
-W "..\user\main.c" 717 9 variable "usb_receive_len"  was declared but never referenced
-W "..\user\main.c" 718 9 variable "data_offset"  was set but never used
+W "..\user\main.c" 727 9 variable "data_offset"  was set but never used
+W "..\user\main.c" 729 17 variable "usbdata"  was set but never used
 N}
 N
 N
